@@ -10,7 +10,7 @@ IS                      (u|U|l|L)*
 #include "y.tab.h"
 
 
-/* Ne gère pas les commentaires. A rajouter */
+/* Ne gï¿½re pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
 
 %}
@@ -89,3 +89,6 @@ L?\"(\\.|[^\\"])*\"     { /* A completer */ }
 .                       { return yytext[0]; }
 %%
 
+main () {
+    yylex();
+}
