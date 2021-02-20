@@ -1,0 +1,70 @@
+       
+digraph exempleminiC {
+
+    // arbre abstrait de la fonction main
+    node_1 [label="main, int" shape=invtrapezium color=blue];     
+    node_2 [label="BLOC"];
+    node_3 [label="FOR"];
+    node_4 [label="printd" shape=septagon];
+    node_5 [label="RETURN" shape=trapezium color=blue]
+
+    node_1 ->   node_2
+    node_2 ->   node_3
+    node_2 ->   node_4
+    node_2 ->   node_5
+
+    // instruction FOR
+    node_6  [label=":="]
+    node_7  [label="i"]
+    node_8  [label="0"]
+
+    node_9  [label="<"]
+    node_10  [label="i"]
+    node_11  [label="10"]
+
+    node_12  [label=":="]
+    node_13  [label="i"]
+    node_14  [label="+"]
+    node_15  [label="i"]
+    node_16  [label="1"]
+ 
+    node_3 -> node_6
+    node_6 -> node_7
+    node_6 -> node_8
+
+    node_3 -> node_9
+    node_9 -> node_10
+    node_9 -> node_11
+
+    node_3 -> node_12
+    node_12 -> node_13
+    node_12 -> node_14
+    node_14 -> node_15
+    node_14 -> node_16
+
+     // appel de fonction printd
+    node_17 [label="i"]
+    node_4 -> node_17
+
+     // return
+    node_18 [label="+"]
+    node_19  [label="i"]
+    node_20  [label="3"]
+    node_5 -> node_18
+    node_18 -> node_19
+    node_18 -> node_20
+
+     // corps de boucle for
+    node_21 [label="IF" shape=diamond]
+    node_22 [label="=="]
+    node_23 [label="i"]
+    node_24 [label="5"]
+    node_3 -> node_21 
+    node_21 -> node_22
+    node_22 -> node_23
+    node_22 -> node_24
+     
+     // corps du if
+    node_25 [label="BREAK" shape=box]
+    node_21 -> node_25
+ }
