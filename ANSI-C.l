@@ -8,6 +8,7 @@ IS                      (u|U|l|L)*
 %{
 #include <stdio.h>
 #include "y.tab.h"
+int yylval;
 
 
 /* Ne g�re pas les commentaires. A rajouter */
@@ -17,41 +18,44 @@ IS                      (u|U|l|L)*
 
 %%
 "auto"                  { /* A completer */ }
-"break"                 { /* A completer */ }
-"case"                  { /* A completer */ }
+"break"                 { return BREAK; }
+"case"                  { return CASE; }
 "char"                  { /* A completer */ }
-"const"                 { /* A completer */ }
+"const"                 { return CONSTANTE; }
 "continue"              { /* A completer */ }
-"default"               { /* A completer */ }
+"default"               { return DEFAULT; }
 "do"                    { /* A completer */ }
 "double"                { /* A completer */ }
-"else"                  { /* A completer */ }
+"else"                  { return ELSE; }
 "enum"                  { /* A completer */ }
-"extern"                { /* A completer */ }
+"extern"                { return EXTERN; }
 "float"                 { /* A completer */ }
-"for"                   { /* A completer */ }
+"for"                   { return FOR; }
 "goto"                  { /* A completer */ }
-"if"                    { /* A completer */ }
-"int"                   { /* A completer */ }
+"if"                    { return IF; }
+"int"                   { return INT; }
 "long"                  { /* A completer */ }
 "register"              { /* A completer */ }
-"return"                { /* A completer */ }
+"return"                { return RETURN; }
 "short"                 { /* A completer */ }
 "signed"                { /* A completer */ }
 "sizeof"                { /* A completer */ }
 "static"                { /* A completer */ }
 "struct"                { /* A completer */ }
-"switch"                { /* A completer */ }
+"switch"                { return SWITCH; }
 "typedef"               { /* A completer */ }
 "union"                 { /* A completer */ }
 "unsigned"              { /* A completer */ }
-"void"                  { /* A completer */ }
+"void"                  { return VOID; }
 "volatile"              { /* A completer */ }
-"while"                 { /* A completer */ }
+"while"                 { return WHILE; }
 
-{L}({L}|{D})*           { /* A completer */ }
+{L}({L}|{D})*           { return IDENTIFICATEUR; } // ID peut etre ???
 
-0[xX]{H}+{IS}?          { /* A completer */ }
+[a-zA-Z_] ([a-zA-Z_]|[0-9])*
+qsdqsd 21 qsdq s 2222 qsd qsdddddd
+
+0[xX]{H}+{IS}?          { /* A completer */ } // hexa ???
 0{D}+{IS}?              { /* A completer */ }
 {D}+{IS}?               { /* A completer */ }
 L?'(\\.|[^\\'])+'       { /* A completer */ }
@@ -70,20 +74,20 @@ L?\"(\\.|[^\\"])*\"     { /* A completer */ }
 "*="                    { /* A completer */ }
 "/="                    { /* A completer */ }
 "%="                    { /* A completer */ }
-"&="                    { /* A completer */ }
+"&="                    { return BAND; }
 "^="                    { /* A completer */ }
-"|="                    { /* A completer */ }
-">>"                    { /* A completer */ }
-"<<"                    { /* A completer */ }
+"|="                    { return BOR; }
+">>"                    { return RSHIFT; }
+"<<"                    { return LSHIFT; }
 "++"                    { /* A completer */ }
 "--"                    { /* A completer */ }
 "->"                    { /* A completer */ }
-"&&"                    { /* A completer */ }
-"||"                    { /* A completer */ }
-"<="                    { /* A completer */ }
-">="                    { /* A completer */ }
-"=="                    { /* A completer */ }
-"!="                    { /* A completer */ }
+"&&"                    { return LAND; }
+"||"                    { return LOR; }
+"<="                    { return LEQ; }
+">="                    { return GEQ; }
+"=="                    { return EQ; }
+"!="                    { return NEQ; }
 
 [ \t\v\n\f]             { /* A completer */ }
 .                       { return yytext[0]; }
