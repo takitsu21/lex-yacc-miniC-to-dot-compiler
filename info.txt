@@ -1,0 +1,14 @@
+{L}({L}|{D})*           {
+    printf("{L}({L}|{D})*  : %s\n", yytext);
+    return IDENTIFICATEUR; } // (nom variable / fonctions) ou commentaire
+
+0[xX]{H}+{IS}?          { printf("0[xX]{H}+{IS}? : %s\n", yytext); } // hexa 0xhexaL | 0XhexaU | 0Xhexa
+0{D}+{IS}?              { printf("0{D}+{IS}?   %s\n", yytext); }    // 0 suivi d'entiers
+{D}+{IS}?               { printf("{D}+{IS}?  : %s\n", yytext); return CONSTANTE; } // entiers
+L?'(\\.|[^\\'])+'       { printf("L?'(\\.|[^\\'])+'      : %s\n", yytext); } // char
+
+{D}+{E}{FS}?            { printf("{D}+{E}{FS}?   : %s\n", yytext); } // 10EF | 15E
+{D}*"."{D}+({E})?{FS}?  { printf("2 : %s\n", yytext); } // .10(E|e)(f|F|l|L) | 10.15(E|e)(f|F|l|L)
+{D}+"."{D}*({E})?{FS}?  { printf("3 : %s\n", yytext); } // 10.10(E|e)(f|F|l|L) | 10(E|e)(f|F|l|L)
+
+L?\"(\\.|[^\\"])*\"     { printf("L?\"(\\.|[^\\\"])*\" : %s\n", yytext); } // string

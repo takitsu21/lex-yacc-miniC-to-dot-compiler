@@ -92,7 +92,7 @@ appel	:
 		IDENTIFICATEUR '(' liste_expressions ')' ';'
 ;
 variable	:
-		IDENTIFICATEUR
+		IDENTIFICATEUR	{printf("YACC %s\n", $1);}
 	|	variable '[' expression ']'
 ;
 expression	:

@@ -1,6 +1,6 @@
 CC=gcc
 
-FILENAME=cond
+FILENAME=add
 FLEX_IN=ANSI-C.l
 YACC_IN=miniC.y
 FILE_OUT=try
@@ -13,7 +13,7 @@ C_FILE=Tests/$(FILENAME).c
 YACC_GENS=$(YACC_C) $(YACC_H)
 LEX_GENS=lex.yy.c
 
-C_FLAGS=$(C_FILE) $(YACC_C) $(LEX_GENS) -o $(FILE_OUT) -lfl
+C_FLAGS=librairie.c $(YACC_C) $(LEX_GENS) -o $(FILE_OUT) -w -Wall -pedantic -lfl
 DOT_FLAGS=-Tpdf $(DOT_FILE) -o $(DOT_OUT_PDF)
 YACC_FLAGS=-d $(YACC_IN)
 
@@ -24,8 +24,8 @@ YACC_CC=yacc
 # test-all:
 # 	./test.sh
 
-all: compile graph test
-test: compile
+all: clean compile graph test
+test: clean compile
 	./try < $(C_FILE)
 install:
 	sudo apt install -y graphviz flex bison
