@@ -52,9 +52,6 @@ int yylval;
 
 {L}({L}|{D})*           { return IDENTIFICATEUR; } // ID peut etre ???
 
-[a-zA-Z_] ([a-zA-Z_]|[0-9])*
-qsdqsd 21 qsdq s 2222 qsd qsdddddd
-
 0[xX]{H}+{IS}?          { /* A completer */ } // hexa ???
 0{D}+{IS}?              { /* A completer */ }
 {D}+{IS}?               { /* A completer */ }
@@ -93,6 +90,3 @@ L?\"(\\.|[^\\"])*\"     { /* A completer */ }
 .                       { return yytext[0]; }
 %%
 
-main () {
-    yylex();
-}

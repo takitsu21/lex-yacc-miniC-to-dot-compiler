@@ -1,4 +1,7 @@
 %{
+	#include <stdio.h>
+	#include <stdlib.h>
+	int printd(int i);
 %}
 %token IDENTIFICATEUR CONSTANTE VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
 %token BREAK RETURN PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR LAND LOR LT GT
@@ -133,8 +136,13 @@ binary_comp	:
 	|	NEQ
 ;
 %%
+
+int yyerror(char *s){
+	fprintf(stderr, "%s\n", s);
+	exit(1);
+}
+
 int printd(int i) {
-    int chr = 0;
-    sprintf(chr, "%d", i);
-    return chr;
+    printf("%d\n", i);
+    return 1;
 }
