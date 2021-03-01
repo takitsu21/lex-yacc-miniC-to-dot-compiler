@@ -2,6 +2,7 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	int printd(int i);
+	extern int yylineno;
 %}
 %token IDENTIFICATEUR CONSTANTE VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
 %token BREAK RETURN PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR LAND LOR LT GT
@@ -92,7 +93,7 @@ appel	:
 		IDENTIFICATEUR '(' liste_expressions ')' ';'
 ;
 variable	:
-		IDENTIFICATEUR	{printf("YACC %s\n", $1);}
+		IDENTIFICATEUR
 	|	variable '[' expression ']'
 ;
 expression	:
@@ -137,8 +138,14 @@ binary_comp	:
 ;
 %%
 
+int main () {
+	while (1) {
+		yyparse();
+	}
+}
+
 int yyerror(char *s){
-	fprintf(stderr, "%s\n", s);
+	fprintf(stderr, "line %d : %s\n", yylineno, s);
 	exit(1);
 }
 

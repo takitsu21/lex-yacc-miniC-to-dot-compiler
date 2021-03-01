@@ -16,18 +16,17 @@ IS                      (u|U|l|L)*
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <memory.h>
-#include "librairie.h"
+// #include "librairie.h"
 #include "y.tab.h"
 int yylval;
-char* dotString;
+// char* dotString;
 
 
 /* Ne g�re pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
 
 %}
-dotString =  malloc(sizeof(char) * 2048);
+
 %%
 "auto"                  { /* A completer */ }
 "break"                 { return BREAK; }
@@ -40,18 +39,16 @@ dotString =  malloc(sizeof(char) * 2048);
 "double"                { /* A completer */ }
 "else"                  { return ELSE; }
 "enum"                  { /* A completer */ }
-"extern"                { return EXTERN; }
+"extern"                { printf("%s ", yytext); return EXTERN; }
 "float"                 { /* A completer */ }
 "for"                   { return FOR; }
 "goto"                  { /* A completer */ }
 "if"                    { return IF; }
-"int"                   { dotString = newString(dotString, yytext);
-                            printf("%s ", yytext);
-                            return INT;
-                        }
+"int"                   { printf("%s ", yytext);
+                            return INT; }
 "long"                  { /* A completer */ }
 "register"              { /* A completer */ }
-"return"                { writeDotFile(dotString); return RETURN; }
+"return"                { return RETURN; }
 "short"                 { /* A completer */ }
 "signed"                { /* A completer */ }
 "sizeof"                { /* A completer */ }
@@ -65,19 +62,14 @@ dotString =  malloc(sizeof(char) * 2048);
 "volatile"              { /* A completer */ }
 "while"                 { return WHILE; }
 
-{L}({L}|{D})*           {
-    printf("{L}({L}|{D})*  : %s\n", yytext);
-    dotString = newString(dotString, yytext);
-    return IDENTIFICATEUR; }
+{L}({L}|{D})*           { return IDENTIFICATEUR; }
 
 0[xX]{H}+{IS}?          { printf("0[xX]{H}+{IS}? : %s\n", yytext); }
-0{D}+{IS}?              { printf("0{D}+{IS}?   %s\n", yytext); }
-{D}+{IS}?               { printf("{D}+{IS}?  : %s\n", yytext);
-
-                return CONSTANTE; }
+0{D}+{IS}?              { printf("0{D}+{IS}?   %s\n", yytext); return CONSTANTE; }
+{D}+{IS}?               { printf("{D}+{IS}?  : %s\n", yytext); return CONSTANTE; }
 L?'(\\.|[^\\'])+'       { printf("L?'(\\.|[^\\'])+'      : %s\n", yytext); }
 
-{D}+{E}{FS}?            { printf("{D}+{E}{FS}?   : %s\n", yytext); }
+{D}+{E}{FS}?            { printf("{D}+{E}{FS}?   : %s\n", yytext); return CONSTANTE; }
 {D}*"."{D}+({E})?{FS}?  { printf("2 : %s\n", yytext); }
 {D}+"."{D}*({E})?{FS}?  { printf("3 : %s\n", yytext); }
 
@@ -107,11 +99,12 @@ L?\"(\\.|[^\\"])*\"     { printf("L?\"(\\.|[^\\\"])*\" : %s\n", yytext); }
 "!="                    { return NEQ; }
 
 "+"                     { return PLUS; }
-"-"                     { printf("%s\n", yytext); return MOINS; }
+"-"                     { printf("%s ", yytext); return MOINS; }
 "/"                     { return DIV; }
 "*"                     { return MUL; }
 
-[ \t\v\n\f]             { /* A completer */ }
-.                       { return yytext[0]; }
+[ \n]   { yylineno = yylineno + 1;}
+[ \t\v\f]             ;
+.                       { printf("%c\n", yytext[0]); return yytext[0]; }
 %%
 

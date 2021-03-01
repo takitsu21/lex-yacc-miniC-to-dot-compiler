@@ -13,7 +13,7 @@ C_FILE=Tests/$(FILENAME).c
 YACC_GENS=$(YACC_C) $(YACC_H)
 LEX_GENS=lex.yy.c
 
-C_FLAGS=librairie.c $(YACC_C) $(LEX_GENS) -o $(FILE_OUT) -w -Wall -pedantic -lfl
+C_FLAGS=$(YACC_C) $(LEX_GENS) -o $(FILE_OUT) -w -Wall -pedantic -lfl
 DOT_FLAGS=-Tpdf $(DOT_FILE) -o $(DOT_OUT_PDF)
 YACC_FLAGS=-d $(YACC_IN)
 

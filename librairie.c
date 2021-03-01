@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <memory.h>
+// #include <memory.h>
 
 
 int writeDotFile(const char* src) {
@@ -16,7 +16,7 @@ int writeDotFile(const char* src) {
     return 1;
 }
 
-const char* newString(char* str1, char* str2) {
+char* newString(const char* str1, const char* str2) {
     printf("TRY TO CONCATENATE %s and %s\n", str1, str2);
     char * str3 = (char *) malloc(1 + strlen(str1)+ strlen(str2) );
     strcpy(str3, str1);
