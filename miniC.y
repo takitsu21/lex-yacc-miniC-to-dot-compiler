@@ -3,6 +3,7 @@
 	#include <stdlib.h>
 	int printd(int i);
 	extern int yylineno;
+	extern int yycol;
 %}
 %token IDENTIFICATEUR CONSTANTE VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
 %token BREAK RETURN PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR LAND LOR LT GT
@@ -48,8 +49,12 @@ type	:
 		VOID
 	|	INT
 ;
+liste_de_param :
+	liste_de_param ',' parm
+	| parm ;
 liste_parms	:
 		liste_parms ',' parm
+	| liste_de_param
 	|
 ;
 parm	:
@@ -138,18 +143,17 @@ binary_comp	:
 ;
 %%
 
+/* Analyseur syntaxique */
 int main () {
-	while (1) {
-		yyparse();
-	}
+	while (1) yyparse();
 }
 
 int yyerror(char *s){
-	fprintf(stderr, "line %d : %s\n", yylineno, s);
+	fprintf(stderr, "Error at line %d : %s\n", yylineno, s);
 	exit(1);
 }
 
 int printd(int i) {
-    printf("%d\n", i);
+    fprintf(stdout, "%d\n", i);
     return 1;
 }

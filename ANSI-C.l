@@ -4,6 +4,7 @@ H                       [a-fA-F0-9]
 E                       [Ee][+-]?{D}+
 FS                      (f|F|l|L)
 IS                      (u|U|l|L)*
+comment    (((\/\*+[\s\S]*?\*\/)|(\/\*+.*\*\/))|(\/{2}.*))*
 
 %{
 /*
@@ -28,83 +29,65 @@ int yylval;
 %}
 
 %%
-"auto"                  { /* A completer */ }
 "break"                 { return BREAK; }
 "case"                  { return CASE; }
-"char"                  { /* A completer */ }
-"const"                 { printf("const : %s", yytext); }
-"continue"              { /* A completer */ }
 "default"               { return DEFAULT; }
-"do"                    { /* A completer */ }
-"double"                { /* A completer */ }
 "else"                  { return ELSE; }
-"enum"                  { /* A completer */ }
 "extern"                { printf("%s ", yytext); return EXTERN; }
-"float"                 { /* A completer */ }
 "for"                   { return FOR; }
-"goto"                  { /* A completer */ }
 "if"                    { return IF; }
 "int"                   { printf("%s ", yytext);
                             return INT; }
-"long"                  { /* A completer */ }
-"register"              { /* A completer */ }
-"return"                { return RETURN; }
-"short"                 { /* A completer */ }
-"signed"                { /* A completer */ }
-"sizeof"                { /* A completer */ }
-"static"                { /* A completer */ }
-"struct"                { /* A completer */ }
+"return"                { printf("%s ", yytext); return RETURN; }
 "switch"                { return SWITCH; }
-"typedef"               { /* A completer */ }
-"union"                 { /* A completer */ }
-"unsigned"              { /* A completer */ }
 "void"                  { return VOID; }
-"volatile"              { /* A completer */ }
 "while"                 { return WHILE; }
 
-{L}({L}|{D})*           { return IDENTIFICATEUR; }
+{L}({L}|{D})*           { printf("[IDENTIFICATEUR : %s ]", yytext); return IDENTIFICATEUR; }
 
-0[xX]{H}+{IS}?          { printf("0[xX]{H}+{IS}? : %s\n", yytext); }
-0{D}+{IS}?              { printf("0{D}+{IS}?   %s\n", yytext); return CONSTANTE; }
-{D}+{IS}?               { printf("{D}+{IS}?  : %s\n", yytext); return CONSTANTE; }
-L?'(\\.|[^\\'])+'       { printf("L?'(\\.|[^\\'])+'      : %s\n", yytext); }
+0[xX]{H}+{IS}?          { ; }
+0{D}+{IS}?              { return CONSTANTE; }
+{D}+{IS}?               { printf("%s ", yytext); return CONSTANTE; }
+L?'(\\.|[^\\'])+'       { ; }
 
-{D}+{E}{FS}?            { printf("{D}+{E}{FS}?   : %s\n", yytext); return CONSTANTE; }
-{D}*"."{D}+({E})?{FS}?  { printf("2 : %s\n", yytext); }
-{D}+"."{D}*({E})?{FS}?  { printf("3 : %s\n", yytext); }
+{D}+{E}{FS}?            { return CONSTANTE; }
+{D}*"."{D}+({E})?{FS}?  { ; }
+{D}+"."{D}*({E})?{FS}?  { ; }
+{comment} {printf("commentaire : %s\n", yytext);}
 
-L?\"(\\.|[^\\"])*\"     { printf("L?\"(\\.|[^\\\"])*\" : %s\n", yytext); }
+L?\"(\\.|[^\\"])*\"     {; }
 
-"..."                   { /* A completer */ }
-">>="                   { /* A completer */ }
-"<<="                   { /* A completer */ }
-"+="                    { /* A completer */ }
-"-="                    { /* A completer */ }
-"*="                    { /* A completer */ }
-"/="                    { /* A completer */ }
-"%="                    { /* A completer */ }
+
+
 "&="                    { return BAND; }
-"^="                    { /* A completer */ }
 "|="                    { return BOR; }
 ">>"                    { return RSHIFT; }
 "<<"                    { return LSHIFT; }
-"++"                    { /* A completer */ }
-"--"                    { /* A completer */ }
-"->"                    { /* A completer */ }
 "&&"                    { return LAND; }
 "||"                    { return LOR; }
 "<="                    { return LEQ; }
 ">="                    { return GEQ; }
 "=="                    { return EQ; }
 "!="                    { return NEQ; }
+"!"                     {return NOT; }
 
-"+"                     { return PLUS; }
+"+"                     { printf("%s ", yytext); return PLUS; }
 "-"                     { printf("%s ", yytext); return MOINS; }
-"/"                     { return DIV; }
-"*"                     { return MUL; }
+"/"                     { printf("%s ", yytext); return DIV; }
+"*"                     { printf("%s ", yytext); return MUL; }
+"="                     { printf("%s ", yytext); return IDENTIFICATEUR; }
+"<"                     { printf("%s ", yytext); return LT; }
+">"                     { printf("%s ", yytext); return GT; }
 
-[ \n]   { yylineno = yylineno + 1;}
-[ \t\v\f]             ;
-.                       { printf("%c\n", yytext[0]); return yytext[0]; }
+
+[\n]                    { yylineno = yylineno + 1; printf("\n[%d] ", yylineno); }
+[ \t\v\f\n]             { ; };
+[();,{}:\[\]]           { printf("%s", yytext); return yytext[0]; }
+.                       { printf("Lexical error at line %d : %s\n", yylineno, yytext);
+                            exit(1); }
 %%
 
+/* Analyseur lexicale */
+// main () {
+//     while (yylex());
+// }
