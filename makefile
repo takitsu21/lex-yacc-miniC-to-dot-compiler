@@ -21,14 +21,17 @@ DOT_CC=dot
 FLEX_CC=flex
 YACC_CC=yacc
 
-# test-all:
-# 	./test.sh
+
 
 all: clean compile graph test
+test-all:
+	./test.sh
 test: clean compile
 	./try < $(C_FILE)
+valgrind-debug:
+	valgrind --tool=memcheck --leak-check=full --leak-resolution=high --show-reachable=yes ./try < $(C_FILE)
 install:
-	sudo apt install -y graphviz flex bison
+	sudo apt install -y graphviz flex bison valgrind
 graph:
 	$(DOT_CC) $(DOT_FLAGS)
 flex_compile:

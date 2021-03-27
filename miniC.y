@@ -1,9 +1,13 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
-	int printd(int i);
+	#define DEBUGGER 1
+	#define VERBOSE 1
+	void yyerror(char *s);
+	extern int printd(int i);
 	extern int yylineno;
 	extern int yycol;
+	extern int debugger(const char* s, int token, const char* token_type);
 %}
 %token IDENTIFICATEUR CONSTANTE VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
 %token BREAK RETURN PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR LAND LOR LT GT
@@ -49,12 +53,13 @@ type	:
 		VOID
 	|	INT
 ;
-liste_de_param :
-	liste_de_param ',' parm
-	| parm ;
+create_liste_param :	// cf Forum Khaoula Bouhlal
+		create_liste_param ',' parm
+	| 	parm
+;
 liste_parms	:
 		liste_parms ',' parm
-	| liste_de_param
+	| create_liste_param
 	|
 ;
 parm	:
@@ -110,8 +115,12 @@ expression	:
 	|	IDENTIFICATEUR '(' liste_expressions ')'
 ;
 liste_expressions	:
-		liste_expressions ',' expression
+		create_expr_liste
 	|
+;
+create_expr_liste :   // cf mail forum David Fissore
+    	create_expr_liste ',' expression
+    | 	expression
 ;
 condition	:
 		NOT '(' condition ')'
@@ -145,15 +154,28 @@ binary_comp	:
 
 /* Analyseur syntaxique */
 int main () {
-	while (1) yyparse();
+	while (yyparse());
 }
 
-int yyerror(char *s){
-	fprintf(stderr, "Error at line %d : %s\n", yylineno, s);
+// Gestion des erreurs syntaxique
+void yyerror(char *s) {
+	fprintf(stderr, "Syntax error at line %d : %s\n", yylineno, s);
 	exit(1);
 }
 
 int printd(int i) {
     fprintf(stdout, "%d\n", i);
     return 1;
+}
+
+// debugger printer
+int debugger(const char* s, int token, const char* token_type) {
+	#if VERBOSE
+		#if DEBUGGER
+			printf("[line %d] [%s] -> %s\n", yylineno, token_type, s);
+		#else
+			printf("%s \n", s);
+		#endif
+	#endif
+	return token;
 }

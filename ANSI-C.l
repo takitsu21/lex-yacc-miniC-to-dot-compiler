@@ -17,37 +17,37 @@ comment    (((\/\*+[\s\S]*?\*\/)|(\/\*+.*\*\/))|(\/{2}.*))*
 */
 #include <stdio.h>
 #include <stdlib.h>
+
+
 // #include "librairie.h"
 #include "y.tab.h"
-int yylval;
-// char* dotString;
+
 
 
 /* Ne g�re pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
-
 %}
+%option noyywrap
 
 %%
-"break"                 { return BREAK; }
-"case"                  { return CASE; }
-"default"               { return DEFAULT; }
-"else"                  { return ELSE; }
-"extern"                { printf("%s ", yytext); return EXTERN; }
-"for"                   { return FOR; }
-"if"                    { return IF; }
-"int"                   { printf("%s ", yytext);
-                            return INT; }
-"return"                { printf("%s ", yytext); return RETURN; }
-"switch"                { return SWITCH; }
-"void"                  { return VOID; }
-"while"                 { return WHILE; }
+"break"                 { return debugger(yytext, BREAK); return BREAK; }
+"case"                  { return debugger(yytext, CASE); return CASE; }
+"default"               { return debugger(yytext, DEFAULT); return DEFAULT; }
+"else"                  { return debugger(yytext, ELSE, "ELSE"); return ELSE; }
+"extern"                { return debugger(yytext, EXTERN, "EXTERN"); return EXTERN; }
+"for"                   { return debugger(yytext, FOR, "FOR"); return FOR; }
+"if"                    { return debugger(yytext, IF, "IF"); return IF; }
+"int"                   { return debugger(yytext, INT, "INT"); return INT ;}
+"return"                { return debugger(yytext, RETURN, "RETURN"); return RETURN; }
+"switch"                { return debugger(yytext, SWITCH, "SWITCH"); return SWITCH; }
+"void"                  { return debugger(yytext, VOID, "VOID"); return VOID; }
+"while"                 { return debugger(yytext, WHILE, "WHILE"); return WHILE; }
 
-{L}({L}|{D})*           { printf("[IDENTIFICATEUR : %s ]", yytext); return IDENTIFICATEUR; }
+{L}({L}|{D})*           { return debugger(yytext, IDENTIFICATEUR, "IDENTIFICATEUR"); return IDENTIFICATEUR; }
 
-0[xX]{H}+{IS}?          { ; }
-0{D}+{IS}?              { return CONSTANTE; }
-{D}+{IS}?               { printf("%s ", yytext); return CONSTANTE; }
+0[xX]{H}+{IS}?          { return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
+0{D}+{IS}?              { return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
+{D}+{IS}?               { return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
 L?'(\\.|[^\\'])+'       { ; }
 
 {D}+{E}{FS}?            { return CONSTANTE; }
@@ -55,36 +55,34 @@ L?'(\\.|[^\\'])+'       { ; }
 {D}+"."{D}*({E})?{FS}?  { ; }
 {comment} {printf("commentaire : %s\n", yytext);}
 
-L?\"(\\.|[^\\"])*\"     {; }
+L?\"(\\.|[^\\"])*\"     { ; }
 
 
 
-"&="                    { return BAND; }
-"|="                    { return BOR; }
-">>"                    { return RSHIFT; }
-"<<"                    { return LSHIFT; }
-"&&"                    { return LAND; }
-"||"                    { return LOR; }
-"<="                    { return LEQ; }
-">="                    { return GEQ; }
-"=="                    { return EQ; }
-"!="                    { return NEQ; }
-"!"                     {return NOT; }
+"&="                    { return debugger(yytext, BAND, "BAND"); return BAND; }
+"|="                    { return debugger(yytext, BOR, "BOR"); return BOR; }
+">>"                    { return debugger(yytext, RSHIFT, "RSHIFT"); return RSHIFT; }
+"<<"                    { return debugger(yytext, LSHIFT, "LSHIFT"); return LSHIFT; }
+"&&"                    { return debugger(yytext, LAND, "LAND"); return LAND; }
+"||"                    { return debugger(yytext, LOR, "LOR"); return LOR; }
+"<="                    { return debugger(yytext, LEQ, "LEQ"); return LEQ; }
+">="                    { return debugger(yytext, GEQ, "GEQ"); return GEQ; }
+"=="                    { return debugger(yytext, EQ, "EQ"); return EQ; }
+"!="                    { return debugger(yytext, NEQ, "NEQ"); return NEQ; }
+"!"                     { return debugger(yytext, NOT, "NOT"); return NOT; }
 
-"+"                     { printf("%s ", yytext); return PLUS; }
-"-"                     { printf("%s ", yytext); return MOINS; }
-"/"                     { printf("%s ", yytext); return DIV; }
-"*"                     { printf("%s ", yytext); return MUL; }
-"="                     { printf("%s ", yytext); return IDENTIFICATEUR; }
-"<"                     { printf("%s ", yytext); return LT; }
-">"                     { printf("%s ", yytext); return GT; }
+"-"                     { return debugger(yytext, MOINS, "MOINS"); return MOINS; }
+"/"                     { return debugger(yytext, DIV, "DIV"); return DIV; }
+"*"                     { return debugger(yytext, MUL, "MUL"); return MUL; }
+"<"                     { return debugger(yytext, LT, "LT"); return LT; }
+">"                     { return debugger(yytext, GT, "GT"); return GT; }
+"+"                     { return debugger(yytext, PLUS, "PLUS"); return PLUS; }
 
-
-[\n]                    { yylineno = yylineno + 1; printf("\n[%d] ", yylineno); }
-[ \t\v\f\n]             { ; };
-[();,{}:\[\]]           { printf("%s", yytext); return yytext[0]; }
-.                       { printf("Lexical error at line %d : %s\n", yylineno, yytext);
-                            exit(1); }
+[\n]                    { yylineno++; }
+[ \t\v\f]               { ; }
+[();,{}:\[\]=]          { printf("%s", yytext); return yytext[0]; }
+.                       { printf("Lexical error at line %d : %s\n", yylineno,  yytext);
+                            exit(EXIT_SUCCESS); }
 %%
 
 /* Analyseur lexicale */
