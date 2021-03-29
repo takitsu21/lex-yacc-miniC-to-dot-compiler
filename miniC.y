@@ -1,15 +1,27 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
+	#include "symboles.h"
 	#define DEBUGGER 1
 	#define VERBOSE 1
 	void yyerror(char *s);
+	extern symbole *table[TAILLE];
 	extern int printd(int i);
 	extern int yylineno;
-	extern int yycol;
 	extern int debugger(const char* s, int token, const char* token_type);
 %}
-%token IDENTIFICATEUR CONSTANTE VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
+%union {
+	int val;
+	struct _symbole *symbole_ptr;
+}
+
+%token<symbole_ptr> IDENTIFICATEUR
+%token<val> CONSTANTE
+
+%type <symbole_ptr> declarateur variable appel fonction parm
+%type <val> expression
+
+%token VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
 %token BREAK RETURN PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR LAND LOR LT GT
 %token GEQ LEQ EQ NEQ NOT EXTERN
 %left PLUS MOINS
@@ -42,12 +54,12 @@ liste_declarateurs	:
 	|	declarateur
 ;
 declarateur	:
-		IDENTIFICATEUR
+		IDENTIFICATEUR { $$ = inserer($1->nom); }
 	|	declarateur '[' CONSTANTE ']'
 ;
 fonction	:
-		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}'
-	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';'
+		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' { $$ = inserer($2->nom); }
+	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' { $$ = inserer($3->nom); }
 ;
 type	:
 		VOID
@@ -63,7 +75,7 @@ liste_parms	:
 	|
 ;
 parm	:
-		INT IDENTIFICATEUR
+		INT IDENTIFICATEUR { $$ = inserer($2->nom); }
 ;
 liste_instructions :
 		liste_instructions instruction
@@ -100,19 +112,19 @@ bloc	:
 		'{' liste_declarations liste_instructions '}'
 ;
 appel	:
-		IDENTIFICATEUR '(' liste_expressions ')' ';'
+		IDENTIFICATEUR '(' liste_expressions ')' ';' { $$ = inserer($1); }
 ;
 variable	:
-		IDENTIFICATEUR
+		IDENTIFICATEUR { $$ = inserer($1); }
 	|	variable '[' expression ']'
 ;
 expression	:
 		'(' expression ')'
 	|	expression binary_op expression %prec OP
 	|	MOINS expression
-	|	CONSTANTE
+	|	CONSTANTE { $$ = $1; }
 	|	variable
-	|	IDENTIFICATEUR '(' liste_expressions ')'
+	|	IDENTIFICATEUR '(' liste_expressions ')' { $$ = inserer($1->nom); }
 ;
 liste_expressions	:
 		create_expr_liste
