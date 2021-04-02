@@ -19,7 +19,7 @@ comment    (((\/\*+[\s\S]*?\*\/)|(\/\*+.*\*\/))|(\/{2}.*))*
 #include <stdlib.h>
 #include "y.tab.h"
 #include "symboles.h"
-symbole *table[TAILLE];
+// symbole *table[TAILLE];
 int current_idx = 0;
 
 /* Ne g�re pas les commentaires. A rajouter */
@@ -27,22 +27,28 @@ int current_idx = 0;
 %}
 
 %%
-"break"                 { return debugger(yytext, BREAK, "CASE"); return BREAK; }
+"break"                 { return debugger(yytext, BREAK, "BREAK"); return BREAK; }
 "case"                  { return debugger(yytext, CASE, "CASE"); return CASE; }
 "default"               { return debugger(yytext, DEFAULT, "DEFAULT"); return DEFAULT; }
 "else"                  { return debugger(yytext, ELSE, "ELSE"); return ELSE; }
 "extern"                { return debugger(yytext, EXTERN, "EXTERN"); return EXTERN; }
 "for"                   { return debugger(yytext, FOR, "FOR"); return FOR; }
 "if"                    { return debugger(yytext, IF, "IF"); return IF; }
-"int"                   { return debugger(yytext, INT, "INT"); return INT ;}
+"int"                   {
+    yylval.type = _INT;
+    return debugger(yytext, INT, "INT"); return INT ;}
 "return"                { return debugger(yytext, RETURN, "RETURN"); return RETURN; }
 "switch"                { return debugger(yytext, SWITCH, "SWITCH"); return SWITCH; }
 "void"                  { return debugger(yytext, VOID, "VOID"); return VOID; }
 "while"                 { return debugger(yytext, WHILE, "WHILE"); return WHILE; }
 
-{L}({L}|{D})*           { yylval.symbole_ptr = inserer(yytext);
-        printf("table[hash(yytext)] : %s\n", table[hash(yytext)]->nom);
-        return debugger(yytext, IDENTIFICATEUR, "IDENTIFICATEUR"); return IDENTIFICATEUR; }
+{L}({L}|{D})*           {
+    int hash_yytext = hash(yytext);
+    symbole* new_symb = inserer(yytext);
+    table[hash_yytext] = new_symb;
+    yylval.symbole_ptr = new_symb;
+    // printf("table[hash(yytext)] : %s\n", table[hash_yytext]->nom);
+    return debugger(yytext, IDENTIFICATEUR, "IDENTIFICATEUR"); return IDENTIFICATEUR; }
 
 0[xX]{H}+{IS}?          {
                         yylval.val = atoi(yytext);
@@ -90,12 +96,12 @@ L?\"(\\.|[^\\"])*\"     { ; }
 
 [\n]                    { yylineno++; }
 [ \t\v\f]               { ; }
-[();,{}:\[\]=]          { return yytext[0]; }
+[();,{}:\[\]=]          { return *yytext; }
 .                       { printf("Lexical error at line %d : %s\n", yylineno,  yytext[0]);
                             exit(EXIT_FAILURE); }
 %%
 
 /* Analyseur lexicale */
-// main () {
-//     while (yylex());
-// }
+main () {
+    while (yyparse());
+}

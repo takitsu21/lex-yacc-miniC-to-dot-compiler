@@ -26,4 +26,5 @@ void affiche();
 symbole *inserer(char *nom);
 void table_reset();
 int hash(char *nom);
+void assigne(symbole* table[], const char* var, int value);
 #endif

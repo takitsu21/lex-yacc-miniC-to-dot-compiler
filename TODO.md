@@ -5,7 +5,7 @@ fournis passent correctement (à savoir que les tokens sont correctement analys�
 lexical). Vérifiez sa robustesse en modifiant les programmes tests pour provoquer des erreurs lexicales :
 introduisez des caractères interdits, des noms de variables incorrects, etc.
 
-- [ ] Une fois que vous êtes sûrs que votre analyseur lexical fonctionne correctement, vérifiez que votre
+- [X] Une fois que vous êtes sûrs que votre analyseur lexical fonctionne correctement, vérifiez que votre
 parseur (analyseur lexico-syntaxique) fonctionne sur tous les programmes tests. Vérifiez sa robustesse
 en modifiant les programmes tests pour provoquer des erreurs syntaxiques.
 

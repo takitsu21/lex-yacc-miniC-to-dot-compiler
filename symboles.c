@@ -76,6 +76,12 @@ void affiche()
     }
 }
 
+void assigne(symbole* table[], const char* var, int value) {
+    int hash_text = hash(var);
+    table[hash_text]->nom = var;
+    table[hash_text]->valeur = value;
+}
+
 // int main()
 // {
 //     // table_reset();

@@ -28,8 +28,8 @@ test-all:
 	./test.sh
 test: clean compile
 	./try < $(C_FILE)
-valgrind-debug:
-	valgrind --tool=memcheck --leak-check=full --leak-resolution=high --show-reachable=yes ./try < $(C_FILE)
+valgrind-debug: clean compile
+	valgrind --tool=memcheck -s --leak-check=full --leak-resolution=high --show-reachable=yes ./try < $(C_FILE)
 install:
 	sudo apt install -y graphviz flex bison valgrind
 graph:

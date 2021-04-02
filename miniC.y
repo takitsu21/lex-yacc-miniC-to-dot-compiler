@@ -12,16 +12,19 @@
 %}
 %union {
 	int val;
+	int type;
 	struct _symbole *symbole_ptr;
 }
 
 %token<symbole_ptr> IDENTIFICATEUR
 %token<val> CONSTANTE
+%token<type> INT VOID
 
 %type <symbole_ptr> declarateur variable appel fonction parm
 %type <val> expression
+%type <type> type
 
-%token VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
+%token FOR WHILE IF ELSE SWITCH CASE DEFAULT
 %token BREAK RETURN PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR LAND LOR LT GT
 %token GEQ LEQ EQ NEQ NOT EXTERN
 %left PLUS MOINS
@@ -44,26 +47,26 @@ liste_declarations	:
 ;
 liste_fonctions	:
 		liste_fonctions fonction
-|               fonction
+|               fonction	{printf("[%d] : fonction list\n", yylineno); }
 ;
 declaration	:
-		type liste_declarateurs ';'
+		type liste_declarateurs ';' 	{printf("[%d] : type liste_declarateurs\n", yylineno); }
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur
-	|	declarateur
+	|	declarateur 	{printf("[%d] : declarateur\n", yylineno); }
 ;
 declarateur	:
-		IDENTIFICATEUR { $$ = inserer($1->nom); }
+		IDENTIFICATEUR
 	|	declarateur '[' CONSTANTE ']'
 ;
 fonction	:
-		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' { $$ = inserer($2->nom); }
-	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' { $$ = inserer($3->nom); }
+		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}'
+	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';'
 ;
 type	:
-		VOID
-	|	INT
+		VOID	{printf("VOID : %s\n", $1); $$ = $1; }
+	|	INT		{printf("INT : %s\n", $1); $$ = $1; }
 ;
 create_liste_param :	// cf Forum Khaoula Bouhlal
 		create_liste_param ',' parm
@@ -75,7 +78,7 @@ liste_parms	:
 	|
 ;
 parm	:
-		INT IDENTIFICATEUR { $$ = inserer($2->nom); }
+		INT IDENTIFICATEUR
 ;
 liste_instructions :
 		liste_instructions instruction
@@ -106,25 +109,28 @@ saut	:
 	|	RETURN expression ';'
 ;
 affectation	:
-		variable '=' expression
+		variable '=' expression {
+		assigne(table, $1->nom, $3);
+		// table[hash($1->nom)]->valeur = $3;
+		printf("%s = %d\n", table[hash($1->nom)]->nom, table[hash($1->nom)]->valeur); }
 ;
 bloc	:
 		'{' liste_declarations liste_instructions '}'
 ;
 appel	:
-		IDENTIFICATEUR '(' liste_expressions ')' ';' { $$ = inserer($1); }
+		IDENTIFICATEUR '(' liste_expressions ')' ';'
 ;
 variable	:
-		IDENTIFICATEUR { $$ = inserer($1); }
+		IDENTIFICATEUR
 	|	variable '[' expression ']'
 ;
 expression	:
-		'(' expression ')'
+		'(' expression ')'		{ $$ = $2; }
 	|	expression binary_op expression %prec OP
-	|	MOINS expression
-	|	CONSTANTE { $$ = $1; }
+	|	MOINS expression	{$$ = -$2; }
+	|	CONSTANTE
 	|	variable
-	|	IDENTIFICATEUR '(' liste_expressions ')' { $$ = inserer($1->nom); }
+	|	IDENTIFICATEUR '(' liste_expressions ')'
 ;
 liste_expressions	:
 		create_expr_liste
@@ -165,9 +171,9 @@ binary_comp	:
 %%
 
 /* Analyseur syntaxique */
-int main () {
-	while (yyparse());
-}
+// int main () {
+// 	while (yyparse());
+// }
 
 // Gestion des erreurs syntaxique
 void yyerror(char *s) {
