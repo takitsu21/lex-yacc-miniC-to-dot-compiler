@@ -19,14 +19,14 @@ comment    (((\/\*+[\s\S]*?\*\/)|(\/\*+.*\*\/))|(\/{2}.*))*
 #include <stdlib.h>
 #include "y.tab.h"
 #include "symboles.h"
-// symbole *table[TAILLE];
-int current_idx = 0;
-
+yycol = 0;
 /* Ne g�re pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
 %}
+%option yylineno
 
 %%
+{comment}               { printf("commentaire : %s\n", yytext); }
 "break"                 { return debugger(yytext, BREAK, "BREAK"); return BREAK; }
 "case"                  { return debugger(yytext, CASE, "CASE"); return CASE; }
 "default"               { return debugger(yytext, DEFAULT, "DEFAULT"); return DEFAULT; }
@@ -35,11 +35,15 @@ int current_idx = 0;
 "for"                   { return debugger(yytext, FOR, "FOR"); return FOR; }
 "if"                    { return debugger(yytext, IF, "IF"); return IF; }
 "int"                   {
-    yylval.type = _INT;
+    // yylval.type = _INT;
+    yylval.param = create_param(_INT);
     return debugger(yytext, INT, "INT"); return INT ;}
 "return"                { return debugger(yytext, RETURN, "RETURN"); return RETURN; }
 "switch"                { return debugger(yytext, SWITCH, "SWITCH"); return SWITCH; }
-"void"                  { return debugger(yytext, VOID, "VOID"); return VOID; }
+"void"                  {
+    // yylval.type = _VOID;
+    yylval.param = create_param(_INT);
+    return debugger(yytext, VOID, "VOID"); return VOID; }
 "while"                 { return debugger(yytext, WHILE, "WHILE"); return WHILE; }
 
 {L}({L}|{D})*           {
@@ -52,24 +56,19 @@ int current_idx = 0;
 
 0[xX]{H}+{IS}?          {
                         yylval.val = atoi(yytext);
-                        // table[hash(yylval.nom)]->valeur = yylval.value;
-                        // printf("table %s = %d",yylval.nom, table[hash(yylval.nom)]->valeur);
-
                         return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
-0{D}+{IS}?              { yylval.val = atoi(yytext);
-                        // table[hash(yylval.nom)]->valeur = yylval.value;
-                        // printf("table %s = %d",yylval.nom, table[hash(yylval.nom)]->valeur);
-return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
-{D}+{IS}?               { yylval.val = atoi(yytext);
-                        // table[hash(yylval.nom)]->valeur = yylval.value;
-                        // printf("table %s = %d",yylval.nom, table[hash(yylval.nom)]->valeur);
-return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
+0{D}+{IS}?              {
+    yylval.val = atoi(yytext);
+    return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
+{D}+{IS}?               {
+    yylval.val = atoi(yytext);
+    return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
 L?'(\\.|[^\\'])+'       { ; }
 
 {D}+{E}{FS}?            { return CONSTANTE; }
 {D}*"."{D}+({E})?{FS}?  { ; }
 {D}+"."{D}*({E})?{FS}?  { ; }
-{comment}               { printf("commentaire : %s\n", yytext); }
+
 
 L?\"(\\.|[^\\"])*\"     { ; }
 
@@ -94,14 +93,13 @@ L?\"(\\.|[^\\"])*\"     { ; }
 ">"                     { return debugger(yytext, GT, "GT"); return GT; }
 "+"                     { return debugger(yytext, PLUS, "PLUS"); return PLUS; }
 
-[\n]                    { yylineno++; }
-[ \t\v\f]               { ; }
+\n                      { yycol = 0; }
+[ \t\v\f\n]               { ; }
 [();,{}:\[\]=]          { return *yytext; }
-.                       { printf("Lexical error at line %d : %s\n", yylineno,  yytext[0]);
+.                       { printf("Lexical error at line %d:%d : %s\n", yylineno, yycol,  *yytext);
                             exit(EXIT_FAILURE); }
 %%
 
-/* Analyseur lexicale */
 main () {
     while (yyparse());
 }

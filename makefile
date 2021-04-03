@@ -3,7 +3,7 @@ CC=gcc
 FILENAME=add
 FLEX_IN=ANSI-C.l
 YACC_IN=miniC.y
-FILE_OUT=try
+FILE_OUT=c2dot
 YACC_C=y.tab.c
 YACC_H=y.tab.h
 DOT_FILE=$(FILENAME).dot
@@ -24,12 +24,12 @@ YACC_CC=yacc
 
 
 all: clean compile graph test
-test-all:
+test-all: clean
 	./test.sh
 test: clean compile
-	./try < $(C_FILE)
+	./$(FILE_OUT) < $(C_FILE)
 valgrind-debug: clean compile
-	valgrind --tool=memcheck -s --leak-check=full --leak-resolution=high --show-reachable=yes ./try < $(C_FILE)
+	valgrind --tool=memcheck -s --leak-check=full --leak-resolution=high --show-reachable=yes ./$(FILE_OUT)  < $(C_FILE)
 install:
 	sudo apt install -y graphviz flex bison valgrind
 graph:

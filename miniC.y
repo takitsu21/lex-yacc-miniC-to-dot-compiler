@@ -8,23 +8,30 @@
 	extern symbole *table[TAILLE];
 	extern int printd(int i);
 	extern int yylineno;
+	extern int yycol;
 	extern int debugger(const char* s, int token, const char* token_type);
 %}
+
+
 %union {
 	int val;
 	int type;
 	struct _symbole *symbole_ptr;
+	struct _liste_t *liste;
+	struct _param_t *param;
 }
 
 %token<symbole_ptr> IDENTIFICATEUR
 %token<val> CONSTANTE
-%token<type> INT VOID
+// %token<type> INT VOID
 
-%type <symbole_ptr> declarateur variable appel fonction parm
+%type <symbole_ptr> declarateur variable appel fonction
 %type <val> expression
 %type <type> type
+%type <param> parm
+%type <liste> create_liste_param create_expr_liste
 
-%token FOR WHILE IF ELSE SWITCH CASE DEFAULT
+%token FOR WHILE IF ELSE SWITCH CASE DEFAULT INT VOID
 %token BREAK RETURN PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR LAND LOR LT GT
 %token GEQ LEQ EQ NEQ NOT EXTERN
 %left PLUS MOINS
@@ -50,7 +57,7 @@ liste_fonctions	:
 |               fonction	{printf("[%d] : fonction list\n", yylineno); }
 ;
 declaration	:
-		type liste_declarateurs ';' 	{printf("[%d] : type liste_declarateurs\n", yylineno); }
+		type liste_declarateurs ';' 	{printf("DECLARATION TYPE : %d\n", $1); }
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur
@@ -61,24 +68,37 @@ declarateur	:
 	|	declarateur '[' CONSTANTE ']'
 ;
 fonction	:
-		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}'
+		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' {
+			// printf("FONCTION TYPE : %d\n", $1);
+		printf("FONCTION : %s, TYPE : %d", $2->nom, $1);
+		}
+
 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';'
 ;
 type	:
-		VOID	{printf("VOID : %s\n", $1); $$ = $1; }
-	|	INT		{printf("INT : %s\n", $1); $$ = $1; }
+		VOID	{ $$ = _VOID; }
+	|	INT		{ $$ = _INT; }
 ;
 create_liste_param :	// cf Forum Khaoula Bouhlal
-		create_liste_param ',' parm
+		create_liste_param ',' parm	{
+			// $$ = concatener_listes($1, creer_liste($3));
+			}
 	| 	parm
 ;
 liste_parms	:
 		liste_parms ',' parm
-	| create_liste_param
+	| create_liste_param {
+		// printf("liste parms : %s\n", $1->param.type);
+
+		// $$ = creer_liste($1);
+		}
 	|
 ;
 parm	:
-		INT IDENTIFICATEUR
+		INT IDENTIFICATEUR	{
+			$$->nom = strdup($2->nom);
+			printf("int : %s\n", $2->nom);
+			}
 ;
 liste_instructions :
 		liste_instructions instruction
@@ -126,11 +146,42 @@ variable	:
 ;
 expression	:
 		'(' expression ')'		{ $$ = $2; }
-	|	expression binary_op expression %prec OP
-	|	MOINS expression	{$$ = -$2; }
+	|	expression binary_op expression %prec OP {
+		// $$ = $1 + $3;
+	// 	switch ($2) {
+	// 		case PLUS:
+	// 			$$ = $1 + $3;
+	// 			break;
+	// 		case MOINS:
+	// 			$$ = $1 - $3;
+	// 			break;
+	// 		case DIV:
+	// 			$$ = $1 / $3;
+	// 			break;
+	// 		case MUL:
+	// 			$$ = $1 * $3;
+	// 			break;
+	// 		case LSHIFT:
+	// 			$$ = $1 << $3;
+	// 			break;
+	// 		case RSHIFT:
+	// 			$$ = $1 >> $3;
+	// 			break;
+	// 		case BAND:
+	// 			$$ = $1 & $3;
+	// 			break;
+	// 		default:
+	// 			$$ = $1 | $3;
+	// 			break;
+	// 	}
+	}
+	|	MOINS expression	{ $$ = -$2; }
 	|	CONSTANTE
 	|	variable
-	|	IDENTIFICATEUR '(' liste_expressions ')'
+	|	IDENTIFICATEUR '(' liste_expressions ')'	{
+		printf("%s\n", $1->nom);
+		$$ = strdup($1->nom);
+		}
 ;
 liste_expressions	:
 		create_expr_liste
@@ -177,7 +228,7 @@ binary_comp	:
 
 // Gestion des erreurs syntaxique
 void yyerror(char *s) {
-	fprintf(stderr, "Syntax error at line %d : %s\n", yylineno, s);
+	fprintf(stderr, "Syntax error at line %d:%d : %s\n", yylineno, yycol, s);
 	exit(1);
 }
 
@@ -188,9 +239,10 @@ int printd(int i) {
 
 // debugger printer
 int debugger(const char* s, int token, const char* token_type) {
+	yycol += strlen(s);
 	#if VERBOSE
 		#if DEBUGGER
-			printf("[line %d] [%s] -> %s\n", yylineno, token_type, s);
+			printf("[line %d:%d] [%s] -> %s\n", yylineno, yycol, token_type, s);
 		#else
 			printf("%s \n", s);
 		#endif
