@@ -85,7 +85,7 @@ liste_t *creer_liste(param_t p)
 {
     liste_t *liste;
     liste = (liste_t *)malloc(sizeof(liste_t));
-    assert(liste != NULL);
+    // assert(liste != NULL);
     liste->param = p;
     liste->suivant = NULL;
     return liste;

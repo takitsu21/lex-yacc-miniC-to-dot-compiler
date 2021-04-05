@@ -16,23 +16,27 @@
 %union {
 	int val;
 	int type;
+	char operator;
 	struct _symbole *symbole_ptr;
 	struct _liste_t *liste;
 	struct _param_t *param;
+	struct _fonction_t *func;
 }
 
 %token<symbole_ptr> IDENTIFICATEUR
 %token<val> CONSTANTE
-// %token<type> INT VOID
+%token <operator> PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR
 
-%type <symbole_ptr> declarateur variable appel fonction
+%type <symbole_ptr> declarateur variable appel
 %type <val> expression
 %type <type> type
 %type <param> parm
-%type <liste> create_liste_param create_expr_liste
+%type <func> fonction
+%type <liste> create_expr_liste create_liste_param liste_declarateurs liste_declarations liste_instructions liste_parms
+%type <operator> binary_op
 
 %token FOR WHILE IF ELSE SWITCH CASE DEFAULT INT VOID
-%token BREAK RETURN PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR LAND LOR LT GT
+%token BREAK RETURN LAND LOR LT GT
 %token GEQ LEQ EQ NEQ NOT EXTERN
 %left PLUS MOINS
 %left MUL DIV
@@ -54,7 +58,7 @@ liste_declarations	:
 ;
 liste_fonctions	:
 		liste_fonctions fonction
-|               fonction	{printf("[%d] : fonction list\n", yylineno); }
+|               fonction	{printf("FONCTION NAME : %s\n", $1); }
 ;
 declaration	:
 		type liste_declarateurs ';' 	{printf("DECLARATION TYPE : %d\n", $1); }
@@ -71,6 +75,7 @@ fonction	:
 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' {
 			// printf("FONCTION TYPE : %d\n", $1);
 		printf("FONCTION : %s, TYPE : %d", $2->nom, $1);
+		// $$ = ajouter_fonction($1, $2->nom, $3);
 		}
 
 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';'
@@ -81,16 +86,22 @@ type	:
 ;
 create_liste_param :	// cf Forum Khaoula Bouhlal
 		create_liste_param ',' parm	{
-			// $$ = concatener_listes($1, creer_liste($3));
+			// $$ = concatener_listes($1, (creer_liste((param_t)$3));
+			printf("PARM %d\n", $3->nom);
+			// $$ = creer_liste($3);
+			$$ = concatener_listes($1, creer_liste(*$3));
 			}
-	| 	parm
+	| 	parm	{ $$ = $1; }
 ;
 liste_parms	:
-		liste_parms ',' parm
+		liste_parms ',' parm	{
+			$$ = concatener_listes($1, creer_liste(*$3));
+			printf("PARM %d\n", $3->type); }
 	| create_liste_param {
-		// printf("liste parms : %s\n", $1->param.type);
+		printf("liste parms : %s\n", $1->param.nom);
 
-		// $$ = creer_liste($1);
+		$$ = creer_liste($1->param);
+		printf("LISTE_PARMS %s : %d/n", $$->param.nom, $$->param.type);
 		}
 	|
 ;
@@ -131,7 +142,13 @@ saut	:
 affectation	:
 		variable '=' expression {
 		assigne(table, $1->nom, $3);
-		// table[hash($1->nom)]->valeur = $3;
+		// "node_affect [label=\":=\" shape=ellipse]"
+		// "node_var [shape=ellipse label=\"$1->nom\"]"
+		// "node_expr [shape=triangle label=\"$3\" style=dotted]"
+
+		// "node_affect -> node_var"
+		// "node_affect -> node_expr"
+
 		printf("%s = %d\n", table[hash($1->nom)]->nom, table[hash($1->nom)]->valeur); }
 ;
 bloc	:
@@ -147,37 +164,39 @@ variable	:
 expression	:
 		'(' expression ')'		{ $$ = $2; }
 	|	expression binary_op expression %prec OP {
-		// $$ = $1 + $3;
-	// 	switch ($2) {
-	// 		case PLUS:
-	// 			$$ = $1 + $3;
-	// 			break;
-	// 		case MOINS:
-	// 			$$ = $1 - $3;
-	// 			break;
-	// 		case DIV:
-	// 			$$ = $1 / $3;
-	// 			break;
-	// 		case MUL:
-	// 			$$ = $1 * $3;
-	// 			break;
-	// 		case LSHIFT:
-	// 			$$ = $1 << $3;
-	// 			break;
-	// 		case RSHIFT:
-	// 			$$ = $1 >> $3;
-	// 			break;
-	// 		case BAND:
-	// 			$$ = $1 & $3;
-	// 			break;
-	// 		default:
-	// 			$$ = $1 | $3;
-	// 			break;
-	// 	}
+
+		switch ($2) {
+			case '+':
+				$$ = $1 + $3;
+				break;
+			case '-':
+				$$ = $1 - $3;
+				break;
+			case '/':
+				$$ = $1 / $3;
+				break;
+			case '*':
+				$$ = $1 * $3;
+				break;
+			case '<':
+				$$ = $1 << $3;
+				break;
+			case '>':
+				$$ = $1 >> $3;
+				break;
+			case '&':
+				$$ = $1 & $3;
+				break;
+			default:
+				$$ = $1 | $3;
+				break;
+		}
+		printf("%d %c %d = %d\n", $1, $2, $3, $$);
+
 	}
 	|	MOINS expression	{ $$ = -$2; }
-	|	CONSTANTE
-	|	variable
+	|	CONSTANTE	{$$ = $1; }
+	|	variable	{ printf("VARIABLE %s\n", $1->nom); $$ = table[hash($1->nom)]->valeur; }
 	|	IDENTIFICATEUR '(' liste_expressions ')'	{
 		printf("%s\n", $1->nom);
 		$$ = strdup($1->nom);
@@ -198,14 +217,14 @@ condition	:
 	|	expression binary_comp expression
 ;
 binary_op	:
-		PLUS
-	|       MOINS
-	|	MUL
-	|	DIV
-	|       LSHIFT
-	|       RSHIFT
-	|	BAND
-	|	BOR
+		PLUS	{$$ = '+'; }
+	|       MOINS	{$$ = '-'; }
+	|	MUL	{$$ = '*'; }
+	|	DIV	{$$ = '/'; }
+	|       LSHIFT	{$$ = '<'; }
+	|       RSHIFT	{$$ = '>'; }
+	|	BAND	{$$ = '&'; }
+	|	BOR	{$$ = '|'; }
 ;
 binary_rel	:
 		LAND
