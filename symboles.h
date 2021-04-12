@@ -42,6 +42,12 @@ typedef struct _fonction_t
     struct _fonction_t *suivant;
 } fonction_t;
 
+typedef struct _programme_t
+{
+    liste_t *declarations;
+    liste_t *fonctions;
+} programme_t;
+
 symbole *table[TAILLE];
 
 void affiche();

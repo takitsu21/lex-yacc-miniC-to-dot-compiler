@@ -16,11 +16,12 @@
 %union {
 	int val;
 	int type;
-	char operator;
+	char *operator;
 	struct _symbole *symbole_ptr;
 	struct _liste_t *liste;
 	struct _param_t *param;
 	struct _fonction_t *func;
+	// struct _programme_t *prog;
 }
 
 %token<symbole_ptr> IDENTIFICATEUR
@@ -33,8 +34,8 @@
 %type <param> parm
 %type <func> fonction
 %type <liste> create_expr_liste create_liste_param liste_declarateurs liste_declarations liste_instructions liste_parms
-%type <operator> binary_op
-
+%type <operator> binary_op binary_comp binary_rel
+// %type<prog> programme
 %token FOR WHILE IF ELSE SWITCH CASE DEFAULT INT VOID
 %token BREAK RETURN LAND LOR LT GT
 %token GEQ LEQ EQ NEQ NOT EXTERN
@@ -50,10 +51,18 @@
 %start programme
 %%
 programme	:
-		liste_declarations liste_fonctions
+		liste_declarations liste_fonctions {
+			// $$->declarations = $1; $$->fonctions = $2;
+			// code gen ?
+			// $$->declarations = creer_liste($1);
+			// $$->fonctions = creer_liste($2);
+			 }
 ;
 liste_declarations	:
-		liste_declarations declaration
+		liste_declarations declaration	{
+			// $$ = concatener_listes($1, creer_liste($2));
+			printf("LISTE DECLARATIONS %s\n", $1);
+			}
 	|
 ;
 liste_fonctions	:
@@ -61,15 +70,29 @@ liste_fonctions	:
 |               fonction	{printf("FONCTION NAME : %s\n", $1); }
 ;
 declaration	:
-		type liste_declarateurs ';' 	{printf("DECLARATION TYPE : %d\n", $1); }
+		type liste_declarateurs ';' 	{
+			printf("DECLARATION TYPE : %d\n", $1);
+			liste_t *list_iterator;
+			for (list_iterator = $2; list_iterator != NULL; list_iterator->suivant) {
+				table[hash(list_iterator->param.nom)]->type.type = $1;
+				table[hash(list_iterator->param.nom)]->nom = strdup(list_iterator->param.nom);
+			}
+	}
 ;
 liste_declarateurs	:
-		liste_declarateurs ',' declarateur
-	|	declarateur 	{printf("[%d] : declarateur\n", yylineno); }
+		liste_declarateurs ',' declarateur {
+			// $$ = concatener_listes($1, creer_liste($3->type));
+			}
+	|	declarateur 	{ $$ = $1; printf("[%d] : declarateur\n", yylineno); }
 ;
 declarateur	:
-		IDENTIFICATEUR
-	|	declarateur '[' CONSTANTE ']'
+		IDENTIFICATEUR {
+			$$ = $1;
+			printf("DECLARATEUR %s\n", $1->nom);
+			}
+	|	declarateur '[' CONSTANTE ']' {
+		table[hash($1->nom)] = $1->nom;
+		printf("%s[%d]\n", $1->nom, $3); }
 ;
 fonction	:
 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' {
@@ -89,7 +112,7 @@ create_liste_param :	// cf Forum Khaoula Bouhlal
 			// $$ = concatener_listes($1, (creer_liste((param_t)$3));
 			printf("PARM %d\n", $3->nom);
 			// $$ = creer_liste($3);
-			$$ = concatener_listes($1, creer_liste(*$3));
+			// $$ = concatener_listes($1, creer_liste(*$3));
 			}
 	| 	parm	{ $$ = $1; }
 ;
@@ -100,14 +123,16 @@ liste_parms	:
 	| create_liste_param {
 		printf("liste parms : %s\n", $1->param.nom);
 
-		$$ = creer_liste($1->param);
-		printf("LISTE_PARMS %s : %d/n", $$->param.nom, $$->param.type);
+		// $$ = creer_liste($1->param);
+		printf("LISTE_PARMS %s : %d\n", $$->param.nom, $$->param.type);
 		}
 	|
 ;
 parm	:
 		INT IDENTIFICATEUR	{
 			$$->nom = strdup($2->nom);
+			$$->type = _INT;
+
 			printf("int : %s\n", $2->nom);
 			}
 ;
@@ -158,52 +183,26 @@ appel	:
 		IDENTIFICATEUR '(' liste_expressions ')' ';'
 ;
 variable	:
-		IDENTIFICATEUR
+		IDENTIFICATEUR	{ $$ = $1; }
 	|	variable '[' expression ']'
 ;
 expression	:
 		'(' expression ')'		{ $$ = $2; }
 	|	expression binary_op expression %prec OP {
-
-		switch ($2) {
-			case '+':
-				$$ = $1 + $3;
-				break;
-			case '-':
-				$$ = $1 - $3;
-				break;
-			case '/':
-				$$ = $1 / $3;
-				break;
-			case '*':
-				$$ = $1 * $3;
-				break;
-			case '<':
-				$$ = $1 << $3;
-				break;
-			case '>':
-				$$ = $1 >> $3;
-				break;
-			case '&':
-				$$ = $1 & $3;
-				break;
-			default:
-				$$ = $1 | $3;
-				break;
-		}
-		printf("%d %c %d = %d\n", $1, $2, $3, $$);
-
+		printf("binary_op %d %s %d = %d\n", $1, $2, $3);
 	}
 	|	MOINS expression	{ $$ = -$2; }
-	|	CONSTANTE	{$$ = $1; }
-	|	variable	{ printf("VARIABLE %s\n", $1->nom); $$ = table[hash($1->nom)]->valeur; }
+	|	CONSTANTE	{ $$ = $1; }
+	|	variable	{ printf("VARIABLE %s\n", $1->nom);
+	// $$ = table[hash($1->nom)]->valeur;
+	}
 	|	IDENTIFICATEUR '(' liste_expressions ')'	{
 		printf("%s\n", $1->nom);
 		$$ = strdup($1->nom);
 		}
 ;
 liste_expressions	:
-		create_expr_liste
+		create_expr_liste { /* $$ = creer_liste($1); */ }
 	|
 ;
 create_expr_liste :   // cf mail forum David Fissore
@@ -217,26 +216,26 @@ condition	:
 	|	expression binary_comp expression
 ;
 binary_op	:
-		PLUS	{$$ = '+'; }
-	|       MOINS	{$$ = '-'; }
-	|	MUL	{$$ = '*'; }
-	|	DIV	{$$ = '/'; }
-	|       LSHIFT	{$$ = '<'; }
-	|       RSHIFT	{$$ = '>'; }
-	|	BAND	{$$ = '&'; }
-	|	BOR	{$$ = '|'; }
+		PLUS	{$$ = "+"; }
+	|       MOINS	{$$ = "-"; }
+	|	MUL	{$$ = "*"; }
+	|	DIV	{$$ = "/"; }
+	|       LSHIFT	{$$ = "<<"; }
+	|       RSHIFT	{$$ = ">>"; }
+	|	BAND	{$$ = "&"; }
+	|	BOR	{$$ = "|"; }
 ;
 binary_rel	:
-		LAND
-	|	LOR
+		LAND	{$$ = "&&"; }
+	|	LOR	{$$ = "||"; }
 ;
 binary_comp	:
-		LT
-	|	GT
-	|	GEQ
-	|	LEQ
-	|	EQ
-	|	NEQ
+		LT	{ $$ = "<"; }
+	|	GT	{ $$ = ">"; }
+	|	GEQ	{ $$ = ">="; }
+	|	LEQ	{ $$ = "<="; }
+	|	EQ	{ $$ = "="; }
+	|	NEQ	{ $$ = "!="; }
 ;
 %%
 
