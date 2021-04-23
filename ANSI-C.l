@@ -36,32 +36,37 @@ yycol = 0;
 "if"                    { return debugger(yytext, IF, "IF"); return IF; }
 "int"                   {
     // yylval.type = _INT;
-    yylval.param = create_param(_INT);
+    // yylval.param = create_param(_INT);
     return debugger(yytext, INT, "INT"); return INT ;}
 "return"                { return debugger(yytext, RETURN, "RETURN"); return RETURN; }
 "switch"                { return debugger(yytext, SWITCH, "SWITCH"); return SWITCH; }
 "void"                  {
     // yylval.type = _VOID;
-    yylval.param = create_param(_INT);
+    // yylval.param = create_param(_INT);
     return debugger(yytext, VOID, "VOID"); return VOID; }
 "while"                 { return debugger(yytext, WHILE, "WHILE"); return WHILE; }
 
 {L}({L}|{D})*           {
-    int hash_yytext = hash(yytext);
-    symbole* new_symb = inserer(yytext);
-    table[hash_yytext] = new_symb;
-    yylval.symbole_ptr = new_symb;
+    // int hash_yytext = hash(yytext);
+    // symbole* new_symb = inserer(yytext);
+    // table[hash_yytext] = new_symb;
+    // yylval.nom = strdup(yytext);
+    node_t *node = create_node(strdup(yytext), NULL, NULL, NULL);
+    yylval.node = node;
     // printf("table[hash(yytext)] : %s\n", table[hash_yytext]->nom);
     return debugger(yytext, IDENTIFICATEUR, "IDENTIFICATEUR"); return IDENTIFICATEUR; }
 
 0[xX]{H}+{IS}?          {
-                        yylval.val = atoi(yytext);
+            node_t *node = create_node(NULL, atoi(yytext), NULL, NULL);
+            yylval.node = node;
                         return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
 0{D}+{IS}?              {
-    yylval.val = atoi(yytext);
+    node_t *node = create_node(NULL, atoi(yytext), NULL, NULL);
+    yylval.node = node;
     return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
 {D}+{IS}?               {
-    yylval.val = atoi(yytext);
+    node_t *node = create_node(strdup(yytext), NULL, NULL, NULL);
+    yylval.node = node;
     return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
 L?'(\\.|[^\\'])+'       { ; }
 
