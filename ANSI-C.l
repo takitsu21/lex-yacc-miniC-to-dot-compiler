@@ -47,30 +47,30 @@ yycol = 0;
 "while"                 { return debugger(yytext, WHILE, "WHILE"); return WHILE; }
 
 {L}({L}|{D})*           {
-    // int hash_yytext = hash(yytext);
-    // symbole* new_symb = inserer(yytext);
-    // table[hash_yytext] = new_symb;
-    // yylval.nom = strdup(yytext);
     node_t *node = create_node(strdup(yytext), NULL, NULL, NULL);
     yylval.node = node;
-    // printf("table[hash(yytext)] : %s\n", table[hash_yytext]->nom);
-    return debugger(yytext, IDENTIFICATEUR, "IDENTIFICATEUR"); return IDENTIFICATEUR; }
+    return debugger(yytext, IDENTIFICATEUR, "IDENTIFICATEUR"); return IDENTIFICATEUR;
+    }
 
 0[xX]{H}+{IS}?          {
-            node_t *node = create_node(NULL, atoi(yytext), NULL, NULL);
+            node_t *node = create_node(strdup(yytext), NULL, NULL, NULL);
             yylval.node = node;
-                        return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
+            return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE;
+        }
 0{D}+{IS}?              {
-    node_t *node = create_node(NULL, atoi(yytext), NULL, NULL);
+    node_t *node = create_node(strdup(yytext), NULL, NULL, NULL);
     yylval.node = node;
-    return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
+    return debugger(strdup(yytext), CONSTANTE, "CONSTANTE"); return CONSTANTE; }
 {D}+{IS}?               {
     node_t *node = create_node(strdup(yytext), NULL, NULL, NULL);
     yylval.node = node;
     return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
 L?'(\\.|[^\\'])+'       { ; }
 
-{D}+{E}{FS}?            { return CONSTANTE; }
+{D}+{E}{FS}?            {
+    node_t *node = create_node(strdup(yytext), NULL, NULL, NULL);
+    yylval.node = node;
+    return CONSTANTE; }
 {D}*"."{D}+({E})?{FS}?  { ; }
 {D}+"."{D}*({E})?{FS}?  { ; }
 
@@ -79,24 +79,41 @@ L?\"(\\.|[^\\"])*\"     { ; }
 
 
 
-"&="                    { return debugger(yytext, BAND, "BAND"); return BAND; }
-"|="                    { return debugger(yytext, BOR, "BOR"); return BOR; }
-">>"                    { return debugger(yytext, RSHIFT, "RSHIFT"); return RSHIFT; }
-"<<"                    { return debugger(yytext, LSHIFT, "LSHIFT"); return LSHIFT; }
-"&&"                    { return debugger(yytext, LAND, "LAND"); return LAND; }
-"||"                    { return debugger(yytext, LOR, "LOR"); return LOR; }
-"<="                    { return debugger(yytext, LEQ, "LEQ"); return LEQ; }
-">="                    { return debugger(yytext, GEQ, "GEQ"); return GEQ; }
-"=="                    { return debugger(yytext, EQ, "EQ"); return EQ; }
-"!="                    { return debugger(yytext, NEQ, "NEQ"); return NEQ; }
-"!"                     { return debugger(yytext, NOT, "NOT"); return NOT; }
+"&"                    {
+    create_node("&", NULL, NULL, NULL); return debugger(yytext, BAND, "BAND"); return BAND; }
+"|"                    {
+    create_node("|", NULL, NULL, NULL); return debugger(yytext, BOR, "BOR"); return BOR; }
+">>"                    {
+    create_node(">>", NULL, NULL, NULL); return debugger(yytext, RSHIFT, "RSHIFT"); return RSHIFT; }
+"<<"                    {
+    create_node("<<", NULL, NULL, NULL); return debugger(yytext, LSHIFT, "LSHIFT"); return LSHIFT; }
+"&&"                    {
+    create_node("&&", NULL, NULL, NULL); return debugger(yytext, LAND, "LAND"); return LAND; }
+"||"                    {
+    create_node("||", NULL, NULL, NULL); return debugger(yytext, LOR, "LOR"); return LOR; }
+"<="                    {
+    create_node("<=", NULL, NULL, NULL); return debugger(yytext, LEQ, "LEQ"); return LEQ; }
+">="                    {
+    create_node(">=", NULL, NULL, NULL); return debugger(yytext, GEQ, "GEQ"); return GEQ; }
+"=="                    {
+    create_node("==", NULL, NULL, NULL); return debugger(yytext, EQ, "EQ"); return EQ; }
+"!="                    {
+    create_node("!=", NULL, NULL, NULL); return debugger(yytext, NEQ, "NEQ"); return NEQ; }
+"!"                     {
+    create_node("!", NULL, NULL, NULL); return debugger(yytext, NOT, "NOT"); return NOT; }
 
-"-"                     { return debugger(yytext, MOINS, "MOINS"); return MOINS; }
-"/"                     { return debugger(yytext, DIV, "DIV"); return DIV; }
-"*"                     { return debugger(yytext, MUL, "MUL"); return MUL; }
-"<"                     { return debugger(yytext, LT, "LT"); return LT; }
-">"                     { return debugger(yytext, GT, "GT"); return GT; }
-"+"                     { return debugger(yytext, PLUS, "PLUS"); return PLUS; }
+"-"                     {
+    create_node("-", NULL, NULL, NULL); return debugger(yytext, MOINS, "MOINS"); return MOINS; }
+"/"                     {
+    create_node("/", NULL, NULL, NULL); return debugger(yytext, DIV, "DIV"); return DIV; }
+"*"                     {
+    create_node("*", NULL, NULL, NULL); return debugger(yytext, MUL, "MUL"); return MUL; }
+"<"                     {
+    create_node("<", NULL, NULL, NULL); return debugger(yytext, LT, "LT"); return LT; }
+">"                     {
+    create_node(">", NULL, NULL, NULL); return debugger(yytext, GT, "GT"); return GT; }
+"+"                     {
+    create_node("+", NULL, NULL, NULL); return debugger(yytext, PLUS, "PLUS"); return PLUS; }
 
 \n                      { yycol = 0; }
 [ \t\v\f\n]               { ; }

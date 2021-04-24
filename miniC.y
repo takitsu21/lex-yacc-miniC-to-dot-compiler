@@ -5,7 +5,7 @@
 	#define DEBUGGER 1
 	#define VERBOSE 1
 	void yyerror(char *s);
-	extern node_t ***tree;
+	extern node_t **tree;
 	// extern int printd(int i);
 	extern int yylineno;
 	extern int yycol;
@@ -16,22 +16,21 @@
 
 
 %union {
-	int val;
+	// int val;
 	// char* nom;
 	// int type;
-	char *operator;
+	// char *operator;
 	// struct _param_t *param;
 	struct _node_t *node;
 }
 
-%token <node> IDENTIFICATEUR CONSTANTE
-%token PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR
+%token <node> IDENTIFICATEUR CONSTANTE PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR GEQ LEQ EQ NEQ NOT LAND LOR LT GT
 
-%type <node> fonction declarateur variable appel create_expr_liste create_liste_param liste_declarateurs expression type binary_op binary_comp binary_rel parm programme liste_declarations liste_fonctions declaration affectation
+%type <node> fonction declarateur variable appel create_expr_liste create_liste_param liste_declarateurs expression type binary_op binary_comp binary_rel parm programme liste_declarations liste_fonctions declaration affectation condition bloc saut liste_instructions iteration instruction selection liste_expressions
 
 %token FOR WHILE IF ELSE SWITCH CASE DEFAULT INT VOID
-%token BREAK RETURN LAND LOR LT GT
-%token GEQ LEQ EQ NEQ NOT EXTERN
+%token BREAK RETURN
+%token EXTERN
 %left PLUS MOINS
 %left MUL DIV
 %left LSHIFT RSHIFT
@@ -60,26 +59,37 @@ liste_declarations	:
 			// printf("LISTE DECLARATIONS %s\n", $1);
 				// $1->suivant[1] = $1;
 			}
-	|
+	| { $$ = create_node("", NULL, NULL, NULL); }
 ;
 liste_fonctions	:
-		liste_fonctions fonction
-|               fonction	{ printf("FONCTION NAME : %s\n", $1); }
+		liste_fonctions fonction {
+		if ($2 != NULL) {
+			printf("FONCTION NAME : %s\n", $2->nom);
+		}
+		$$ = mk_node2($2, $1, NULL);
+	}
+	|   fonction	{
+		if ($1 != NULL) {
+			printf("FONCTION NAME : %s\n", $1->nom);
+		}
+		$$ = $1;
+	}
 ;
 declaration	:
 		type liste_declarateurs ';' 	{
-			$$ = mk_node(NULL, NULL, NULL, $1->type);
+			$$ = create_node(NULL, NULL, NULL, &$1->type);
 	}
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur {
 			// $$ = concatener_listes($1, creer_liste($3->type));
+			$$->left = mk_node2(NULL, $3, NULL);
 			}
 	|	declarateur 	{ $$ = $1; }
 ;
 declarateur	:
 		IDENTIFICATEUR {
-			printf("%s\n", $1->nom);
+			printf("DECLARATEUR %s\n", $1->nom);
 			$$ = $1;
 			}
 	|	declarateur '[' CONSTANTE ']' {
@@ -90,17 +100,19 @@ declarateur	:
 fonction	:
 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' {
 
-		printf("FONCTION %s\n", $2->nom);
+		// printf("FONCTION %s\n", $2->nom);
 		node_t* node = malloc(sizeof(node_t));
 		node->nom = strdup($2->nom);
-		// node->type = $1->type;
+		node->type = $1->type;
 
 		$$ = node;
 
 
 		}
 
-	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' { printf("FONCTION %s\n", $3->nom); }
+	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' {
+		//printf("FONCTION %s\n", $3->nom);
+		}
 ;
 type	:
 		VOID	{ $$ = create_node(NULL, NULL, NULL, _VOID); }
@@ -139,118 +151,111 @@ parm	:
 			}
 ;
 liste_instructions :
-		liste_instructions instruction
-	|
+		liste_instructions instruction {$$->left = mk_node($2, $1, NULL); }
+	| { $$ = create_node("LIST_INST", NULL, NULL, NULL); }
 ;
 instruction	:
-		iteration
-	|	selection
-	|	saut
-	|	affectation ';'
-	|	bloc
-	|	appel
+		iteration {$$ = $1; }
+	|	selection { $$ = $1; }
+	|	saut { $$ = $1; }
+	|	affectation ';' {$$ = $1; }
+	|	bloc {$$ = $1;}
+	|	appel {$$ = $1; }
 ;
 iteration	:
-		FOR '(' affectation ';' condition ';' affectation ')' instruction
-	|	WHILE '(' condition ')' instruction
+		FOR '(' affectation ';' condition ';' affectation ')' instruction {
+			$$ = mk_node_for(mk_for_loop($3, $5, $7, $9));
+			}
+	|	WHILE '(' condition ')' instruction {$$ = mk_node($3, "WHILE", $5); }
 ;
 selection	:
-		IF '(' condition ')' instruction %prec THEN
-	|	IF '(' condition ')' instruction ELSE instruction
-	|	SWITCH '(' expression ')' instruction
-	|	CASE CONSTANTE ':' instruction
-	|	DEFAULT ':' instruction
+		IF '(' condition ')' instruction %prec THEN { $$ = mk_node_if(mk_if_cond($3, $5, NULL)); }
+	|	IF '(' condition ')' instruction ELSE instruction { $$ = mk_node_if(mk_if_cond($3, $5, $7)); }
+	|	SWITCH '(' expression ')' instruction { $$ = mk_node(NULL, "SWITCH", NULL); }
+	|	CASE CONSTANTE ':' instruction { $$ = mk_node($4, $2->nom, NULL); }
+	|	DEFAULT ':' instruction {$$ = mk_node(NULL, "DEFAULT", $3); }
 ;
 saut	:
-		BREAK ';'
-	|	RETURN ';'
-	|	RETURN expression ';'
+		BREAK ';' { $$ = mk_node(NULL, "BREAK", NULL); }
+	|	RETURN ';' {$$ = mk_node(NULL, "RETURN", NULL); }
+	|	RETURN expression ';' { $$ = mk_node($2, "RETURN", NULL); }
 ;
 affectation	:
 		variable '=' expression {
+			printf("VARIABLE : %s\n", $1->nom);
 			$$ = mk_node($1, "=", $3);
 		}
 ;
 bloc	:
-		'{' liste_declarations liste_instructions '}'
+		'{' liste_declarations liste_instructions '}' {
+			$$ = mk_node($2, "BLOC", $3);
+		}
 ;
 appel	:
 		IDENTIFICATEUR '(' liste_expressions ')' ';' { printf("APPEL %s\n", $1->nom); }
 ;
 variable	:
 		IDENTIFICATEUR	{ $$ = $1; }
-	|	variable '[' expression ']'
+	|	variable '[' expression ']' { $$->left = mk_node($1, "VARIABLE", NULL); }
 ;
 expression	:
-		'(' expression ')'		{ $$ = $2; }
+		'(' expression ')'		{ $$->right = $2; }
 	|	expression binary_op expression %prec OP {
-		// node_t *node = malloc(sizeof(node_t));
-		// node_t **suivant = (node_t**)calloc(3, sizeof(node_t));
-		// suivant[0] = $1;
-		// printf("*$1 : %s | *$3 : %s\n", $1->nom, $3->nom);
-		// suivant[1] = $3;
-		// node->nom = strdup($2->nom);
-		// node->suivant = suivant;
-		// printf("GAUCHE : %s\n", suivant[0]->nom);
-		// printf("PARENT : %s\n", node->nom);
-		// printf("DROITE : %s\n", suivant[1]->nom);
-		// last_node_used = node;
-		$$ = mk_node($1, $2->nom, $3);
+		node_t *node = mk_node2($1, $2, $3);
+		$$ = node;
 	}
 	|	MOINS expression	{
-		printf("-%s\n", $2->nom);
-		// $1->nom = strcat()
-		node_t* parent_node = create_node("-", NULL, NULL, NULL);
-		node_t **child_nodes = calloc(3, sizeof(node_t));
+		printf("MOINS %s%s\n", $1->nom, $2->nom);
 
-		child_nodes[0] = $2;
-
-		$$ = parent_node;
+		// node_t* parent_node = create_node(strdup($2->nom), NULL, NULL, NULL);
+		$1->left = $2;
+		$$ = $1;
 		}
 	|	CONSTANTE	{ $$ = $1; }
-	|	variable	{ printf("VARIABLE %s\n", $1->nom);
+	|	variable	{
+		printf("VARIABLE %s\n", $1->nom);
 			$$ = $1;
 		}
 	|	IDENTIFICATEUR '(' liste_expressions ')' {
-			printf("%s\n", $1->nom);
-			$$ = $1;
+			// printf("%s\n", $1->nom);
+			$$ = mk_node2($3, $1, NULL);
 		}
 ;
 liste_expressions	:
-		create_expr_liste { /* $$ = creer_liste($1); */ }
-	|
+		create_expr_liste { $$ = mk_node(NULL, $1, NULL); }
+	| {$$ = create_node("LIST_EXPR", NULL, NULL, NULL); }
 ;
 create_expr_liste :   // cf mail forum David Fissore
-    	create_expr_liste ',' expression
-    | 	expression
+    	create_expr_liste ',' expression {$$->right = mk_node2($3, $1, NULL); }
+    | 	expression { $$->left = $1; }
 ;
 condition	:
-		NOT '(' condition ')'
-	|	condition binary_rel condition %prec REL
-	|	'(' condition ')'
-	|	expression binary_comp expression
+		NOT '(' condition ')' { $$->left = mk_node($3, "NOT", NULL); }
+	|	condition binary_rel condition %prec REL { $$->right = mk_node($1, $2->nom, $3); }
+	|	'(' condition ')' { $$->left = $2; }
+	|	expression binary_comp expression { $$ = mk_node2($1, $2, $3); }
 ;
 binary_op	:
-		PLUS	{ $$ = create_node("+", NULL, NULL, NULL); }
-	|       MOINS	{ $$ = create_node("-", NULL, NULL, NULL); }
-	|	MUL	{ $$ = create_node("*", NULL, NULL, NULL); }
-	|	DIV	{ $$ = create_node("/", NULL, NULL, NULL); }
-	|       LSHIFT	{ $$ = create_node("<<", NULL, NULL, NULL); }
-	|       RSHIFT	{$$ = create_node(">>", NULL, NULL, NULL); }
-	|	BAND	{$$ = create_node("&", NULL, NULL, NULL); }
-	|	BOR	{$$ = create_node("|", NULL, NULL, NULL); }
+		PLUS	{ $$ = $1; }
+	|       MOINS	{ $$ = $1; }
+	|	MUL	{ $$ = $1; }
+	|	DIV	{ $$ = $1; }
+	|       LSHIFT	{ $$ = $1; }
+	|       RSHIFT	{$$ = $1; }
+	|	BAND	{$$ = $1; }
+	|	BOR	{$$ = $1; }
 ;
 binary_rel	:
-		LAND	{ $$ = create_node("&&", NULL, NULL, NULL); }
-	|	LOR	{ $$ = create_node("||", NULL, NULL, NULL); }
+		LAND	{ $$ = $1; }
+	|	LOR	{ $$ = $1; }
 ;
 binary_comp	:
-		LT	{ $$ = create_node("<", NULL, NULL, NULL); }
-	|	GT	{ $$ = create_node(">", NULL, NULL, NULL); }
-	|	GEQ	{ $$ = create_node(">=", NULL, NULL, NULL); }
-	|	LEQ	{ $$ = create_node("<=", NULL, NULL, NULL); }
-	|	EQ	{ $$ = create_node("==", NULL, NULL, NULL); }
-	|	NEQ	{ $$ = create_node("!=", NULL, NULL, NULL); }
+		LT	{ $$ = $1; }
+	|	GT	{ $$ = $1; }
+	|	GEQ	{ $$ = $1; }
+	|	LEQ	{ $$ = $1; }
+	|	EQ	{ $$ = $1; }
+	|	NEQ	{ $$ = $1; }
 ;
 %%
 

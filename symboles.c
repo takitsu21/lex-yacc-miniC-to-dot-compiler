@@ -64,10 +64,10 @@ void affiche()
         {
             s = tree[i];
             printf("table[%d]-> %s ", i, s->nom);
-            while (s->suivant != NULL)
+            while (s->left != NULL)
             {
                 printf("[%s]->", s->nom);
-                s = s->suivant;
+                s = s->left;
             }
             printf("NULL\n");
         }
@@ -183,7 +183,8 @@ node_t *create_node(const char* nom, int val, void *bt, void* type) {
     node->val = val;
     node->bt = (bloc_type_t)bt;
     node->type = (type_t)type;
-    node->suivant = NULL;
+    node->left = NULL;
+    node->right = NULL;
     // show_node(node);
     return node;
 }
@@ -201,20 +202,69 @@ void insert_to_tree(node_t * node, int cursor) {
 }
 
 void insert_next_node(node_t* src_node, node_t *dst_node) {
-    dst_node->suivant = src_node;
+    node_t *next;
+    while ((next = src_node->left) != NULL);
+    next->left = dst_node;
+}
+
+node_t *mk_node2(node_t *L, node_t *P, node_t *R) {
+    P->right = R;
+    P->left = L;
+    P->for_loop = NULL;
+    P->if_cond = NULL;
+    debug_node(P);
+    return P;
 }
 
 node_t *mk_node(node_t *L, const char *parent_name, node_t *R) {
     node_t *node = malloc(sizeof(node_t));
-    node_t **childs = (node_t**)calloc(3, sizeof(node_t));
-    childs[0] = L;
-    childs[1] = R;
     node->nom = strdup(parent_name);
-    node->suivant = childs;
-    // printf("GAUCHE : %s\n", childs[0]->nom);
-    // printf("PARENT : %s\n", node->nom);
-    // printf("DROITE : %s\n", childs[1]->nom);
+    node->right = R;
+    node->left = L;
+    node->for_loop = NULL;
+    node->if_cond = NULL;
+    debug_node(node);
     return node;
+}
+
+node_for_t *mk_for_loop(node_t *init, node_t *cond, node_t *post_cond, node_t *corp) {
+    node_for_t *for_loop = (node_for_t*)malloc(sizeof(node_for_t));
+    for_loop->init = init;
+    for_loop->cond = cond;
+    for_loop->post_cond = post_cond;
+    for_loop->corp = corp;
+    return for_loop;
+}
+
+node_if_t *mk_if_cond(node_t *cond, node_t *then, node_t *_else) {
+    node_if_t *if_cond = (node_if_t*)malloc(sizeof(node_if_t));
+    if_cond->cond = cond;
+    if_cond->then = then;
+    if_cond->_else = _else;
+    return if_cond;
+}
+
+node_t *mk_node_if(node_if_t *if_cond) {
+    node_t *node = malloc(sizeof(node_t));
+    node->nom = "IF";
+    node->if_cond = if_cond;
+    return node;
+}
+
+node_t *mk_node_for(node_for_t *for_loop) {
+    node_t *node = malloc(sizeof(node_t));
+    node->nom = "FOR";
+    node->right = NULL;
+    node->left = NULL;
+    node->bt = _FOR;
+    node->for_loop = for_loop;
+    return node;
+}
+
+void debug_node(node_t *P) {
+    printf("GAUCHE : %s\n", P->left != NULL ? P->left->nom : "NULL");
+    printf("PARENT : %s\n", P->nom != NULL ? P->nom : "NULL");
+    printf("DROITE : %s\n", P->right != NULL ? P->right->nom : "NULL");
 }
 
 void insert_node(node_t *node, char* nom, int cursor) {
@@ -229,7 +279,7 @@ void insert_node(node_t *node, char* nom, int cursor) {
         if (strcmp(s->nom, nom) == 0)
             return;
         precedent = s;
-        s = s->suivant;
+        s = s->left;
     }
     if (precedent == NULL)
     {
@@ -238,15 +288,15 @@ void insert_node(node_t *node, char* nom, int cursor) {
     }
     else
     {
-        precedent->suivant = (node_t *)malloc(sizeof(node_t));
-        s = precedent->suivant;
+        precedent->left = (node_t *)malloc(sizeof(node_t));
+        s = precedent->left;
     }
 
     s->nom = strdup(nom);
-    s->suivant = NULL;
+    s->left = NULL;
     // tree[cursor]->suivant[0] = s;
 }
 
 void init() {
-    tree = (node_t***)calloc(100, sizeof(node_t));
+    tree = (node_t**)calloc(100, sizeof(node_t));
 }

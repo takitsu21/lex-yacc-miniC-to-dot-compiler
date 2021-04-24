@@ -74,14 +74,34 @@ typedef enum _bloc_type_t
     _IF
 } bloc_type_t;
 
+typedef struct _node_for_t
+{
+    struct _node_t *init;
+    struct _node_t *cond;
+    struct _node_t *post_cond;
+    struct _node_t *corp;
+} node_for_t;
+
+typedef struct _node_if_t
+{
+    struct _node_t *cond;
+    struct _node_t *then;
+    struct _node_t *_else;
+} node_if_t;
+
 typedef struct _node_t
 {
     char *nom;
     int val;
     bloc_type_t bt; // si null = opération simple (ex: +, :=, <, ...)
     type_t type;
-    struct _node_t **suivant;
+    struct _node_t *left;
+    struct _node_t *right;
+    struct _node_for_t *for_loop;
+    struct _if_t *if_cond;
 } node_t;
+
+
 
 // suivant = [node -> [], ]
 
@@ -104,7 +124,7 @@ cursor = 0;
 
 // symbole *table[TAILLE];
 
-node_t ***tree;
+node_t **tree;
 
 
 void affiche();
