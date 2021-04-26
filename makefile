@@ -13,7 +13,7 @@ C_FILE=Tests/$(FILENAME).c
 YACC_GENS=$(YACC_C) $(YACC_H)
 LEX_GENS=lex.yy.c
 
-C_FLAGS=$(YACC_C) $(LEX_GENS) -o $(FILE_OUT) symboles.c -w -Wall -pedantic -lfl
+C_FLAGS=$(YACC_C) $(LEX_GENS) -o $(FILE_OUT) symboles.c -g -w -Wall -pedantic -lfl
 DOT_FLAGS=-Tpdf $(DOT_FILE) -o $(DOT_OUT_PDF)
 YACC_FLAGS=-d $(YACC_IN)
 
@@ -29,9 +29,9 @@ test-all: clean
 test: clean compile
 	./$(FILE_OUT) < $(C_FILE)
 valgrind-debug: clean compile
-	valgrind --tool=memcheck -s --leak-check=full --leak-resolution=high --show-reachable=yes ./$(FILE_OUT)  < $(C_FILE)
+	valgrind --tool=memcheck -s --leak-check=full --leak-resolution=high --show-reachable=yes ./$(FILE_OUT) < $(C_FILE)
 install:
-	sudo apt install -y graphviz flex bison valgrind
+	sudo apt install -y graphviz flex bison valgrind --upgrade
 graph:
 	$(DOT_CC) $(DOT_FLAGS)
 flex_compile:
