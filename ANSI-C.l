@@ -42,7 +42,8 @@ fun_cursor = 0;
 "switch"                { return debugger(yytext, SWITCH, "SWITCH"); return SWITCH; }
 "void"                  {
     return debugger(yytext, VOID, "VOID"); return VOID; }
-"while"                 { return debugger(yytext, WHILE, "WHILE"); return WHILE; }
+"while"                 {
+    return debugger(yytext, WHILE, "WHILE"); return WHILE; }
 
 {L}({L}|{D})*           {
     node_t *node = create_node(strdup(yytext), NULL, NULL, NULL);
@@ -85,40 +86,40 @@ L?\"(\\.|[^\\"])*\"     { ; }
 
 
 "&"                    {
-    yylval.node = create_node("&", NULL, NULL, NULL); return debugger(yytext, BAND, "BAND"); return BAND; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, BAND, "BAND"); return BAND; }
 "|"                    {
-    yylval.node = create_node("|", NULL, NULL, NULL); return debugger(yytext, BOR, "BOR"); return BOR; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, BOR, "BOR"); return BOR; }
 ">>"                    {
-    yylval.node = create_node(">>", NULL, NULL, NULL); return debugger(yytext, RSHIFT, "RSHIFT"); return RSHIFT; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, RSHIFT, "RSHIFT"); return RSHIFT; }
 "<<"                    {
-    yylval.node = create_node("<<", NULL, NULL, NULL); return debugger(yytext, LSHIFT, "LSHIFT"); return LSHIFT; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, LSHIFT, "LSHIFT"); return LSHIFT; }
 "&&"                    {
-    yylval.node = create_node("&&", NULL, NULL, NULL); return debugger(yytext, LAND, "LAND"); return LAND; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, LAND, "LAND"); return LAND; }
 "||"                    {
-    yylval.node = create_node("||", NULL, NULL, NULL); return debugger(yytext, LOR, "LOR"); return LOR; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, LOR, "LOR"); return LOR; }
 "<="                    {
-    yylval.node = create_node("<=", NULL, NULL, NULL); return debugger(yytext, LEQ, "LEQ"); return LEQ; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, LEQ, "LEQ"); return LEQ; }
 ">="                    {
-    yylval.node = create_node(">=", NULL, NULL, NULL); return debugger(yytext, GEQ, "GEQ"); return GEQ; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, GEQ, "GEQ"); return GEQ; }
 "=="                    {
-    yylval.node = create_node("==", NULL, NULL, NULL); return debugger(yytext, EQ, "EQ"); return EQ; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, EQ, "EQ"); return EQ; }
 "!="                    {
-    yylval.node = create_node("!=", NULL, NULL, NULL); return debugger(yytext, NEQ, "NEQ"); return NEQ; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, NEQ, "NEQ"); return NEQ; }
 "!"                     {
-    yylval.node = create_node("!", NULL, NULL, NULL); return debugger(yytext, NOT, "NOT"); return NOT; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, NOT, "NOT"); return NOT; }
 
 "-"                     {
-    yylval.node = create_node("-", NULL, NULL, NULL); return debugger(yytext, MOINS, "MOINS"); return MOINS; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, MOINS, "MOINS"); return MOINS; }
 "/"                     {
-    yylval.node = create_node("/", NULL, NULL, NULL); return debugger(yytext, DIV, "DIV"); return DIV; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, DIV, "DIV"); return DIV; }
 "*"                     {
-    yylval.node = create_node("*", NULL, NULL, NULL); return debugger(yytext, MUL, "MUL"); return MUL; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, MUL, "MUL"); return MUL; }
 "<"                     {
-    yylval.node = create_node("<", NULL, NULL, NULL); return debugger(yytext, LT, "LT"); return LT; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, LT, "LT"); return LT; }
 ">"                     {
-    yylval.node = create_node(">", NULL, NULL, NULL); return debugger(yytext, GT, "GT"); return GT; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, GT, "GT"); return GT; }
 "+"                     {
-    yylval.node = create_node("+", NULL, NULL, NULL); return debugger(yytext, PLUS, "PLUS"); return PLUS; }
+    yylval.node = create_node(yytext, NULL, NULL, NULL); return debugger(yytext, PLUS, "PLUS"); return PLUS; }
 
 \n                      { yycol = 0; }
 [ \t\v\f\n]               { ; }

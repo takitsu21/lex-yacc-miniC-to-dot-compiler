@@ -15,7 +15,7 @@ LEX_GENS=lex.yy.c
 
 C_FLAGS=$(YACC_C) $(LEX_GENS) -o $(FILE_OUT) symboles.c -g -w -Wall -pedantic -lfl
 DOT_FLAGS=-Tpdf $(DOT_FILE) -o $(DOT_OUT_PDF)
-YACC_FLAGS=-d $(YACC_IN)
+YACC_FLAGS=-d -v $(YACC_IN)
 
 DOT_CC=dot
 FLEX_CC=flex

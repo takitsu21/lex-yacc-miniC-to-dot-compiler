@@ -1,11 +1,13 @@
 int main() {
-    int a, b;
-    a = 1;
-    return 0;
-}
-
-int foo() {
-    int c;
-    c = -3;
-    return 1;
+    int x, y, z, t, toto, a;
+    x = -900;
+    if (x < 10) {
+        if (z > 10) {
+            y = 500;
+        }
+        a = 63;
+        return a;
+    } else {
+        return -1;
+    }
 }

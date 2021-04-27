@@ -1,9 +1,6 @@
 extern int printd( int i );
 
-/*----------------------------*/
-/* un petit programme exemple
-  pour montrer le langage miniC.*/
-/*----------------------------*/
+
 
 int main() {
    int i, x;
