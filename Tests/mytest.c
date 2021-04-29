@@ -11,3 +11,8 @@ int main() {
         return -1;
     }
 }
+
+void foo() {
+    int a;
+    a = 10;
+}

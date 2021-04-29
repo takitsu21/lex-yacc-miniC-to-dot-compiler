@@ -23,7 +23,7 @@ YACC_CC=yacc
 
 
 
-all: clean compile graph test
+all: clean compile test graph test
 test-all: clean
 	./test.sh
 test: clean compile
@@ -41,5 +41,5 @@ yacc_compile:
 compile: yacc_compile flex_compile
 	$(CC) $(C_FLAGS)
 clean:
-	rm -rf $(LEX_GENS) $(YACC_GENS) $(FILE_OUT) *.o
+	rm -rf $(LEX_GENS) $(YACC_GENS) $(FILE_OUT) *.o $(DOT_FILE) $(DOT_OUT_PDF)
 .PHONY: clean

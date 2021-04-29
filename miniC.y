@@ -2,8 +2,8 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include "symboles.h"
-	#define DEBUGGER 1
-	#define VERBOSE 1
+	#define DEBUGGER 0
+	#define VERBOSE 0
 	void yyerror(char *s);
 	extern node_t **tree;
 	// extern int printd(int i);
@@ -42,7 +42,15 @@
 programme	:
 		liste_declarations liste_fonctions {
 				printf("PROGRAMME END\n");
-				// visualise($2);
+				visualise($2);
+				char *dst = strcpy(dst, "digraph mon_programme {\n");
+
+				strcat(dst, $2->code);
+				strcat(dst, "node_reste [shape=triangle label=\"...\" style=dotted];\n");
+				strcat(dst, "node_main -> node_reste\n");
+				strcat(dst, "}");
+				printf("%s\n", dst);
+				write_file("mytest.dot", dst);
 			}
 ;
 liste_declarations	:
@@ -61,6 +69,7 @@ liste_fonctions	:
 		liste_fonctions fonction {
 		insert_next($1, $2);
 		$$ = $1;
+
 	}
 	|   fonction	{
 		$$ = $1;
@@ -89,19 +98,23 @@ liste_declarateurs	:
 declarateur	:
 		IDENTIFICATEUR {
 				// printf("DECLARATEUR %s\n", $1->nom);
-				// $$ = $1;
+				$$ = $1;
 			}
 	|	declarateur '[' CONSTANTE ']' {
-			// $$ = mk_single_node("TAB");
+			$$ = mk_single_node("TAB");
+			$$->fils = $1;
 		}
 ;
 fonction	:
 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' {
-		// node_t *node = create_node($2->nom, NULL, NULL, &$1->type);
-		// $$ = mk_node2($7, node, $8);
-		// $2->type = $1->type;
-		// $2->fils = $8;
+		$2->type = $1->type;
+		$2->fils = $8;
+		sprintf($2->code, "node_%s [label=\"%s, %s\" shape=invtrapezium color=blue];", $2->nom, $2->nom, get_type($2->type));
+		// $$->code = strdup(src);
 		$$ = $2;
+		printf("$$->code %s\n", $$->code);
+
+
 
 		}
 
@@ -110,8 +123,8 @@ fonction	:
 		}
 ;
 type	:
-		VOID	{ printf("type\n");$$ = create_node("VOID", NULL, NULL, _VOID); }
-	|	INT		{ printf("type\n");$$ = create_node("INT", NULL, NULL, _INT); }
+		VOID	{ printf("type\n");$$ = create_node("VOID", _VOID); }
+	|	INT		{ printf("type\n");$$ = create_node("INT", _INT); }
 ;
 create_liste_param :	// cf Forum Khaoula Bouhlal
 		create_liste_param ',' parm	{
@@ -119,7 +132,7 @@ create_liste_param :	// cf Forum Khaoula Bouhlal
 				// $$ = $1;
 			}
 	| 	parm	{
-		//$$ = $1;
+		// $$ = $1;
 		}
 ;
 liste_parms	:
@@ -140,12 +153,8 @@ parm	:
 ;
 liste_instructions :
 		liste_instructions instruction {
-			printf("liste instructions %s\n", $1->nom);
-			// insert_children($1, $2, NULL, NULL, NULL);
-			// $$ = create_node_children($1, $2, NULL, NULL, NULL);
-			$$ = $2;
-			$$->suivant = $1;
-
+			insert_next($1, $2);
+			$$ = $1;
 		}
 	| {
 		printf("liste instructions empty\n");
@@ -163,32 +172,38 @@ instruction	:
 ;
 iteration	:
 		FOR '(' affectation ';' condition ';' affectation ')' instruction {
-			node_t *for_node = create_node("FOR", NULL, NULL, NULL);
+			node_t *for_node = mk_single_node("FOR");
 			for_node->fils = $3;
-			for_node->fils->fils = $5;
-			for_node->fils->fils->fils = $7;
-			for_node->fils->fils->fils->fils = $9;
+			for_node->fils->suivant = $5;
+			for_node->fils->suivant->suivant = $7;
+			for_node->fils->suivant->suivant->suivant = $9;
 			$$ = for_node;
 			// print_all_next(for_node->suivant, 0);
 			}
-	|	WHILE '(' condition ')' instruction {$$ = mk_node($3, "WHILE", $5); }
+	|	WHILE '(' condition ')' instruction {
+			node_t *for_node = mk_single_node("WHILE");
+			for_node->fils = $3;
+			for_node->fils->suivant = $5;
+			$$ = for_node;
+		}
 ;
 selection	:
 		IF '(' condition ')' instruction %prec THEN {
-			node_t *if_node = create_node("IF", NULL, NULL, NULL);
-			if_node->fils = $3;
-			if_node->fils->suivant = $5;
+			node_t *if_node = mk_single_node("IF");
+			insert_next(if_node, $3);
+			insert_next(if_node, $5);
+			// if_node->fils = $3;
+			// if_node->fils->suivant = $5;
 			$$ = if_node;
-
-			// print_all_next(if_node, 0);
 		}
 	|	IF '(' condition ')' instruction ELSE instruction {
-		printf("IF");
 			node_t *if_node = mk_single_node("IF");
-			if_node->fils = $3;
-			if_node->fils->suivant = $5;
-			if_node->fils->suivant->suivant = $7;
-			visualise(if_node);
+			insert_next(if_node, $3);
+			insert_next(if_node, $5);
+			insert_next(if_node, $7);
+			// if_node->fils = $3;
+			// if_node->fils->suivant = $5;
+			// if_node->fils->suivant->suivant = $7;
 			$$ = if_node;
 		}
 	|	SWITCH '(' expression ')' instruction {
@@ -196,11 +211,12 @@ selection	:
 		node_switch->fils = $3;
 		node_switch->fils->suivant = $5;
 		$$ = node_switch; }
-	|	CASE CONSTANTE ':' instruction { $$ = mk_single_node("CASE"); }
+	|	CASE CONSTANTE ':' instruction {
+		$$ = mk_single_node("CASE"); }
 	|	DEFAULT ':' instruction {$$ = mk_single_node("DEFAULT"); }
 ;
 saut	:
-		BREAK ';' { $$ = create_node("BREAK", NULL, NULL, NULL); }
+		BREAK ';' { $$ = create_node("BREAK", NULL); }
 	|	RETURN ';' {
 		printf("before return\n");
 		$$ = mk_single_node("RETURN");
@@ -212,14 +228,21 @@ saut	:
 ;
 affectation	:
 		variable '=' expression {
-			printf("%s\n", $1->nom);
+			// printf("%s\n", $1->nom);
+			printf("VARIABLE 1\n");
+			// node_t *node = mk_single_node(":=");
+
+			// printf("%s\n", node->nom);
+			printf("VARIABLE 2\n");
 			$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
+			printf("VARIABLE 3\n");
 		}
 ;
 bloc	:
 		'{' liste_declarations liste_instructions '}' {
 			printf("BLOC\n");
 			$$ = create_node_children(mk_single_node("BLOC"), $3, NULL, NULL, NULL);
+
 			printf("AFTER BLOC\n");
 		}
 ;
@@ -232,8 +255,8 @@ appel	:
 ;
 variable	:
 		IDENTIFICATEUR	{
-			$$ = $1;
-			  }
+				$$ = $1;
+			}
 	|	variable '[' expression ']' {
 			$$ = $1;
 			printf("variable %s\n", $1->nom);
@@ -257,12 +280,13 @@ expression :
 	| IDENTIFICATEUR '(' liste_expressions ')' {
 		// $1->suivant = $3;
 		printf("id liste_expr");
+		insert_children($1, $3);
 		$$ = $1;
 		}
 ;
 liste_expressions	:
 		create_expr_liste { printf("list creation"); $$ = $1; }
-	| { printf("list expr eps\n");$$ = create_node("LIST_EXPR", NULL, NULL, NULL); }
+	| { printf("list expr eps\n");$$ = create_node("LIST_EXPR", NULL); }
 ;
 create_expr_liste :   // cf mail forum David Fissore
     	create_expr_liste ',' expression {
@@ -273,7 +297,7 @@ create_expr_liste :   // cf mail forum David Fissore
 ;
 condition	:
 		NOT '(' condition ')' {
-			node_t *node = mk_node(NULL, "NOT", NULL);
+			node_t *node = mk_single_node("NOT");
 			$$ = create_node_children(node, $3, NULL, NULL, NULL);
 			}
 	|	condition binary_rel condition %prec REL {
