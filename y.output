@@ -1,0 +1,2148 @@
+Nonterminals useless in grammar
+
+    binary_op
+
+
+Terminals unused in grammar
+
+    OP
+
+
+Rules useless in grammar
+
+   73 binary_op: PLUS
+   74          | MOINS
+   75          | MUL
+   76          | DIV
+   77          | LSHIFT
+   78          | RSHIFT
+   79          | BAND
+   80          | BOR
+
+
+State 25 conflicts: 1 shift/reduce
+
+
+Grammar
+
+    0 $accept: programme $end
+
+    1 programme: liste_declarations liste_fonctions
+
+    2 liste_declarations: liste_declarations declaration
+    3                   | %empty
+
+    4 liste_fonctions: liste_fonctions fonction
+    5                | fonction
+
+    6 declaration: type liste_declarateurs ';'
+
+    7 liste_declarateurs: liste_declarateurs ',' declarateur
+    8                   | declarateur
+
+    9 declarateur: IDENTIFICATEUR
+   10            | declarateur '[' CONSTANTE ']'
+
+   11 fonction: type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}'
+   12         | EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';'
+
+   13 type: VOID
+   14     | INT
+
+   15 create_liste_param: create_liste_param ',' parm
+   16                   | parm
+
+   17 liste_parms: liste_parms ',' parm
+   18            | create_liste_param
+   19            | %empty
+
+   20 parm: INT IDENTIFICATEUR
+
+   21 liste_instructions: liste_instructions instruction
+   22                   | %empty
+
+   23 instruction: iteration
+   24            | selection
+   25            | saut
+   26            | affectation ';'
+   27            | bloc
+   28            | appel
+
+   29 iteration: FOR '(' affectation ';' condition ';' affectation ')' instruction
+   30          | WHILE '(' condition ')' instruction
+
+   31 selection: IF '(' condition ')' instruction
+   32          | IF '(' condition ')' instruction ELSE instruction
+   33          | SWITCH '(' expression ')' instruction
+   34          | CASE CONSTANTE ':' instruction
+   35          | DEFAULT ':' instruction
+
+   36 saut: BREAK ';'
+   37     | RETURN ';'
+   38     | RETURN expression ';'
+
+   39 affectation: variable '=' expression
+
+   40 bloc: '{' liste_declarations liste_instructions '}'
+
+   41 appel: IDENTIFICATEUR '(' liste_expressions ')' ';'
+
+   42 variable: IDENTIFICATEUR
+   43         | variable '[' expression ']'
+
+   44 expression: '(' expression ')'
+   45           | expression PLUS expression
+   46           | expression MOINS expression
+   47           | expression DIV expression
+   48           | expression MUL expression
+   49           | expression RSHIFT expression
+   50           | expression LSHIFT expression
+   51           | expression BAND expression
+   52           | expression BOR expression
+   53           | MOINS expression
+   54           | CONSTANTE
+   55           | variable
+   56           | IDENTIFICATEUR '(' liste_expressions ')'
+
+   57 liste_expressions: create_expr_liste
+   58                  | %empty
+
+   59 create_expr_liste: create_expr_liste ',' expression
+   60                  | expression
+
+   61 condition: NOT '(' condition ')'
+   62          | condition binary_rel condition
+   63          | '(' condition ')'
+   64          | expression binary_comp expression
+
+   65 binary_rel: LAND
+   66           | LOR
+
+   67 binary_comp: LT
+   68            | GT
+   69            | GEQ
+   70            | LEQ
+   71            | EQ
+   72            | NEQ
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    '(' (40) 11 12 29 30 31 32 33 41 44 56 61 63
+    ')' (41) 11 12 29 30 31 32 33 41 44 56 61 63
+    ',' (44) 7 15 17 59
+    ':' (58) 34 35
+    ';' (59) 6 12 26 29 36 37 38 41
+    '=' (61) 39
+    '[' (91) 10 43
+    ']' (93) 10 43
+    '{' (123) 11 40
+    '}' (125) 11 40
+    error (256)
+    IDENTIFICATEUR <node> (258) 9 11 12 20 41 42 56
+    CONSTANTE <node> (259) 10 34 54
+    PLUS <node> (260) 45
+    MOINS <node> (261) 46 53
+    MUL <node> (262) 48
+    DIV <node> (263) 47
+    LSHIFT <node> (264) 50
+    RSHIFT <node> (265) 49
+    BAND <node> (266) 51
+    BOR <node> (267) 52
+    GEQ <node> (268) 69
+    LEQ <node> (269) 70
+    EQ <node> (270) 71
+    NEQ <node> (271) 72
+    NOT <node> (272) 61
+    LAND <node> (273) 65
+    LOR <node> (274) 66
+    LT <node> (275) 67
+    GT <node> (276) 68
+    FOR (277) 29
+    WHILE (278) 30
+    IF (279) 31 32
+    ELSE (280) 32
+    SWITCH (281) 33
+    CASE (282) 34
+    DEFAULT (283) 35
+    INT (284) 14 20
+    VOID (285) 13
+    BREAK (286) 36
+    RETURN (287) 37 38
+    EXTERN (288) 12
+    THEN (289)
+    OP (290)
+    REL (291)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (47)
+        on left: 0
+    programme <node> (48)
+        on left: 1
+        on right: 0
+    liste_declarations <node> (49)
+        on left: 2 3
+        on right: 1 2 11 40
+    liste_fonctions <node> (50)
+        on left: 4 5
+        on right: 1 4
+    declaration <node> (51)
+        on left: 6
+        on right: 2
+    liste_declarateurs <node> (52)
+        on left: 7 8
+        on right: 6 7
+    declarateur <node> (53)
+        on left: 9 10
+        on right: 7 8 10
+    fonction <node> (54)
+        on left: 11 12
+        on right: 4 5
+    type <node> (55)
+        on left: 13 14
+        on right: 6 11 12
+    create_liste_param <node> (56)
+        on left: 15 16
+        on right: 15 18
+    liste_parms <node> (57)
+        on left: 17 18 19
+        on right: 11 12 17
+    parm <node> (58)
+        on left: 20
+        on right: 15 16 17
+    liste_instructions <node> (59)
+        on left: 21 22
+        on right: 11 21 40
+    instruction <node> (60)
+        on left: 23 24 25 26 27 28
+        on right: 21 29 30 31 32 33 34 35
+    iteration <node> (61)
+        on left: 29 30
+        on right: 23
+    selection <node> (62)
+        on left: 31 32 33 34 35
+        on right: 24
+    saut <node> (63)
+        on left: 36 37 38
+        on right: 25
+    affectation <node> (64)
+        on left: 39
+        on right: 26 29
+    bloc <node> (65)
+        on left: 40
+        on right: 27
+    appel <node> (66)
+        on left: 41
+        on right: 28
+    variable <node> (67)
+        on left: 42 43
+        on right: 39 43 55
+    expression <node> (68)
+        on left: 44 45 46 47 48 49 50 51 52 53 54 55 56
+        on right: 33 38 39 43 44 45 46 47 48 49 50 51 52 53 59 60 64
+    liste_expressions <node> (69)
+        on left: 57 58
+        on right: 41 56
+    create_expr_liste <node> (70)
+        on left: 59 60
+        on right: 57 59
+    condition <node> (71)
+        on left: 61 62 63 64
+        on right: 29 30 31 32 61 62 63
+    binary_rel <node> (72)
+        on left: 65 66
+        on right: 62
+    binary_comp <node> (73)
+        on left: 67 68 69 70 71 72
+        on right: 64
+
+
+State 0
+
+    0 $accept: . programme $end
+
+    $default  reduce using rule 3 (liste_declarations)
+
+    programme           go to state 1
+    liste_declarations  go to state 2
+
+
+State 1
+
+    0 $accept: programme . $end
+
+    $end  shift, and go to state 3
+
+
+State 2
+
+    1 programme: liste_declarations . liste_fonctions
+    2 liste_declarations: liste_declarations . declaration
+
+    INT     shift, and go to state 4
+    VOID    shift, and go to state 5
+    EXTERN  shift, and go to state 6
+
+    liste_fonctions  go to state 7
+    declaration      go to state 8
+    fonction         go to state 9
+    type             go to state 10
+
+
+State 3
+
+    0 $accept: programme $end .
+
+    $default  accept
+
+
+State 4
+
+   14 type: INT .
+
+    $default  reduce using rule 14 (type)
+
+
+State 5
+
+   13 type: VOID .
+
+    $default  reduce using rule 13 (type)
+
+
+State 6
+
+   12 fonction: EXTERN . type IDENTIFICATEUR '(' liste_parms ')' ';'
+
+    INT   shift, and go to state 4
+    VOID  shift, and go to state 5
+
+    type  go to state 11
+
+
+State 7
+
+    1 programme: liste_declarations liste_fonctions .
+    4 liste_fonctions: liste_fonctions . fonction
+
+    INT     shift, and go to state 4
+    VOID    shift, and go to state 5
+    EXTERN  shift, and go to state 6
+
+    $default  reduce using rule 1 (programme)
+
+    fonction  go to state 12
+    type      go to state 13
+
+
+State 8
+
+    2 liste_declarations: liste_declarations declaration .
+
+    $default  reduce using rule 2 (liste_declarations)
+
+
+State 9
+
+    5 liste_fonctions: fonction .
+
+    $default  reduce using rule 5 (liste_fonctions)
+
+
+State 10
+
+    6 declaration: type . liste_declarateurs ';'
+   11 fonction: type . IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}'
+
+    IDENTIFICATEUR  shift, and go to state 14
+
+    liste_declarateurs  go to state 15
+    declarateur         go to state 16
+
+
+State 11
+
+   12 fonction: EXTERN type . IDENTIFICATEUR '(' liste_parms ')' ';'
+
+    IDENTIFICATEUR  shift, and go to state 17
+
+
+State 12
+
+    4 liste_fonctions: liste_fonctions fonction .
+
+    $default  reduce using rule 4 (liste_fonctions)
+
+
+State 13
+
+   11 fonction: type . IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}'
+
+    IDENTIFICATEUR  shift, and go to state 18
+
+
+State 14
+
+    9 declarateur: IDENTIFICATEUR .
+   11 fonction: type IDENTIFICATEUR . '(' liste_parms ')' '{' liste_declarations liste_instructions '}'
+
+    '('  shift, and go to state 19
+
+    $default  reduce using rule 9 (declarateur)
+
+
+State 15
+
+    6 declaration: type liste_declarateurs . ';'
+    7 liste_declarateurs: liste_declarateurs . ',' declarateur
+
+    ';'  shift, and go to state 20
+    ','  shift, and go to state 21
+
+
+State 16
+
+    8 liste_declarateurs: declarateur .
+   10 declarateur: declarateur . '[' CONSTANTE ']'
+
+    '['  shift, and go to state 22
+
+    $default  reduce using rule 8 (liste_declarateurs)
+
+
+State 17
+
+   12 fonction: EXTERN type IDENTIFICATEUR . '(' liste_parms ')' ';'
+
+    '('  shift, and go to state 23
+
+
+State 18
+
+   11 fonction: type IDENTIFICATEUR . '(' liste_parms ')' '{' liste_declarations liste_instructions '}'
+
+    '('  shift, and go to state 19
+
+
+State 19
+
+   11 fonction: type IDENTIFICATEUR '(' . liste_parms ')' '{' liste_declarations liste_instructions '}'
+
+    INT  shift, and go to state 24
+
+    $default  reduce using rule 19 (liste_parms)
+
+    create_liste_param  go to state 25
+    liste_parms         go to state 26
+    parm                go to state 27
+
+
+State 20
+
+    6 declaration: type liste_declarateurs ';' .
+
+    $default  reduce using rule 6 (declaration)
+
+
+State 21
+
+    7 liste_declarateurs: liste_declarateurs ',' . declarateur
+
+    IDENTIFICATEUR  shift, and go to state 28
+
+    declarateur  go to state 29
+
+
+State 22
+
+   10 declarateur: declarateur '[' . CONSTANTE ']'
+
+    CONSTANTE  shift, and go to state 30
+
+
+State 23
+
+   12 fonction: EXTERN type IDENTIFICATEUR '(' . liste_parms ')' ';'
+
+    INT  shift, and go to state 24
+
+    $default  reduce using rule 19 (liste_parms)
+
+    create_liste_param  go to state 25
+    liste_parms         go to state 31
+    parm                go to state 27
+
+
+State 24
+
+   20 parm: INT . IDENTIFICATEUR
+
+    IDENTIFICATEUR  shift, and go to state 32
+
+
+State 25
+
+   15 create_liste_param: create_liste_param . ',' parm
+   18 liste_parms: create_liste_param .
+
+    ','  shift, and go to state 33
+
+    ','       [reduce using rule 18 (liste_parms)]
+    $default  reduce using rule 18 (liste_parms)
+
+
+State 26
+
+   11 fonction: type IDENTIFICATEUR '(' liste_parms . ')' '{' liste_declarations liste_instructions '}'
+   17 liste_parms: liste_parms . ',' parm
+
+    ','  shift, and go to state 34
+    ')'  shift, and go to state 35
+
+
+State 27
+
+   16 create_liste_param: parm .
+
+    $default  reduce using rule 16 (create_liste_param)
+
+
+State 28
+
+    9 declarateur: IDENTIFICATEUR .
+
+    $default  reduce using rule 9 (declarateur)
+
+
+State 29
+
+    7 liste_declarateurs: liste_declarateurs ',' declarateur .
+   10 declarateur: declarateur . '[' CONSTANTE ']'
+
+    '['  shift, and go to state 22
+
+    $default  reduce using rule 7 (liste_declarateurs)
+
+
+State 30
+
+   10 declarateur: declarateur '[' CONSTANTE . ']'
+
+    ']'  shift, and go to state 36
+
+
+State 31
+
+   12 fonction: EXTERN type IDENTIFICATEUR '(' liste_parms . ')' ';'
+   17 liste_parms: liste_parms . ',' parm
+
+    ','  shift, and go to state 34
+    ')'  shift, and go to state 37
+
+
+State 32
+
+   20 parm: INT IDENTIFICATEUR .
+
+    $default  reduce using rule 20 (parm)
+
+
+State 33
+
+   15 create_liste_param: create_liste_param ',' . parm
+
+    INT  shift, and go to state 24
+
+    parm  go to state 38
+
+
+State 34
+
+   17 liste_parms: liste_parms ',' . parm
+
+    INT  shift, and go to state 24
+
+    parm  go to state 39
+
+
+State 35
+
+   11 fonction: type IDENTIFICATEUR '(' liste_parms ')' . '{' liste_declarations liste_instructions '}'
+
+    '{'  shift, and go to state 40
+
+
+State 36
+
+   10 declarateur: declarateur '[' CONSTANTE ']' .
+
+    $default  reduce using rule 10 (declarateur)
+
+
+State 37
+
+   12 fonction: EXTERN type IDENTIFICATEUR '(' liste_parms ')' . ';'
+
+    ';'  shift, and go to state 41
+
+
+State 38
+
+   15 create_liste_param: create_liste_param ',' parm .
+
+    $default  reduce using rule 15 (create_liste_param)
+
+
+State 39
+
+   17 liste_parms: liste_parms ',' parm .
+
+    $default  reduce using rule 17 (liste_parms)
+
+
+State 40
+
+   11 fonction: type IDENTIFICATEUR '(' liste_parms ')' '{' . liste_declarations liste_instructions '}'
+
+    $default  reduce using rule 3 (liste_declarations)
+
+    liste_declarations  go to state 42
+
+
+State 41
+
+   12 fonction: EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' .
+
+    $default  reduce using rule 12 (fonction)
+
+
+State 42
+
+    2 liste_declarations: liste_declarations . declaration
+   11 fonction: type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations . liste_instructions '}'
+
+    INT   shift, and go to state 4
+    VOID  shift, and go to state 5
+
+    $default  reduce using rule 22 (liste_instructions)
+
+    declaration         go to state 8
+    type                go to state 43
+    liste_instructions  go to state 44
+
+
+State 43
+
+    6 declaration: type . liste_declarateurs ';'
+
+    IDENTIFICATEUR  shift, and go to state 28
+
+    liste_declarateurs  go to state 15
+    declarateur         go to state 16
+
+
+State 44
+
+   11 fonction: type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions . '}'
+   21 liste_instructions: liste_instructions . instruction
+
+    IDENTIFICATEUR  shift, and go to state 45
+    FOR             shift, and go to state 46
+    WHILE           shift, and go to state 47
+    IF              shift, and go to state 48
+    SWITCH          shift, and go to state 49
+    CASE            shift, and go to state 50
+    DEFAULT         shift, and go to state 51
+    BREAK           shift, and go to state 52
+    RETURN          shift, and go to state 53
+    '{'             shift, and go to state 54
+    '}'             shift, and go to state 55
+
+    instruction  go to state 56
+    iteration    go to state 57
+    selection    go to state 58
+    saut         go to state 59
+    affectation  go to state 60
+    bloc         go to state 61
+    appel        go to state 62
+    variable     go to state 63
+
+
+State 45
+
+   41 appel: IDENTIFICATEUR . '(' liste_expressions ')' ';'
+   42 variable: IDENTIFICATEUR .
+
+    '('  shift, and go to state 64
+
+    $default  reduce using rule 42 (variable)
+
+
+State 46
+
+   29 iteration: FOR . '(' affectation ';' condition ';' affectation ')' instruction
+
+    '('  shift, and go to state 65
+
+
+State 47
+
+   30 iteration: WHILE . '(' condition ')' instruction
+
+    '('  shift, and go to state 66
+
+
+State 48
+
+   31 selection: IF . '(' condition ')' instruction
+   32          | IF . '(' condition ')' instruction ELSE instruction
+
+    '('  shift, and go to state 67
+
+
+State 49
+
+   33 selection: SWITCH . '(' expression ')' instruction
+
+    '('  shift, and go to state 68
+
+
+State 50
+
+   34 selection: CASE . CONSTANTE ':' instruction
+
+    CONSTANTE  shift, and go to state 69
+
+
+State 51
+
+   35 selection: DEFAULT . ':' instruction
+
+    ':'  shift, and go to state 70
+
+
+State 52
+
+   36 saut: BREAK . ';'
+
+    ';'  shift, and go to state 71
+
+
+State 53
+
+   37 saut: RETURN . ';'
+   38     | RETURN . expression ';'
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    ';'             shift, and go to state 75
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 78
+
+
+State 54
+
+   40 bloc: '{' . liste_declarations liste_instructions '}'
+
+    $default  reduce using rule 3 (liste_declarations)
+
+    liste_declarations  go to state 79
+
+
+State 55
+
+   11 fonction: type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' .
+
+    $default  reduce using rule 11 (fonction)
+
+
+State 56
+
+   21 liste_instructions: liste_instructions instruction .
+
+    $default  reduce using rule 21 (liste_instructions)
+
+
+State 57
+
+   23 instruction: iteration .
+
+    $default  reduce using rule 23 (instruction)
+
+
+State 58
+
+   24 instruction: selection .
+
+    $default  reduce using rule 24 (instruction)
+
+
+State 59
+
+   25 instruction: saut .
+
+    $default  reduce using rule 25 (instruction)
+
+
+State 60
+
+   26 instruction: affectation . ';'
+
+    ';'  shift, and go to state 80
+
+
+State 61
+
+   27 instruction: bloc .
+
+    $default  reduce using rule 27 (instruction)
+
+
+State 62
+
+   28 instruction: appel .
+
+    $default  reduce using rule 28 (instruction)
+
+
+State 63
+
+   39 affectation: variable . '=' expression
+   43 variable: variable . '[' expression ']'
+
+    '['  shift, and go to state 81
+    '='  shift, and go to state 82
+
+
+State 64
+
+   41 appel: IDENTIFICATEUR '(' . liste_expressions ')' ';'
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    $default  reduce using rule 58 (liste_expressions)
+
+    variable           go to state 77
+    expression         go to state 83
+    liste_expressions  go to state 84
+    create_expr_liste  go to state 85
+
+
+State 65
+
+   29 iteration: FOR '(' . affectation ';' condition ';' affectation ')' instruction
+
+    IDENTIFICATEUR  shift, and go to state 86
+
+    affectation  go to state 87
+    variable     go to state 63
+
+
+State 66
+
+   30 iteration: WHILE '(' . condition ')' instruction
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    NOT             shift, and go to state 88
+    '('             shift, and go to state 89
+
+    variable    go to state 77
+    expression  go to state 90
+    condition   go to state 91
+
+
+State 67
+
+   31 selection: IF '(' . condition ')' instruction
+   32          | IF '(' . condition ')' instruction ELSE instruction
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    NOT             shift, and go to state 88
+    '('             shift, and go to state 89
+
+    variable    go to state 77
+    expression  go to state 90
+    condition   go to state 92
+
+
+State 68
+
+   33 selection: SWITCH '(' . expression ')' instruction
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 93
+
+
+State 69
+
+   34 selection: CASE CONSTANTE . ':' instruction
+
+    ':'  shift, and go to state 94
+
+
+State 70
+
+   35 selection: DEFAULT ':' . instruction
+
+    IDENTIFICATEUR  shift, and go to state 45
+    FOR             shift, and go to state 46
+    WHILE           shift, and go to state 47
+    IF              shift, and go to state 48
+    SWITCH          shift, and go to state 49
+    CASE            shift, and go to state 50
+    DEFAULT         shift, and go to state 51
+    BREAK           shift, and go to state 52
+    RETURN          shift, and go to state 53
+    '{'             shift, and go to state 54
+
+    instruction  go to state 95
+    iteration    go to state 57
+    selection    go to state 58
+    saut         go to state 59
+    affectation  go to state 60
+    bloc         go to state 61
+    appel        go to state 62
+    variable     go to state 63
+
+
+State 71
+
+   36 saut: BREAK ';' .
+
+    $default  reduce using rule 36 (saut)
+
+
+State 72
+
+   42 variable: IDENTIFICATEUR .
+   56 expression: IDENTIFICATEUR . '(' liste_expressions ')'
+
+    '('  shift, and go to state 96
+
+    $default  reduce using rule 42 (variable)
+
+
+State 73
+
+   54 expression: CONSTANTE .
+
+    $default  reduce using rule 54 (expression)
+
+
+State 74
+
+   53 expression: MOINS . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 97
+
+
+State 75
+
+   37 saut: RETURN ';' .
+
+    $default  reduce using rule 37 (saut)
+
+
+State 76
+
+   44 expression: '(' . expression ')'
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 98
+
+
+State 77
+
+   43 variable: variable . '[' expression ']'
+   55 expression: variable .
+
+    '['  shift, and go to state 81
+
+    $default  reduce using rule 55 (expression)
+
+
+State 78
+
+   38 saut: RETURN expression . ';'
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    PLUS    shift, and go to state 99
+    MOINS   shift, and go to state 100
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+    ';'     shift, and go to state 107
+
+
+State 79
+
+    2 liste_declarations: liste_declarations . declaration
+   40 bloc: '{' liste_declarations . liste_instructions '}'
+
+    INT   shift, and go to state 4
+    VOID  shift, and go to state 5
+
+    $default  reduce using rule 22 (liste_instructions)
+
+    declaration         go to state 8
+    type                go to state 43
+    liste_instructions  go to state 108
+
+
+State 80
+
+   26 instruction: affectation ';' .
+
+    $default  reduce using rule 26 (instruction)
+
+
+State 81
+
+   43 variable: variable '[' . expression ']'
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 109
+
+
+State 82
+
+   39 affectation: variable '=' . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 110
+
+
+State 83
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+   60 create_expr_liste: expression .
+
+    PLUS    shift, and go to state 99
+    MOINS   shift, and go to state 100
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+
+    $default  reduce using rule 60 (create_expr_liste)
+
+
+State 84
+
+   41 appel: IDENTIFICATEUR '(' liste_expressions . ')' ';'
+
+    ')'  shift, and go to state 111
+
+
+State 85
+
+   57 liste_expressions: create_expr_liste .
+   59 create_expr_liste: create_expr_liste . ',' expression
+
+    ','  shift, and go to state 112
+
+    $default  reduce using rule 57 (liste_expressions)
+
+
+State 86
+
+   42 variable: IDENTIFICATEUR .
+
+    $default  reduce using rule 42 (variable)
+
+
+State 87
+
+   29 iteration: FOR '(' affectation . ';' condition ';' affectation ')' instruction
+
+    ';'  shift, and go to state 113
+
+
+State 88
+
+   61 condition: NOT . '(' condition ')'
+
+    '('  shift, and go to state 114
+
+
+State 89
+
+   44 expression: '(' . expression ')'
+   63 condition: '(' . condition ')'
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    NOT             shift, and go to state 88
+    '('             shift, and go to state 89
+
+    variable    go to state 77
+    expression  go to state 115
+    condition   go to state 116
+
+
+State 90
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+   64 condition: expression . binary_comp expression
+
+    PLUS    shift, and go to state 99
+    MOINS   shift, and go to state 100
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+    GEQ     shift, and go to state 117
+    LEQ     shift, and go to state 118
+    EQ      shift, and go to state 119
+    NEQ     shift, and go to state 120
+    LT      shift, and go to state 121
+    GT      shift, and go to state 122
+
+    binary_comp  go to state 123
+
+
+State 91
+
+   30 iteration: WHILE '(' condition . ')' instruction
+   62 condition: condition . binary_rel condition
+
+    LAND  shift, and go to state 124
+    LOR   shift, and go to state 125
+    ')'   shift, and go to state 126
+
+    binary_rel  go to state 127
+
+
+State 92
+
+   31 selection: IF '(' condition . ')' instruction
+   32          | IF '(' condition . ')' instruction ELSE instruction
+   62 condition: condition . binary_rel condition
+
+    LAND  shift, and go to state 124
+    LOR   shift, and go to state 125
+    ')'   shift, and go to state 128
+
+    binary_rel  go to state 127
+
+
+State 93
+
+   33 selection: SWITCH '(' expression . ')' instruction
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    PLUS    shift, and go to state 99
+    MOINS   shift, and go to state 100
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+    ')'     shift, and go to state 129
+
+
+State 94
+
+   34 selection: CASE CONSTANTE ':' . instruction
+
+    IDENTIFICATEUR  shift, and go to state 45
+    FOR             shift, and go to state 46
+    WHILE           shift, and go to state 47
+    IF              shift, and go to state 48
+    SWITCH          shift, and go to state 49
+    CASE            shift, and go to state 50
+    DEFAULT         shift, and go to state 51
+    BREAK           shift, and go to state 52
+    RETURN          shift, and go to state 53
+    '{'             shift, and go to state 54
+
+    instruction  go to state 130
+    iteration    go to state 57
+    selection    go to state 58
+    saut         go to state 59
+    affectation  go to state 60
+    bloc         go to state 61
+    appel        go to state 62
+    variable     go to state 63
+
+
+State 95
+
+   35 selection: DEFAULT ':' instruction .
+
+    $default  reduce using rule 35 (selection)
+
+
+State 96
+
+   56 expression: IDENTIFICATEUR '(' . liste_expressions ')'
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    $default  reduce using rule 58 (liste_expressions)
+
+    variable           go to state 77
+    expression         go to state 83
+    liste_expressions  go to state 131
+    create_expr_liste  go to state 85
+
+
+State 97
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+   53           | MOINS expression .
+
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+
+    $default  reduce using rule 53 (expression)
+
+
+State 98
+
+   44 expression: '(' expression . ')'
+   45           | expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    PLUS    shift, and go to state 99
+    MOINS   shift, and go to state 100
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+    ')'     shift, and go to state 132
+
+
+State 99
+
+   45 expression: expression PLUS . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 133
+
+
+State 100
+
+   46 expression: expression MOINS . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 134
+
+
+State 101
+
+   48 expression: expression MUL . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 135
+
+
+State 102
+
+   47 expression: expression DIV . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 136
+
+
+State 103
+
+   50 expression: expression LSHIFT . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 137
+
+
+State 104
+
+   49 expression: expression RSHIFT . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 138
+
+
+State 105
+
+   51 expression: expression BAND . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 139
+
+
+State 106
+
+   52 expression: expression BOR . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 140
+
+
+State 107
+
+   38 saut: RETURN expression ';' .
+
+    $default  reduce using rule 38 (saut)
+
+
+State 108
+
+   21 liste_instructions: liste_instructions . instruction
+   40 bloc: '{' liste_declarations liste_instructions . '}'
+
+    IDENTIFICATEUR  shift, and go to state 45
+    FOR             shift, and go to state 46
+    WHILE           shift, and go to state 47
+    IF              shift, and go to state 48
+    SWITCH          shift, and go to state 49
+    CASE            shift, and go to state 50
+    DEFAULT         shift, and go to state 51
+    BREAK           shift, and go to state 52
+    RETURN          shift, and go to state 53
+    '{'             shift, and go to state 54
+    '}'             shift, and go to state 141
+
+    instruction  go to state 56
+    iteration    go to state 57
+    selection    go to state 58
+    saut         go to state 59
+    affectation  go to state 60
+    bloc         go to state 61
+    appel        go to state 62
+    variable     go to state 63
+
+
+State 109
+
+   43 variable: variable '[' expression . ']'
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    PLUS    shift, and go to state 99
+    MOINS   shift, and go to state 100
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+    ']'     shift, and go to state 142
+
+
+State 110
+
+   39 affectation: variable '=' expression .
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    PLUS    shift, and go to state 99
+    MOINS   shift, and go to state 100
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+
+    $default  reduce using rule 39 (affectation)
+
+
+State 111
+
+   41 appel: IDENTIFICATEUR '(' liste_expressions ')' . ';'
+
+    ';'  shift, and go to state 143
+
+
+State 112
+
+   59 create_expr_liste: create_expr_liste ',' . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 144
+
+
+State 113
+
+   29 iteration: FOR '(' affectation ';' . condition ';' affectation ')' instruction
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    NOT             shift, and go to state 88
+    '('             shift, and go to state 89
+
+    variable    go to state 77
+    expression  go to state 90
+    condition   go to state 145
+
+
+State 114
+
+   61 condition: NOT '(' . condition ')'
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    NOT             shift, and go to state 88
+    '('             shift, and go to state 89
+
+    variable    go to state 77
+    expression  go to state 90
+    condition   go to state 146
+
+
+State 115
+
+   44 expression: '(' expression . ')'
+   45           | expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+   64 condition: expression . binary_comp expression
+
+    PLUS    shift, and go to state 99
+    MOINS   shift, and go to state 100
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+    GEQ     shift, and go to state 117
+    LEQ     shift, and go to state 118
+    EQ      shift, and go to state 119
+    NEQ     shift, and go to state 120
+    LT      shift, and go to state 121
+    GT      shift, and go to state 122
+    ')'     shift, and go to state 132
+
+    binary_comp  go to state 123
+
+
+State 116
+
+   62 condition: condition . binary_rel condition
+   63          | '(' condition . ')'
+
+    LAND  shift, and go to state 124
+    LOR   shift, and go to state 125
+    ')'   shift, and go to state 147
+
+    binary_rel  go to state 127
+
+
+State 117
+
+   69 binary_comp: GEQ .
+
+    $default  reduce using rule 69 (binary_comp)
+
+
+State 118
+
+   70 binary_comp: LEQ .
+
+    $default  reduce using rule 70 (binary_comp)
+
+
+State 119
+
+   71 binary_comp: EQ .
+
+    $default  reduce using rule 71 (binary_comp)
+
+
+State 120
+
+   72 binary_comp: NEQ .
+
+    $default  reduce using rule 72 (binary_comp)
+
+
+State 121
+
+   67 binary_comp: LT .
+
+    $default  reduce using rule 67 (binary_comp)
+
+
+State 122
+
+   68 binary_comp: GT .
+
+    $default  reduce using rule 68 (binary_comp)
+
+
+State 123
+
+   64 condition: expression binary_comp . expression
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    '('             shift, and go to state 76
+
+    variable    go to state 77
+    expression  go to state 148
+
+
+State 124
+
+   65 binary_rel: LAND .
+
+    $default  reduce using rule 65 (binary_rel)
+
+
+State 125
+
+   66 binary_rel: LOR .
+
+    $default  reduce using rule 66 (binary_rel)
+
+
+State 126
+
+   30 iteration: WHILE '(' condition ')' . instruction
+
+    IDENTIFICATEUR  shift, and go to state 45
+    FOR             shift, and go to state 46
+    WHILE           shift, and go to state 47
+    IF              shift, and go to state 48
+    SWITCH          shift, and go to state 49
+    CASE            shift, and go to state 50
+    DEFAULT         shift, and go to state 51
+    BREAK           shift, and go to state 52
+    RETURN          shift, and go to state 53
+    '{'             shift, and go to state 54
+
+    instruction  go to state 149
+    iteration    go to state 57
+    selection    go to state 58
+    saut         go to state 59
+    affectation  go to state 60
+    bloc         go to state 61
+    appel        go to state 62
+    variable     go to state 63
+
+
+State 127
+
+   62 condition: condition binary_rel . condition
+
+    IDENTIFICATEUR  shift, and go to state 72
+    CONSTANTE       shift, and go to state 73
+    MOINS           shift, and go to state 74
+    NOT             shift, and go to state 88
+    '('             shift, and go to state 89
+
+    variable    go to state 77
+    expression  go to state 90
+    condition   go to state 150
+
+
+State 128
+
+   31 selection: IF '(' condition ')' . instruction
+   32          | IF '(' condition ')' . instruction ELSE instruction
+
+    IDENTIFICATEUR  shift, and go to state 45
+    FOR             shift, and go to state 46
+    WHILE           shift, and go to state 47
+    IF              shift, and go to state 48
+    SWITCH          shift, and go to state 49
+    CASE            shift, and go to state 50
+    DEFAULT         shift, and go to state 51
+    BREAK           shift, and go to state 52
+    RETURN          shift, and go to state 53
+    '{'             shift, and go to state 54
+
+    instruction  go to state 151
+    iteration    go to state 57
+    selection    go to state 58
+    saut         go to state 59
+    affectation  go to state 60
+    bloc         go to state 61
+    appel        go to state 62
+    variable     go to state 63
+
+
+State 129
+
+   33 selection: SWITCH '(' expression ')' . instruction
+
+    IDENTIFICATEUR  shift, and go to state 45
+    FOR             shift, and go to state 46
+    WHILE           shift, and go to state 47
+    IF              shift, and go to state 48
+    SWITCH          shift, and go to state 49
+    CASE            shift, and go to state 50
+    DEFAULT         shift, and go to state 51
+    BREAK           shift, and go to state 52
+    RETURN          shift, and go to state 53
+    '{'             shift, and go to state 54
+
+    instruction  go to state 152
+    iteration    go to state 57
+    selection    go to state 58
+    saut         go to state 59
+    affectation  go to state 60
+    bloc         go to state 61
+    appel        go to state 62
+    variable     go to state 63
+
+
+State 130
+
+   34 selection: CASE CONSTANTE ':' instruction .
+
+    $default  reduce using rule 34 (selection)
+
+
+State 131
+
+   56 expression: IDENTIFICATEUR '(' liste_expressions . ')'
+
+    ')'  shift, and go to state 153
+
+
+State 132
+
+   44 expression: '(' expression ')' .
+
+    $default  reduce using rule 44 (expression)
+
+
+State 133
+
+   45 expression: expression . PLUS expression
+   45           | expression PLUS expression .
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+
+    $default  reduce using rule 45 (expression)
+
+
+State 134
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   46           | expression MOINS expression .
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+
+    $default  reduce using rule 46 (expression)
+
+
+State 135
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   48           | expression MUL expression .
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+
+    $default  reduce using rule 48 (expression)
+
+
+State 136
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   47           | expression DIV expression .
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+
+    $default  reduce using rule 47 (expression)
+
+
+State 137
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   50           | expression LSHIFT expression .
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    BAND  shift, and go to state 105
+    BOR   shift, and go to state 106
+
+    $default  reduce using rule 50 (expression)
+
+
+State 138
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   49           | expression RSHIFT expression .
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+
+    BAND  shift, and go to state 105
+    BOR   shift, and go to state 106
+
+    $default  reduce using rule 49 (expression)
+
+
+State 139
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   51           | expression BAND expression .
+   52           | expression . BOR expression
+
+    $default  reduce using rule 51 (expression)
+
+
+State 140
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+   52           | expression BOR expression .
+
+    $default  reduce using rule 52 (expression)
+
+
+State 141
+
+   40 bloc: '{' liste_declarations liste_instructions '}' .
+
+    $default  reduce using rule 40 (bloc)
+
+
+State 142
+
+   43 variable: variable '[' expression ']' .
+
+    $default  reduce using rule 43 (variable)
+
+
+State 143
+
+   41 appel: IDENTIFICATEUR '(' liste_expressions ')' ';' .
+
+    $default  reduce using rule 41 (appel)
+
+
+State 144
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+   59 create_expr_liste: create_expr_liste ',' expression .
+
+    PLUS    shift, and go to state 99
+    MOINS   shift, and go to state 100
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+
+    $default  reduce using rule 59 (create_expr_liste)
+
+
+State 145
+
+   29 iteration: FOR '(' affectation ';' condition . ';' affectation ')' instruction
+   62 condition: condition . binary_rel condition
+
+    LAND  shift, and go to state 124
+    LOR   shift, and go to state 125
+    ';'   shift, and go to state 154
+
+    binary_rel  go to state 127
+
+
+State 146
+
+   61 condition: NOT '(' condition . ')'
+   62          | condition . binary_rel condition
+
+    LAND  shift, and go to state 124
+    LOR   shift, and go to state 125
+    ')'   shift, and go to state 155
+
+    binary_rel  go to state 127
+
+
+State 147
+
+   63 condition: '(' condition ')' .
+
+    $default  reduce using rule 63 (condition)
+
+
+State 148
+
+   45 expression: expression . PLUS expression
+   46           | expression . MOINS expression
+   47           | expression . DIV expression
+   48           | expression . MUL expression
+   49           | expression . RSHIFT expression
+   50           | expression . LSHIFT expression
+   51           | expression . BAND expression
+   52           | expression . BOR expression
+   64 condition: expression binary_comp expression .
+
+    PLUS    shift, and go to state 99
+    MOINS   shift, and go to state 100
+    MUL     shift, and go to state 101
+    DIV     shift, and go to state 102
+    LSHIFT  shift, and go to state 103
+    RSHIFT  shift, and go to state 104
+    BAND    shift, and go to state 105
+    BOR     shift, and go to state 106
+
+    $default  reduce using rule 64 (condition)
+
+
+State 149
+
+   30 iteration: WHILE '(' condition ')' instruction .
+
+    $default  reduce using rule 30 (iteration)
+
+
+State 150
+
+   62 condition: condition . binary_rel condition
+   62          | condition binary_rel condition .
+
+    $default  reduce using rule 62 (condition)
+
+    binary_rel  go to state 127
+
+
+State 151
+
+   31 selection: IF '(' condition ')' instruction .
+   32          | IF '(' condition ')' instruction . ELSE instruction
+
+    ELSE  shift, and go to state 156
+
+    $default  reduce using rule 31 (selection)
+
+
+State 152
+
+   33 selection: SWITCH '(' expression ')' instruction .
+
+    $default  reduce using rule 33 (selection)
+
+
+State 153
+
+   56 expression: IDENTIFICATEUR '(' liste_expressions ')' .
+
+    $default  reduce using rule 56 (expression)
+
+
+State 154
+
+   29 iteration: FOR '(' affectation ';' condition ';' . affectation ')' instruction
+
+    IDENTIFICATEUR  shift, and go to state 86
+
+    affectation  go to state 157
+    variable     go to state 63
+
+
+State 155
+
+   61 condition: NOT '(' condition ')' .
+
+    $default  reduce using rule 61 (condition)
+
+
+State 156
+
+   32 selection: IF '(' condition ')' instruction ELSE . instruction
+
+    IDENTIFICATEUR  shift, and go to state 45
+    FOR             shift, and go to state 46
+    WHILE           shift, and go to state 47
+    IF              shift, and go to state 48
+    SWITCH          shift, and go to state 49
+    CASE            shift, and go to state 50
+    DEFAULT         shift, and go to state 51
+    BREAK           shift, and go to state 52
+    RETURN          shift, and go to state 53
+    '{'             shift, and go to state 54
+
+    instruction  go to state 158
+    iteration    go to state 57
+    selection    go to state 58
+    saut         go to state 59
+    affectation  go to state 60
+    bloc         go to state 61
+    appel        go to state 62
+    variable     go to state 63
+
+
+State 157
+
+   29 iteration: FOR '(' affectation ';' condition ';' affectation . ')' instruction
+
+    ')'  shift, and go to state 159
+
+
+State 158
+
+   32 selection: IF '(' condition ')' instruction ELSE instruction .
+
+    $default  reduce using rule 32 (selection)
+
+
+State 159
+
+   29 iteration: FOR '(' affectation ';' condition ';' affectation ')' . instruction
+
+    IDENTIFICATEUR  shift, and go to state 45
+    FOR             shift, and go to state 46
+    WHILE           shift, and go to state 47
+    IF              shift, and go to state 48
+    SWITCH          shift, and go to state 49
+    CASE            shift, and go to state 50
+    DEFAULT         shift, and go to state 51
+    BREAK           shift, and go to state 52
+    RETURN          shift, and go to state 53
+    '{'             shift, and go to state 54
+
+    instruction  go to state 160
+    iteration    go to state 57
+    selection    go to state 58
+    saut         go to state 59
+    affectation  go to state 60
+    bloc         go to state 61
+    appel        go to state 62
+    variable     go to state 63
+
+
+State 160
+
+   29 iteration: FOR '(' affectation ';' condition ';' affectation ')' instruction .
+
+    $default  reduce using rule 29 (iteration)

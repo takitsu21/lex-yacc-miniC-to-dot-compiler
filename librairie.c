@@ -1,31 +1,67 @@
 #include <stdio.h>
-#include <stdlib.h>
-// #include <memory.h>
+#include <malloc.h>
+#include <stdio.h>
+// #include "conio.h"
 
-
-int writeDotFile(const char* src) {
-    FILE* fp;
-    fp = fopen("test.dot", "a");
-    if (fp == NULL) {
-        fprintf(stderr, "File cannot be opened\n");
-        return 0;
-    }
-    printf("DOTCONVERSION %s\n", src);
-    fprintf(fp, "%s", src);
-
-    return 1;
+typedef struct TREE {
+	int data;
+	struct TREE *left;
+	struct TREE *right;
 }
-
-char* newString(const char* str1, const char* str2) {
-    printf("TRY TO CONCATENATE %s and %s\n", str1, str2);
-    char * str3 = (char *) malloc(1 + strlen(str1)+ strlen(str2) );
-    strcpy(str3, str1);
-    strcat(str3, str2);
-    return str3;
+TREE;
+int main() {
+	int data,depth;
+	TREE *tree =NULL;
+	TREE *InsertTree(int data,TREE *p);
+	TREE *PrintTreeTriangle(TREE *tree, int level);
+	int TreeDepth(TREE *tree,int *depth,int level);
+	// clrscr();
+	while(1) {
+		printf("\nKey to insert|");
+		scanf("%d", &data);
+		if (data==0)
+			  break;
+		tree =InsertTree(data,tree);
+		printf("\n Tree Display;\n");
+		PrintTreeTriangle(tree,1);
+		depth=0;
+		TreeDepth(tree,&depth,0);
+		printf("\nTree Depth =%d\n",depth);
+	}
+	return(0);
 }
-
-// int main(void) {
-//     char* test = newString("str1", "str2");
-//     printf("%s\n", test);
-//     return 0;
-// }
+TREE *InsertTree(int data,TREE *p) {
+	if(!p) {
+		p=(TREE*)malloc(sizeof(TREE));
+		p->data=data;
+		p->left=NULL;
+		p->right=NULL;
+		return(p);
+	}
+	if(data < p->data)
+		p->left=InsertTree(data,p->left); else
+		if(data > p->data)
+		p->right=InsertTree(data,p->right);
+	return(p);
+}
+TREE *PrintTreeTriangle(TREE *tree, int level) {
+	int i;
+	if(tree) {
+		PrintTreeTriangle(tree->right,level+1);
+		printf("\n\n");
+		for (i=0;i<level;i++)
+				printf("       ");
+		printf("%d",tree->data);
+		PrintTreeTriangle(tree->left,level+1);
+	}
+	return(NULL);
+}
+int TreeDepth(TREE *tree,int *depth,int level) {
+	if(tree) {
+		if (level>*depth)
+		     *depth=level;
+		TreeDepth(tree->left,depth,level+1);
+		TreeDepth(tree->right,depth,level+1);
+	}
+	return(0);
+}

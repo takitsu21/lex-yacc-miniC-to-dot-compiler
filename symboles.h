@@ -4,9 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-
-#define TAILLE 103 /*nbr premier de preference */
 
 typedef enum _type_t
 {
@@ -14,51 +11,47 @@ typedef enum _type_t
     _VOID
 } type_t;
 
-typedef struct _param_t
+typedef enum _bloc_type_t
 {
+    _FOR,
+    _WHILE,
+    _SWITCH,
+    _IF
+} bloc_type_t;
+
+typedef struct _node_t
+{
+    char *nom;
     type_t type;
-    char *nom;
-} param_t;
+    char *code;
+    struct _node_t *fils;
+    struct _node_t *suivant;
+} node_t;
 
-typedef struct _symbole
-{
-    char *nom;
-    int valeur;
-    param_t type;
-    struct _symbole *suivant;
-} symbole;
 
-typedef struct _liste_t
-{
-    param_t param;
-    struct _liste_t *suivant;
-} liste_t;
+node_t **tree;
+node_t* functions;
+extern node_t *instructions;
 
-typedef struct _fonction_t
-{
-    type_t type;
-    char *nom;
-    liste_t *arguments;
-    struct _fonction_t *suivant;
-} fonction_t;
-
-typedef struct _programme_t
-{
-    liste_t *declarations;
-    liste_t *fonctions;
-} programme_t;
-
-symbole *table[TAILLE];
 
 void affiche();
-symbole *inserer(char *nom);
-void table_reset();
-int hash(char *nom);
-void assigne(symbole *table[], const char *var, int value);
-liste_t *creer_liste(param_t p);
-liste_t *concatener_listes(liste_t *l1, liste_t *l2);
-void afficher_liste(liste_t *liste);
-int listes_egales(liste_t *l1, liste_t *l2);
-fonction_t *ajouter_fonction(type_t type, char *nom, liste_t *args);
-param_t *create_param(type_t type);
+node_t *mk_single_node(const char *nom);
+void insert_next(node_t *p, node_t *c);
+void print_children(node_t *ll);
+void print_next(node_t *ll);
+void insert_children(node_t *t, node_t *c1);
+void insert_brother(node_t *c, node_t *b);
+node_t *create_node(const char* nom, void* type);
+void printTreeRecursive(node_t *node, int level);
+void printTabs(int count);
+void print_all_next(node_t *suivants, int level);
+void insert_node(node_t *src, node_t *dst);
+node_t *create_node_children(node_t *p, node_t *c1, node_t *c2, node_t *c3, node_t *c4);
+void visualise(node_t *node);
+void printTreeRecursive(node_t *node, int level);
+void printTabs(int count);
+void init();
+void insert_next_brother(node_t *p, node_t *brother);
+void write_file(const char *filename, const char *text);
+char *get_type(type_t type);
 #endif

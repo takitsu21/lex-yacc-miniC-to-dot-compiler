@@ -2,43 +2,32 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include "symboles.h"
-	#define DEBUGGER 1
-	#define VERBOSE 1
+	#define DEBUGGER 0
+	#define VERBOSE 0
 	void yyerror(char *s);
-	extern symbole *table[TAILLE];
-	extern int printd(int i);
+	extern node_t **tree;
+	// extern int printd(int i);
 	extern int yylineno;
 	extern int yycol;
 	extern int debugger(const char* s, int token, const char* token_type);
+	extern int fun_cursor;
+	extern node_t* functions;
+	extern node_t *bloc;
+	// init();
 %}
 
 
 %union {
-	int val;
-	int type;
-	char *operator;
-	struct _symbole *symbole_ptr;
-	struct _liste_t *liste;
-	struct _param_t *param;
-	struct _fonction_t *func;
-	// struct _programme_t *prog;
+	struct _node_t *node;
 }
 
-%token<symbole_ptr> IDENTIFICATEUR
-%token<val> CONSTANTE
-%token <operator> PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR
+%token <node> IDENTIFICATEUR CONSTANTE PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR GEQ LEQ EQ NEQ NOT LAND LOR LT GT
 
-%type <symbole_ptr> declarateur variable appel
-%type <val> expression
-%type <type> type
-%type <param> parm
-%type <func> fonction
-%type <liste> create_expr_liste create_liste_param liste_declarateurs liste_declarations liste_instructions liste_parms
-%type <operator> binary_op binary_comp binary_rel
-// %type<prog> programme
+%type <node> fonction declarateur variable appel create_expr_liste create_liste_param liste_declarateurs expression type binary_op binary_comp binary_rel parm programme liste_declarations liste_fonctions declaration affectation condition bloc saut liste_instructions iteration instruction selection liste_expressions liste_parms
+
 %token FOR WHILE IF ELSE SWITCH CASE DEFAULT INT VOID
-%token BREAK RETURN LAND LOR LT GT
-%token GEQ LEQ EQ NEQ NOT EXTERN
+%token BREAK RETURN
+%token EXTERN
 %left PLUS MOINS
 %left MUL DIV
 %left LSHIFT RSHIFT
@@ -52,190 +41,292 @@
 %%
 programme	:
 		liste_declarations liste_fonctions {
-			// $$->declarations = $1; $$->fonctions = $2;
-			// code gen ?
-			// $$->declarations = creer_liste($1);
-			// $$->fonctions = creer_liste($2);
-			 }
+				printf("PROGRAMME END\n");
+				visualise($2);
+				char *dst = strcpy(dst, "digraph mon_programme {\n");
+
+				strcat(dst, $2->code);
+				strcat(dst, "node_reste [shape=triangle label=\"...\" style=dotted];\n");
+				strcat(dst, "node_main -> node_reste\n");
+				strcat(dst, "}");
+				printf("%s\n", dst);
+				write_file("mytest.dot", dst);
+			}
 ;
 liste_declarations	:
 		liste_declarations declaration	{
-			// $$ = concatener_listes($1, creer_liste($2));
-			printf("LISTE DECLARATIONS %s\n", $1);
+
+				// insert_next($1, $2);
+				// $2->suivant = $1;
+				// $$ = $2;
 			}
-	|
+	| {
+		// $$ = mk_single_node("LIST_DECL EPSILON");
+		// printf("list declarations\n");
+	}
 ;
 liste_fonctions	:
-		liste_fonctions fonction
-|               fonction	{printf("FONCTION NAME : %s\n", $1); }
+		liste_fonctions fonction {
+		insert_next($1, $2);
+		$$ = $1;
+
+	}
+	|   fonction	{
+		$$ = $1;
+	}
 ;
 declaration	:
 		type liste_declarateurs ';' 	{
-			printf("DECLARATION TYPE : %d\n", $1);
-			liste_t *list_iterator;
-			for (list_iterator = $2; list_iterator != NULL; list_iterator->suivant) {
-				table[hash(list_iterator->param.nom)]->type.type = $1;
-				table[hash(list_iterator->param.nom)]->nom = strdup(list_iterator->param.nom);
-			}
+			// printf("DECLARATION\n");
+			// $2->type = $1->type;
+			// insert_children($1, $2, NULL, NULL, NULL);
+			// printf("ici");
+
+			// $$ = $1;
+
 	}
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur {
-			// $$ = concatener_listes($1, creer_liste($3->type));
+
+			// insert_next($1, $3);
+			// $$ = $1;
+			// printf("laaa\n");
 			}
-	|	declarateur 	{ $$ = $1; printf("[%d] : declarateur\n", yylineno); }
+	|	declarateur 	{ $$ = $1; }
 ;
 declarateur	:
 		IDENTIFICATEUR {
-			$$ = $1;
-			printf("DECLARATEUR %s\n", $1->nom);
+				// printf("DECLARATEUR %s\n", $1->nom);
+				$$ = $1;
 			}
 	|	declarateur '[' CONSTANTE ']' {
-		table[hash($1->nom)] = $1->nom;
-		printf("%s[%d]\n", $1->nom, $3); }
+			$$ = mk_single_node("TAB");
+			$$->fils = $1;
+		}
 ;
 fonction	:
 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' {
-			// printf("FONCTION TYPE : %d\n", $1);
-		printf("FONCTION : %s, TYPE : %d", $2->nom, $1);
-		// $$ = ajouter_fonction($1, $2->nom, $3);
+		$2->type = $1->type;
+		$2->fils = $8;
+		sprintf($2->code, "node_%s [label=\"%s, %s\" shape=invtrapezium color=blue];", $2->nom, $2->nom, get_type($2->type));
+		// $$->code = strdup(src);
+		$$ = $2;
+		printf("$$->code %s\n", $$->code);
+
+
+
 		}
 
-	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';'
+	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' {
+			printf("EXTERN %s\n", $3->nom);
+		}
 ;
 type	:
-		VOID	{ $$ = _VOID; }
-	|	INT		{ $$ = _INT; }
+		VOID	{ printf("type\n");$$ = create_node("VOID", _VOID); }
+	|	INT		{ printf("type\n");$$ = create_node("INT", _INT); }
 ;
 create_liste_param :	// cf Forum Khaoula Bouhlal
 		create_liste_param ',' parm	{
-			// $$ = concatener_listes($1, (creer_liste((param_t)$3));
-			printf("PARM %d\n", $3->nom);
-			// $$ = creer_liste($3);
-			// $$ = concatener_listes($1, creer_liste(*$3));
+				// insert_next($1, $3);
+				// $$ = $1;
 			}
-	| 	parm	{ $$ = $1; }
+	| 	parm	{
+		// $$ = $1;
+		}
 ;
 liste_parms	:
 		liste_parms ',' parm	{
-			$$ = concatener_listes($1, creer_liste(*$3));
-			printf("PARM %d\n", $3->type); }
+				insert_next($1, $3);
+				$$ = $1;
+			}
 	| create_liste_param {
-		printf("liste parms : %s\n", $1->param.nom);
-
-		// $$ = creer_liste($1->param);
-		printf("LISTE_PARMS %s : %d\n", $$->param.nom, $$->param.type);
+			$$ = $1;
 		}
-	|
+	| {$$ = mk_single_node("LIST PARMS"); }
 ;
 parm	:
 		INT IDENTIFICATEUR	{
-			$$->nom = strdup($2->nom);
-			$$->type = _INT;
-
-			printf("int : %s\n", $2->nom);
+				$2->type = _INT;
+				$$ = $2;
 			}
 ;
 liste_instructions :
-		liste_instructions instruction
-	|
+		liste_instructions instruction {
+			insert_next($1, $2);
+			$$ = $1;
+		}
+	| {
+		printf("liste instructions empty\n");
+		$$ = mk_single_node("LIST_INST");
+		}
 ;
 instruction	:
-		iteration
-	|	selection
-	|	saut
-	|	affectation ';'
-	|	bloc
-	|	appel
+		iteration {printf("before iteration "); $$ = $1;printf("after iteration\n"); }
+	|	selection {printf("before selection "); $$ = $1;printf("after selection\n"); }
+	|	saut {printf("before saut "); $$ = $1;printf("after saut\n"); }
+	|	affectation ';' {
+		printf("before inst affectation ");$$ = $1;printf("after inst affectation\n"); }
+	|	bloc {printf("bloc ");$$ = $1;printf("after bloc\n");}
+	|	appel {printf("appel ");$$ = $1;printf("appel after\n"); }
 ;
 iteration	:
-		FOR '(' affectation ';' condition ';' affectation ')' instruction
-	|	WHILE '(' condition ')' instruction
+		FOR '(' affectation ';' condition ';' affectation ')' instruction {
+			node_t *for_node = mk_single_node("FOR");
+			for_node->fils = $3;
+			for_node->fils->suivant = $5;
+			for_node->fils->suivant->suivant = $7;
+			for_node->fils->suivant->suivant->suivant = $9;
+			$$ = for_node;
+			// print_all_next(for_node->suivant, 0);
+			}
+	|	WHILE '(' condition ')' instruction {
+			node_t *for_node = mk_single_node("WHILE");
+			for_node->fils = $3;
+			for_node->fils->suivant = $5;
+			$$ = for_node;
+		}
 ;
 selection	:
-		IF '(' condition ')' instruction %prec THEN
-	|	IF '(' condition ')' instruction ELSE instruction
-	|	SWITCH '(' expression ')' instruction
-	|	CASE CONSTANTE ':' instruction
-	|	DEFAULT ':' instruction
+		IF '(' condition ')' instruction %prec THEN {
+			node_t *if_node = mk_single_node("IF");
+			insert_next(if_node, $3);
+			insert_next(if_node, $5);
+			// if_node->fils = $3;
+			// if_node->fils->suivant = $5;
+			$$ = if_node;
+		}
+	|	IF '(' condition ')' instruction ELSE instruction {
+			node_t *if_node = mk_single_node("IF");
+			insert_next(if_node, $3);
+			insert_next(if_node, $5);
+			insert_next(if_node, $7);
+			// if_node->fils = $3;
+			// if_node->fils->suivant = $5;
+			// if_node->fils->suivant->suivant = $7;
+			$$ = if_node;
+		}
+	|	SWITCH '(' expression ')' instruction {
+		node_t *node_switch = mk_single_node("SWITCH");
+		node_switch->fils = $3;
+		node_switch->fils->suivant = $5;
+		$$ = node_switch; }
+	|	CASE CONSTANTE ':' instruction {
+		$$ = mk_single_node("CASE"); }
+	|	DEFAULT ':' instruction {$$ = mk_single_node("DEFAULT"); }
 ;
 saut	:
-		BREAK ';'
-	|	RETURN ';'
-	|	RETURN expression ';'
+		BREAK ';' { $$ = create_node("BREAK", NULL); }
+	|	RETURN ';' {
+		printf("before return\n");
+		$$ = mk_single_node("RETURN");
+		printf("after return\n"); }
+	|	RETURN expression ';' {
+		printf("before return\n");
+		$$ = create_node_children(mk_single_node("RETURN"), $2, NULL, NULL, NULL);
+	printf("after return\n"); }
 ;
 affectation	:
 		variable '=' expression {
-		assigne(table, $1->nom, $3);
-		// "node_affect [label=\":=\" shape=ellipse]"
-		// "node_var [shape=ellipse label=\"$1->nom\"]"
-		// "node_expr [shape=triangle label=\"$3\" style=dotted]"
+			// printf("%s\n", $1->nom);
+			printf("VARIABLE 1\n");
+			// node_t *node = mk_single_node(":=");
 
-		// "node_affect -> node_var"
-		// "node_affect -> node_expr"
-
-		printf("%s = %d\n", table[hash($1->nom)]->nom, table[hash($1->nom)]->valeur); }
+			// printf("%s\n", node->nom);
+			printf("VARIABLE 2\n");
+			$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
+			printf("VARIABLE 3\n");
+		}
 ;
 bloc	:
-		'{' liste_declarations liste_instructions '}'
+		'{' liste_declarations liste_instructions '}' {
+			printf("BLOC\n");
+			$$ = create_node_children(mk_single_node("BLOC"), $3, NULL, NULL, NULL);
+
+			printf("AFTER BLOC\n");
+		}
 ;
 appel	:
-		IDENTIFICATEUR '(' liste_expressions ')' ';'
+		IDENTIFICATEUR '(' liste_expressions ')' ';' {
+			printf("APPEL \n");
+			insert_children($1, $3);
+			$$ = $1;
+		}
 ;
 variable	:
-		IDENTIFICATEUR	{ $$ = $1; }
-	|	variable '[' expression ']'
+		IDENTIFICATEUR	{
+				$$ = $1;
+			}
+	|	variable '[' expression ']' {
+			$$ = $1;
+			printf("variable %s\n", $1->nom);
+		}
 ;
-expression	:
-		'(' expression ')'		{ $$ = $2; }
-	|	expression binary_op expression %prec OP {
-		printf("binary_op %d %s %d = %d\n", $1, $2, $3);
-	}
-	|	MOINS expression	{ $$ = -$2; }
-	|	CONSTANTE	{ $$ = $1; }
-	|	variable	{ printf("VARIABLE %s\n", $1->nom);
-	// $$ = table[hash($1->nom)]->valeur;
-	}
-	|	IDENTIFICATEUR '(' liste_expressions ')'	{
-		printf("%s\n", $1->nom);
-		$$ = strdup($1->nom);
+/* TD 5 */
+expression :
+
+	'(' expression ')' { $$ = $2; }
+	| expression PLUS expression {$$ = create_node_children($2, $1, $3, NULL, NULL);}
+	| expression MOINS expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression DIV expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression MUL expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression RSHIFT expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression LSHIFT expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression BAND expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression BOR expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| MOINS expression %prec MUL { printf("%s\n", $1->nom);$$ = create_node_children($1, $2, NULL, NULL, NULL); }
+	| CONSTANTE { $$ = $1;printf("%s\n", $1->nom);  }
+	| variable { $$ = $1;printf("%s\n", $1->nom); }
+	| IDENTIFICATEUR '(' liste_expressions ')' {
+		// $1->suivant = $3;
+		printf("id liste_expr");
+		insert_children($1, $3);
+		$$ = $1;
 		}
 ;
 liste_expressions	:
-		create_expr_liste { /* $$ = creer_liste($1); */ }
-	|
+		create_expr_liste { printf("list creation"); $$ = $1; }
+	| { printf("list expr eps\n");$$ = create_node("LIST_EXPR", NULL); }
 ;
 create_expr_liste :   // cf mail forum David Fissore
-    	create_expr_liste ',' expression
-    | 	expression
+    	create_expr_liste ',' expression {
+			printf("create_expr_liste\n");
+			$1->suivant = $3;
+			$$ = $1; }
+    | 	expression { printf("create expression\n");$$ = $1; }
 ;
 condition	:
-		NOT '(' condition ')'
-	|	condition binary_rel condition %prec REL
-	|	'(' condition ')'
-	|	expression binary_comp expression
+		NOT '(' condition ')' {
+			node_t *node = mk_single_node("NOT");
+			$$ = create_node_children(node, $3, NULL, NULL, NULL);
+			}
+	|	condition binary_rel condition %prec REL {
+		$$ = create_node_children($2, $1, $3, NULL, NULL);
+		}
+	|	'(' condition ')' { $$ = $2; }
+	|	expression binary_comp expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
 ;
 binary_op	:
-		PLUS	{$$ = "+"; }
-	|       MOINS	{$$ = "-"; }
-	|	MUL	{$$ = "*"; }
-	|	DIV	{$$ = "/"; }
-	|       LSHIFT	{$$ = "<<"; }
-	|       RSHIFT	{$$ = ">>"; }
-	|	BAND	{$$ = "&"; }
-	|	BOR	{$$ = "|"; }
+		PLUS	{ $$ = $1; }
+	|       MOINS	{ $$ = $1; }
+	|	MUL	{ $$ = $1; }
+	|	DIV	{ $$ = $1; }
+	|       LSHIFT	{ $$ = $1; }
+	|       RSHIFT	{$$ = $1; }
+	|	BAND	{$$ = $1; }
+	|	BOR	{$$ = $1; }
 ;
 binary_rel	:
-		LAND	{$$ = "&&"; }
-	|	LOR	{$$ = "||"; }
+		LAND	{ $$ = $1; }
+	|	LOR	{ $$ = $1; }
 ;
 binary_comp	:
-		LT	{ $$ = "<"; }
-	|	GT	{ $$ = ">"; }
-	|	GEQ	{ $$ = ">="; }
-	|	LEQ	{ $$ = "<="; }
-	|	EQ	{ $$ = "="; }
-	|	NEQ	{ $$ = "!="; }
+		LT	{ $$ = $1; }
+	|	GT	{ $$ = $1; }
+	|	GEQ	{ $$ = $1; }
+	|	LEQ	{ $$ = $1; }
+	|	EQ	{ $$ = $1; }
+	|	NEQ	{ $$ = $1; }
 ;
 %%
 
@@ -248,11 +339,6 @@ binary_comp	:
 void yyerror(char *s) {
 	fprintf(stderr, "Syntax error at line %d:%d : %s\n", yylineno, yycol, s);
 	exit(1);
-}
-
-int printd(int i) {
-    fprintf(stdout, "%d\n", i);
-    return 1;
 }
 
 // debugger printer

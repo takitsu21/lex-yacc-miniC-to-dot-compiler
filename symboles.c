@@ -1,193 +1,165 @@
 #include "symboles.h"
+extern int yylineno;
+#define TAILLE 103
 
-int hash(char *nom)
+node_t *create_node(const char *nom, void *type)
 {
-    int i, r;
-    int taille = strlen(nom);
-    r = 0;
-    for (i = 0; i < taille; i++)
-        r = ((r << 8) + nom[i]) % TAILLE;
-    return r;
+    node_t *node = (node_t *)malloc(sizeof(node_t));
+    node->nom = strdup(nom);
+    node->type = (type_t)type;
+    node->suivant = NULL;
+    node->fils = NULL;
+    node->code = (char*)malloc(sizeof(char));
+    return node;
 }
 
-void table_reset()
+void init()
 {
-    int i;
-    for (i = 0; i < TAILLE; i++)
-        table[i] = NULL;
+    tree = (node_t **)calloc(100, sizeof(node_t));
+    functions = (node_t *)malloc(sizeof(node_t));
 }
 
-symbole *inserer(char *nom)
+void insert_node(node_t *src, node_t *dst)
 {
-    int h;
-    symbole *s;
-    symbole *precedent;
-
-    h = hash(nom);
-    s = table[h];
-    precedent = NULL;
-
-    while (s != NULL)
+    node_t *next = dst;
+    while (next->suivant != NULL)
     {
-        if (strcmp(s->nom, nom) == 0)
-            return s;
-        precedent = s;
-        s = s->suivant;
+        next = next->suivant;
     }
-    if (precedent == NULL)
-    {
-        table[h] = (symbole *)malloc(sizeof(symbole));
-        s = table[h];
-    }
-    else
-    {
-        precedent->suivant = (symbole *)malloc(sizeof(symbole));
-        s = precedent->suivant;
-    }
-
-    s->nom = strdup(nom);
-    s->suivant = NULL;
-    return s;
+    next->suivant = src;
 }
 
-void affiche()
+void printTabs(int count)
 {
-    int i = 0;
-    symbole *s;
-    for (i = 0; i < TAILLE; i++)
+    for (int i = 0; i < count; i++)
     {
-        if (table[i] == NULL)
+        putchar('\t');
+    }
+}
+
+void printTreeRecursive(node_t *node, int level)
+{
+    while (node != NULL)
+    {
+        printTabs(level);
+        printf("Node: %s\n", node->nom);
+
+        if (node->fils != NULL)
         {
-            printf(" orpo table[%d]->NULL\n", i);
+            printTabs(level);
+            printf("Children:\n");
+            printTreeRecursive(node->fils, level + 1);
         }
-        else
-        {
-            s = table[i];
-            printf("table[%d]-> %s ", i, s->nom);
-            while (s->suivant != NULL)
-            {
-                printf("[%s]->", s->nom);
-                s = s->suivant;
-            }
-            printf("NULL\n");
-        }
+
+        node = node->suivant;
     }
 }
 
-void assigne(symbole *table[], const char *var, int value)
+void visualise(node_t *node)
 {
-    int hash_text = hash(var);
-    table[hash_text]->nom = strdup(var);
-    table[hash_text]->valeur = value;
+    printTreeRecursive(node, 0);
 }
 
-liste_t *creer_liste(param_t p)
+node_t *create_node_children(node_t *p, node_t *c1, node_t *c2, node_t *c3, node_t *c4)
 {
-    liste_t *liste;
-    liste = (liste_t *)malloc(sizeof(liste_t));
-    // assert(liste != NULL);
-    liste->param = p;
-    liste->suivant = NULL;
-    return liste;
-}
-
-liste_t *concatener_listes(liste_t *l1, liste_t *l2)
-{
-    liste_t *l = l1;
-    if (l1 == NULL)
-        return l2;
-    while (l->suivant != NULL)
-        l = l->suivant;
-    l->suivant = l2;
-    return l1;
-}
-
-void afficher_liste(liste_t *liste)
-{
-    liste_t *l;
-    for (l = liste; l != NULL; l = l->suivant)
+    if (c1 != NULL)
     {
-        if (l != liste)
-            printf(",");
-        printf(" %s (%s)", l->param.nom,
-               (l->param.type == _INT) ? "int" : "void");
+        p->fils = c1;
     }
-}
-
-int listes_egales(liste_t *l1, liste_t *l2)
-{
-    liste_t *liste;
-    for (liste = l1; liste != NULL; liste = liste->suivant)
+    if (c2 != NULL)
     {
-        if ((l2 == NULL) || (l2->param.type != liste->param.type))
-            return 0;
-        l2 = l2->suivant;
+        p->fils->suivant = c2;
     }
-    if (l2 != NULL)
-        return 0;
-    return 1;
-}
-
-fonction_t *ajouter_fonction(type_t type, char *nom, liste_t *args)
-{
-    int h;
-    fonction_t *f;
-    fonction_t *precedent;
-    fonction_t *nouvelle_fonction;
-    h = hash(nom);
-    f = table[h];
-    precedent = NULL;
-    while (f != NULL)
+    if (c3 != NULL)
     {
-        if (strcmp(f->nom, nom) == 0)
-        {
-            /* on a trouvé une fonction portant le meme nom */
-            if ((f->type == type) && (listes_egales(f->arguments, args)))
-                printf("Re-déclaration cohérente de la fonction %s\n", f->nom);
-            else
-                printf("Re-déclaration incohérente de la fonction %s\n", f->nom);
-            return NULL;
-        }
-        precedent = f;
-        f = f->suivant;
+        p->fils->suivant->suivant = c3;
     }
-    nouvelle_fonction = (fonction_t *)malloc(sizeof(fonction_t));
-    assert(nouvelle_fonction != NULL);
-    if (precedent == NULL)
+    if (c4 != NULL)
     {
-        table[h] = nouvelle_fonction;
-        f = table[h];
+        p->fils->suivant->suivant->suivant = c4;
     }
-    else
-    {
-        precedent->suivant = nouvelle_fonction;
-        f = precedent->suivant;
-    }
-    f->type = type;
-    f->nom = strdup(nom);
-    f->arguments = args;
-    f->suivant = NULL;
-    return f;
-}
-
-param_t *create_param(type_t type) {
-    param_t *p = (param_t *)malloc(sizeof(param_t));
-    p->type = type;
-    p->nom = NULL;
     return p;
 }
 
+node_t *mk_single_node(const char *nom)
+{
+    node_t *node = (node_t *)malloc(sizeof(node_t));
+    node->nom = strdup(nom);
+    node->type = (type_t)NULL;
+    node->suivant = NULL;
+    node->fils = NULL;
+    node->code = malloc(sizeof(char));
+    return node;
+}
 
-// int main()
-// {
-//     // table_reset();
-//     // printf("porca paletta");
-//     inserer("coco");
-//     inserer("coca");
-//     inserer("lala");
-//     inserer("cola");
-//     // affiche();
-//     printf("Hello, World!\n");
-//     printf("%s", table[1]->nom);
-//     return 0;
-// }
+void insert_children(node_t *t, node_t *c1)
+{
+    t->fils = c1;
+}
+
+void insert_brother(node_t *c, node_t *b)
+{
+    c->suivant = b;
+}
+
+void insert_next(node_t *p, node_t *c)
+{
+    node_t *q;
+
+    q = p;
+    while (q->suivant != NULL)
+    {
+        q = q->suivant;
+    }
+    printf("\n");
+
+    q->suivant = c;
+}
+
+void insert_next_brother(node_t *p, node_t *brother)
+{
+    insert_next(p->fils, brother);
+}
+
+void print_children(node_t *ll)
+{
+    node_t *next = ll->fils;
+    while ((next = next->suivant) != NULL)
+    {
+        printf("%s -> ", next->nom);
+    }
+}
+
+void print_next(node_t *ll)
+{
+    node_t *next = ll;
+    while ((next = next->suivant) != NULL)
+    {
+        printf("%s\n", next->nom);
+    }
+}
+
+char *get_type(type_t type)
+{
+    switch (type)
+    {
+    case _INT:
+    return "int";
+        break;
+
+    default:
+        return "void";
+        break;
+    }
+}
+
+
+void write_file(const char *filename, const char *text) {
+    FILE *fp = fopen(filename, "w+");
+    if (fp == NULL) {
+        printf("file can't be opened");
+        exit(1);
+    }
+    fputs(text, fp);
+    fclose(fp);
+}
