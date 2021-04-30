@@ -15,7 +15,7 @@ LEX_GENS=lex.yy.c
 
 C_FLAGS=$(YACC_C) $(LEX_GENS) -o $(FILE_OUT) symboles.c -g -w -Wall -pedantic -lfl
 DOT_FLAGS=-Tpdf $(DOT_FILE) -o $(DOT_OUT_PDF)
-YACC_FLAGS=-d -v $(YACC_IN)
+YACC_FLAGS=-d $(YACC_IN)
 
 DOT_CC=dot
 FLEX_CC=flex
@@ -27,7 +27,7 @@ all: clean compile test graph test
 test-all: clean
 	./test.sh
 test: clean compile
-	./$(FILE_OUT) < $(C_FILE)
+	./$(FILE_OUT) $(C_FILE) < $(C_FILE)
 valgrind-debug: clean compile
 	valgrind --tool=memcheck -s --leak-check=full --leak-resolution=high --show-reachable=yes ./$(FILE_OUT) < $(C_FILE)
 install:

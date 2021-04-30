@@ -2,6 +2,11 @@ extern int printd( int i );
 
 
 
+/*----------------------------*/
+/* un petit programme exemple
+  pour montrer le langage miniC.*/
+/*----------------------------*/
+
 int main() {
    int i, x;
    for (i=0; i<10; i=i+1) {
@@ -9,4 +14,12 @@ int main() {
    }
    printd(i);
    return (i+3);
+}
+
+int foo() {
+   return 0;
+}
+
+void bar() {
+   printd(0 + 5);
 }

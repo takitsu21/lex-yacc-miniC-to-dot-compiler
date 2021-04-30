@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 typedef enum _type_t
 {
@@ -24,6 +25,8 @@ typedef struct _node_t
     char *nom;
     type_t type;
     char *code;
+    int no_node;
+    int is_func;
     struct _node_t *fils;
     struct _node_t *suivant;
 } node_t;
@@ -41,7 +44,7 @@ void print_children(node_t *ll);
 void print_next(node_t *ll);
 void insert_children(node_t *t, node_t *c1);
 void insert_brother(node_t *c, node_t *b);
-node_t *create_node(const char* nom, void* type);
+node_t *create_node(const char *nom, void* type);
 void printTreeRecursive(node_t *node, int level);
 void printTabs(int count);
 void print_all_next(node_t *suivants, int level);
@@ -54,4 +57,8 @@ void init();
 void insert_next_brother(node_t *p, node_t *brother);
 void write_file(const char *filename, const char *text);
 char *get_type(type_t type);
+void concatenate(char *ptr, const char *str, ...);
+void generateDot(node_t *node);
+void generateDotContent(FILE* fp, node_t *node, node_t *parent);
+char *generateHex(int length);
 #endif

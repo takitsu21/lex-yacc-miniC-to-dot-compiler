@@ -4,7 +4,8 @@ H                       [a-fA-F0-9]
 E                       [Ee][+-]?{D}+
 FS                      (f|F|l|L)
 IS                      (u|U|l|L)*
-comment    (((\/\*+[\s\S]*?\*\/)|(\/\*+.*\*\/))|(\/{2}.*))*
+comment    "/*"((\*+[^/*])|([^*]))*\**"*/"
+
 
 %{
 /*
@@ -21,7 +22,7 @@ comment    (((\/\*+[\s\S]*?\*\/)|(\/\*+.*\*\/))|(\/{2}.*))*
 #include "symboles.h"
 yycol = 0;
 fun_cursor = 0;
-
+file_name = NULL;
 /* Ne g�re pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
 %}
@@ -128,7 +129,14 @@ L?\"(\\.|[^\\"])*\"     { ; }
                             exit(EXIT_FAILURE); }
 %%
 
-main () {
+
+main (int argc, char *argv[]) {
+
+    /* file_name = strcpy(file_name, argv[1]);
+    /* file_name = strdup(argv[1]);
+
+
+    printf("%s\n\n\n", file_name); */
     while (yyparse());
 }
 
