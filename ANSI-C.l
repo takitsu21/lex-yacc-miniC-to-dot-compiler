@@ -20,9 +20,9 @@ comment    "/*"((\*+[^/*])|([^*]))*\**"*/"
 #include <stdlib.h>
 #include "y.tab.h"
 #include "symboles.h"
+#include "table.h"
 yycol = 0;
-fun_cursor = 0;
-file_name = NULL;
+scope = 0;
 /* Ne g�re pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
 %}
@@ -124,7 +124,9 @@ L?\"(\\.|[^\\"])*\"     { ; }
 
 \n                      { yycol = 0; }
 [ \t\v\f\n]               { ; }
-[();,{}:\[\]=]          { return *yytext; }
+[();,:\[\]=]          { return *yytext; }
+"{"                     { scope++; return *yytext; }
+"}"                     { scope--; return *yytext; }
 .                       { printf("Lexical error at line %d:%d : %s\n", yylineno, yycol,  *yytext);
                             exit(EXIT_FAILURE); }
 %%
@@ -132,11 +134,16 @@ L?\"(\\.|[^\\"])*\"     { ; }
 
 main (int argc, char *argv[]) {
 
-    /* file_name = strcpy(file_name, argv[1]);
-    /* file_name = strdup(argv[1]);
-
-
-    printf("%s\n\n\n", file_name); */
+    // printf("%s\n\n\n", argv[1]);
+    // file_name = calloc(strlen(argv[1]) + 1, sizeof(char));
+    // strcpy(file_name, argv[1]);
+    // printf("%s\n", file_name);
     while (yyparse());
+
+
+    // sprintf(file_name, "%s", argv[1]);
+
+
+
 }
 

@@ -2,30 +2,31 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include "symboles.h"
+	#include "table.h"
 	#define DEBUGGER 0
 	#define VERBOSE 0
 	void yyerror(char *s);
-	extern node_t **tree;
 	// extern int printd(int i);
 	extern int yylineno;
 	extern char* file_name;
 	extern int yycol;
 	extern int debugger(const char* s, int token, const char* token_type);
-	extern int fun_cursor;
 	extern int no_node;
-	extern node_t* functions;
-	extern node_t *bloc;
+	extern int scope;
 	// init();
 %}
 
 
 %union {
+	struct _symbole_t *symb;
 	struct _node_t *node;
 }
 
 %token <node> IDENTIFICATEUR CONSTANTE PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR GEQ LEQ EQ NEQ NOT LAND LOR LT GT
 
-%type <node> fonction declarateur variable appel create_expr_liste create_liste_param liste_declarateurs expression type binary_op binary_comp binary_rel parm programme liste_declarations liste_fonctions declaration affectation condition bloc saut liste_instructions iteration instruction selection liste_expressions liste_parms tableau
+%type <node> fonction variable appel create_expr_liste create_liste_param expression type binary_op binary_comp binary_rel programme liste_fonctions affectation condition bloc saut liste_instructions iteration instruction selection liste_expressions tableau
+
+%type <symb> liste_declarateurs liste_declarations declarateur declaration liste_parms parm
 
 %token FOR WHILE IF ELSE SWITCH CASE DEFAULT INT VOID
 %token BREAK RETURN
@@ -53,7 +54,12 @@ programme	:
 					q = q->suivant;
 				}
 				q->fils = create_node_children(mk_single_node("BLOC"), q->fils, NULL, NULL, NULL);
-				visualise($2);
+				// visualise($2);
+				generateDot($2, "test.dot");
+				// printf("LIST DECL %s\n", $1->nom);
+				affiche();
+				// printf("%s\n", file_name);
+
 			}
 ;
 liste_declarations	:
@@ -62,6 +68,12 @@ liste_declarations	:
 				// insert_next($1, $2);
 				// $2->suivant = $1;
 				// $$ = $2;
+				// if ($1 == NULL) {
+				// 	$1 = $2;
+				// } else {
+				// 	insert_next_symb($1, $2);
+				// }
+				$$ = inserer($2->nom);
 			}
 	| {
 		$$ = NULL;
@@ -71,11 +83,8 @@ liste_fonctions	:
 		liste_fonctions fonction {
 		// insert_next_brother($1, $2);
 
-
 		if ($1 == NULL) {
-			// node_t *bloc = create_node_children(mk_single_node("BLOC"), $1, NULL, NULL, NULL);
 			$1 = $2;
-			insert_next_brother($2, $1);
 		} else {
 			insert_next($1, $2);
 		}
@@ -83,39 +92,66 @@ liste_fonctions	:
 	}
 	|   fonction	{
 		$$ = $1;
+
 	}
 ;
 declaration	:
 		type liste_declarateurs ';' 	{
+			// table[hash()]
+			$$ = $2;
+			$$->type = $1->type;
+			printf("DECLARATION %s\n", $$->nom);
+
 	}
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur {
-			insert_next($1, $3);
+
+			if ($1 == NULL) {
+				$1 = $3;
+			} else {
+				insert_next_symb($1, $3);
+			}
+
+			// table[hash($3->nom)] = $1;
+			// inserer($3->nom);
 			$$ = $1;
 			}
-	|	declarateur 	{ $$ = $1; }
+	|	declarateur 	{
+		$$ = $1;
+		// inserer($1->nom);
+		// inserer($1->nom);
+		}
 ;
 declarateur	:
 		IDENTIFICATEUR {
-				$$ = $1;
+				$$ = inserer($1->nom);
 			}
 	|	declarateur '[' CONSTANTE ']' {
-
+			$$ = inserer($1->nom);
+			table[hash($1->nom)]->constante = $3->nom;
+			// table[hash($1->nom)]->constante =  strdup($3->nom);
+			// $$ = create_symb($1->nom, NULL);
+			$$->constante = $3->nom;
 		}
 ;
 fonction	:
 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' {
-			$2->fils = $8;
-
+			// $2->fils = $8;
+			$$->fils = $8;
+			$$->nom = $2->nom;
 			$$->type = $1->type;
-			$$ = $2;
 			$$->is_func = 1;
+			// table_reset();
 
 		}
 
 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' {
-			printf("EXTERN %s\n", $3->nom);
+			// $$ = $3;
+			inserer($3->nom);
+			table[hash($3->nom)]->type = $2->type;
+			printf("table[hash($3->nom)] = %s\n", table[hash($3->nom)]->nom);
+			$$ = mk_single_node("EXTERN");
 		}
 ;
 type	:
@@ -132,18 +168,27 @@ create_liste_param :	// cf Forum Khaoula Bouhlal
 ;
 liste_parms	:
 		liste_parms ',' parm	{
-				insert_next($1, $3);
-				$$ = $1;
+				// if ($1 == NULL) {
+				// 	$1 = $3;
+				// } else {
+				// 	insert_next_symb($1, $3);
+				// }
+				// $$ = $3;
+				// $$ = inserer($3->nom);
 			}
 	| create_liste_param {
-			$$ = $1;
+			// $$ = $1;
+			// $$ = $1;
 		}
-	| {$$ = mk_single_node("LIST PARMS"); }
+	| {
+		// $$ = NULL;
+		// $$ = NULL;
+		}
 ;
 parm	:
 		INT IDENTIFICATEUR	{
-				$2->type = _INT;
-				$$ = $2;
+				// $2->type = _INT;
+				// $$ = $2;
 			}
 ;
 liste_instructions :
@@ -155,62 +200,50 @@ liste_instructions :
 			}
 
 			$$ = $1;
-			printf("inserting list inst\n");
 		}
 	| {
 		$$ = NULL;
 		}
 ;
 instruction	:
-		iteration {printf("before iteration "); $$ = $1;printf("after iteration\n"); }
-	|	selection {printf("before selection "); $$ = $1;printf("after selection\n"); }
-	|	saut {printf("before saut "); $$ = $1;printf("after saut\n"); }
-	|	affectation ';' {
-		printf("before inst affectation ");$$ = $1;printf("after inst affectation\n"); }
-	|	bloc {printf("bloc ");$$ = $1;printf("after bloc\n");}
-	|	appel {printf("appel ");$$ = $1;printf("appel after\n"); }
+		iteration {$$ = $1; }
+	|	selection {$$ = $1;}
+	|	saut {$$ = $1; }
+	|	affectation ';' {$$ = $1; }
+	|	bloc {$$ = $1;}
+	|	appel {$$ = $1;}
 ;
 iteration	:
 		FOR '(' affectation ';' condition ';' affectation ')' instruction {
-			node_t *for_node = create_node_children(mk_single_node("FOR"), $3, $5, $7, $9);
-			$$ = for_node;
-			// print_all_next(for_node->suivant, 0);
+			$$ = create_node_children(mk_single_node("FOR"), $3, $5, $7, $9);
 			}
 	|	WHILE '(' condition ')' instruction {
-			node_t *while_node = create_node_children(mk_single_node("IF"), $3, $5, NULL, NULL);
-			$$ = while_node;
+			$$ = create_node_children(mk_single_node("WHILE"), $3, $5, NULL, NULL);
 		}
 ;
 selection	:
 		IF '(' condition ')' instruction %prec THEN {
-			node_t *if_node = create_node_children(mk_single_node("IF"), $3, $5, NULL, NULL);
-			$$ = if_node;
-			// $$->fils->suivant = $5;
+			$$ = create_node_children(mk_single_node("IF"), $3, $5, NULL, NULL);
 		}
 	|	IF '(' condition ')' instruction ELSE instruction {
-			node_t *if_node = create_node_children(mk_single_node("IF"), $3, $5, $7, NULL);
+			node_t *if_node = create_node_children(mk_single_node("IF"), $3, $5, NULL, NULL);
 			$$ = if_node;
+			$$->suivant = $7;
 		}
 	|	SWITCH '(' expression ')' instruction {
-		printf("SWITCH\n");
 			node_t *node_switch = create_node_children(mk_single_node("SWITCH"), $3, $5, NULL, NULL);
 			$$ = node_switch;
 		}
-	|	CASE CONSTANTE ':' instruction {
-		printf("case %s\n", $2->nom);
-		printf("%s", $2->nom);
-		char * case_name = strcpy(case_name, "case%s");
-		node_t *inst = create_node_children(mk_single_node("case"), $4, NULL, NULL, NULL);
-		$$ = inst;
-		}
-	| CASE CONSTANTE ':' instruction saut {
-		printf("case %s\n", $2->nom);
-			node_t *inst = create_node_children(mk_single_node("case"), $4, $5, NULL, NULL);
+	|	CASE CONSTANTE ':' liste_instructions selection {
+			char *tmp = calloc(4 + strlen($2->nom), sizeof(char));
+			sprintf(tmp, "CASE %s", $2->nom);
+			node_t *inst = create_node_children(mk_single_node(tmp), $4, NULL, NULL, NULL);
+			inst->suivant = $5;
 			$$ = inst;
 		}
+
 	|	DEFAULT ':' instruction {
-		$$ = create_node_children(mk_single_node("DEFAULT"), $3, NULL, NULL, NULL);
-		// $$->suivant = create_node_children(mk_single_node("DEFAULT"), $3, NULL, NULL, NULL);
+			$$ = create_node_children(mk_single_node("DEFAULT"), $3, NULL, NULL, NULL);
 		}
 ;
 saut	:
@@ -224,24 +257,24 @@ saut	:
 ;
 affectation	:
 		variable '=' expression {
-			// printf("%s\n", $1->nom);
-			printf("VARIABLE 1\n");
-			// node_t *node = mk_single_node(":=");
-
-			// printf("%s\n", node->nom);
-			printf("VARIABLE 2\n");
-			$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
-
-			printf("VARIABLE 3\n");
+			if (table[hash($1->nom)] != NULL && scope >= table[hash($1->nom)]->scope) {
+				$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
+			} else {
+				char *tmp = malloc(sizeof(char));
+				sprintf(tmp, "La variable %s n'a pas encore été délcaré\n", $1->nom);
+				semantic_error(tmp);
+			}
 		}
 ;
 bloc	:
 		'{' liste_declarations liste_instructions '}' {
-			printf("BLOC\n");
 			// $$ = create_node_children(mk_single_node("BLOC"), $3, NULL, NULL, NULL);
 			$$ = $3;
+			// $$->suivant = $3;
+			// table[hash($2->nom)] = $2;
+			// scope++;
+			printf("SCOPE : %d\n", scope);
 
-			printf("AFTER BLOC\n");
 		}
 ;
 appel	:
@@ -288,14 +321,18 @@ expression :
 ;
 liste_expressions	:
 		create_expr_liste { printf("list creation"); $$ = $1; }
-	| { printf("list expr eps\n");$$ = mk_single_node("LIST_EXPR"); }
+	| { printf("list expr eps\n");$$ = NULL; }
 ;
 create_expr_liste :   // cf mail forum David Fissore
     	create_expr_liste ',' expression {
-			insert_next($1, $3);
+			if ($1 == NULL) {
+				$1 = $3;
+			} else {
+				insert_next($1, $3);
+			}
 			$$ = $1;
 			}
-    | 	expression { printf("create expression\n");$$ = $1; }
+    | 	expression { $$ = $1; }
 ;
 condition	:
 		NOT '(' condition ')' {

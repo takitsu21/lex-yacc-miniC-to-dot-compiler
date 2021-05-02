@@ -1,7 +1,8 @@
 #include "symboles.h"
+#include "table.h"
 extern int yylineno;
+extern char* file_name;
 #define TAILLE 103
-no_node = 0;
 
 node_t *create_node(const char *nom, void* type)
 {
@@ -14,15 +15,9 @@ node_t *create_node(const char *nom, void* type)
     node->suivant = NULL;
     node->fils = NULL;
     node->code = (char *)malloc(sizeof(char));
-    node->no_node = ++no_node;
     return node;
 }
 
-void init()
-{
-    tree = (node_t **)calloc(100, sizeof(node_t));
-    functions = (node_t *)malloc(sizeof(node_t));
-}
 
 void insert_node(node_t *src, node_t *dst)
 {
@@ -71,16 +66,15 @@ void printTreeRecursive(node_t *node, int level)
 void visualise(node_t *node)
 {
     printTreeRecursive(node, 0);
-    generateDot(node);
+    // generateDot(node);
 }
 
-void generateDot(node_t *node)
+void generateDot(node_t *node, const char *filename)
 {
     srand((unsigned int)time(NULL));
-    // printf("digraph exempleminiC {\n");
 
-    FILE *fp = fopen("test.dot", "w");
-    fp = fopen("test.dot", "a");
+    FILE *fp = fopen(filename, "w");
+    fp = fopen(filename, "a");
 
     if (fp == NULL)
     {
@@ -106,7 +100,7 @@ char *generateHex(int length)
     }
 
     str[i] = '\0';
-    char *ret = calloc(strlen(str) + 1, sizeof(char));
+    char *ret = calloc(length, sizeof(char));
     strcpy(ret, str);
     return ret;
 }
@@ -117,18 +111,23 @@ void generateDotContent(FILE* fp, node_t *node, node_t *parent)
     {
         node->code = generateHex(16);
 
+        if(strcmp("EXTERN", node->nom) == 0){
+            node = node->suivant;
+            continue;
+        }
+
         if (node->is_func != NULL)
         {
             printf("get type %s\n", get_type(node->type));
             fprintf(fp, "node_%s [label=\"%s, %s\" shape=invtrapezium color=blue];\n", node->code, node->nom, get_type(node->type));
-
         }
         else
         {
             // FIXME: printd peut être n'importe quel fonction externe, a changer.
-            if (strcmp("printd", node->nom) == 0)
+            // if (table[hash(node->nom)] != NULL)
+            if (table[hash(node->nom)] != NULL)
             {
-                fprintf(fp, "node_%s [label=\"%s\" shape=septagon];\n", node->code, node->nom);
+                fprintf(fp, "node_%s [label=\"%s\" shape=septagon];\n", node->code, table[hash(node->nom)]->nom);
             }
             else if (strcmp("RETURN", node->nom) == 0)
             {
@@ -190,7 +189,6 @@ node_t *mk_single_node(const char *nom)
     // node->type = (type_t)NULL;
     node->suivant = NULL;
     node->fils = NULL;
-    node->no_node = ++no_node;
     return node;
 }
 

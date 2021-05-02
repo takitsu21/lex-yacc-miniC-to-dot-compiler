@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "stdlib.h": "c",
-        "limits": "c"
+        "limits": "c",
+        "type_traits": "cpp",
+        "cmath": "cpp"
     }
 }

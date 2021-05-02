@@ -6,35 +6,46 @@
 #include <string.h>
 #include <stdarg.h>
 
+
+
+
+
+
 typedef enum _type_t
 {
     _INT,
     _VOID
 } type_t;
 
-typedef enum _bloc_type_t
+typedef struct _record_t
 {
-    _FOR,
-    _WHILE,
-    _SWITCH,
-    _IF
-} bloc_type_t;
+    type_t type;
+    char *nom;
+    int decLineNo;
+    int lastUseLine;
+} record_t;
+
+typedef struct _symbole_t
+{
+    char *nom;
+    int scope;
+    char *constante;
+    type_t type;
+    struct _symbole *suivant;
+    struct _symbole_t *records;
+} symbole_t;
 
 typedef struct _node_t
 {
     char *nom;
     type_t type;
     char *code;
-    int no_node;
     int is_func;
+    struct _symbole_t symb;
     struct _node_t *fils;
     struct _node_t *suivant;
 } node_t;
 
-
-node_t **tree;
-node_t* functions;
-extern node_t *instructions;
 
 
 void affiche();
@@ -53,12 +64,11 @@ node_t *create_node_children(node_t *p, node_t *c1, node_t *c2, node_t *c3, node
 void visualise(node_t *node);
 void printTreeRecursive(node_t *node, int level);
 void printTabs(int count);
-void init();
 void insert_next_brother(node_t *p, node_t *brother);
 void write_file(const char *filename, const char *text);
 char *get_type(type_t type);
 void concatenate(char *ptr, const char *str, ...);
-void generateDot(node_t *node);
+void generateDot(node_t *node, const char *filename);
 void generateDotContent(FILE* fp, node_t *node, node_t *parent);
 char *generateHex(int length);
 #endif
