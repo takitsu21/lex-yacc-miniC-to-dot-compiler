@@ -1,9 +1,12 @@
 extern int printd(int i);
 
 
-int main() {
+int test() {
+    return 1;
+}
+
+int main(int p, int c, int w) {
     int x, y, z, t, a, v;
-    x = -900;
     printd(x);
     if (x < 10) {
         int toto, toto2, b;
@@ -20,8 +23,10 @@ int main() {
     }
 }
 
-void foo() {
+
+
+int foo() {
     int a;
-    a = 10;
-    printd(a);
+    printd(test());
+
 }

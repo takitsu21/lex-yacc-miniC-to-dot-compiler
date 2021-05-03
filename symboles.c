@@ -1,14 +1,15 @@
 #include "symboles.h"
 #include "table.h"
 extern int yylineno;
-extern char* file_name;
+extern char *file_name;
 #define TAILLE 103
 
-node_t *create_node(const char *nom, void* type)
+node_t *create_node(const char *nom, void *type)
 {
     node_t *node = (node_t *)malloc(sizeof(node_t));
     node->nom = strdup(nom);
-    if (type != NULL) {
+    if (type != NULL)
+    {
         node->type = (type_t)type;
     }
 
@@ -17,7 +18,6 @@ node_t *create_node(const char *nom, void* type)
     node->code = (char *)malloc(sizeof(char));
     return node;
 }
-
 
 void insert_node(node_t *src, node_t *dst)
 {
@@ -66,7 +66,6 @@ void printTreeRecursive(node_t *node, int level)
 void visualise(node_t *node)
 {
     printTreeRecursive(node, 0);
-    // generateDot(node);
 }
 
 void generateDot(node_t *node, const char *filename)
@@ -84,7 +83,6 @@ void generateDot(node_t *node, const char *filename)
     fprintf(fp, "digraph mon_programme {\n");
     generateDotContent(fp, node, NULL);
     fprintf(fp, "}\n");
-    // write_file("test", ptr);
 }
 
 char *generateHex(int length)
@@ -105,13 +103,55 @@ char *generateHex(int length)
     return ret;
 }
 
-void generateDotContent(FILE* fp, node_t *node, node_t *parent)
+int linked_list_size(liste_t *linked_list)
+{
+    int i = 0;
+    liste_t *q = linked_list;
+    while (q != NULL)
+    {
+        i++;
+        q = q->suivant;
+    }
+    return i;
+}
+
+int linked_node_size(node_t *node) {
+    int i = 0;
+    node_t *q = node;
+    while (q != NULL)
+    {
+        i++;
+        q = q->suivant;
+    }
+    return i;
+}
+
+void verify_return_statements(node_t *node, type_t return_type)
+{
+    while (node != NULL)
+    {
+        if (strcmp("RETURN", node->nom) == 0 && node->type != return_type)
+        {
+            char *tmp = malloc(sizeof(char));
+            sprintf(tmp, "Le type de renvoie %s n'est pas le bon.\n", node->nom);
+            semantic_error(tmp);
+        }
+        if (node->fils != NULL)
+        {
+            verify_return_statements(node->fils, return_type);
+        }
+        node = node->suivant;
+    }
+}
+
+void generateDotContent(FILE *fp, node_t *node, node_t *parent)
 {
     while (node != NULL)
     {
         node->code = generateHex(16);
 
-        if(strcmp("EXTERN", node->nom) == 0){
+        if (strcmp("EXTERN", node->nom) == 0)
+        {
             node = node->suivant;
             continue;
         }
@@ -123,11 +163,11 @@ void generateDotContent(FILE* fp, node_t *node, node_t *parent)
         }
         else
         {
-            // FIXME: printd peut être n'importe quel fonction externe, a changer.
-            // if (table[hash(node->nom)] != NULL)
-            if (table[hash(node->nom)] != NULL)
+            if (fonctions[hash(node->nom)] != NULL)
             {
-                fprintf(fp, "node_%s [label=\"%s\" shape=septagon];\n", node->code, table[hash(node->nom)]->nom);
+                printf("fonctions[hash(node->nom)] %s\n", fonctions[hash(node->nom)]->nom);
+
+                fprintf(fp, "node_%s [label=\"%s\" shape=septagon];\n", node->code, fonctions[hash(node->nom)]->nom);
             }
             else if (strcmp("RETURN", node->nom) == 0)
             {
@@ -292,4 +332,49 @@ void concatenate(char *ptr, const char *str, ...)
     va_end(args);
     printf("copy");
     strcpy(ptr, ret);
+}
+
+int expression_match(node_t *e1, node_t *e2)
+{
+    if (e1->type != e2->type)
+    {
+        printf("Les expression %s (%s) et %s (%s) n'ont pas le meme type", e1->nom, get_type(e1->type), e2->nom, get_type(e2->type));
+        exit(1);
+    }
+    return 1;
+}
+
+void check_call_func(node_t *func_call, node_t *list_expr)
+{
+    if (fonctions[hash(func_call->nom)] == NULL)
+    {
+        char *tmp = malloc(sizeof(char));
+        sprintf(tmp, "La fonction %s n'a pas encore été déclaré.\n", func_call->nom);
+        semantic_error(tmp);
+    }
+    node_t *q = list_expr;
+    liste_t *args = fonctions[hash(func_call->nom)]->arguments;
+    if (linked_node_size(q) != linked_list_size(args))
+    {
+        char *tmp = malloc(sizeof(char));
+        sprintf(tmp, "Il n'y a pas le même nombre d'arguments dans l'appel de la fonction %s\n", func_call->nom);
+        semantic_error(tmp);
+    }
+    while (q != NULL)
+    {
+        if (args == NULL)
+        {
+            char *tmp = malloc(sizeof(char));
+            sprintf(tmp, "Il n'y a pas le même nombre d'arguments dans l'appel de la fonction %s\n", func_call->nom);
+            semantic_error(tmp);
+        }
+        else if (q->type != args->param->type)
+        {
+            char *tmp = malloc(sizeof(char));
+            sprintf(tmp, "La variable %s n'a pas le même type que l'argument %s\n", func_call->nom);
+            semantic_error(tmp);
+        }
+        args = args->suivant;
+        q = q->suivant;
+    }
 }

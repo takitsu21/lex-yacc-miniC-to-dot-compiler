@@ -41,10 +41,29 @@ typedef struct _node_t
     type_t type;
     char *code;
     int is_func;
-    struct _symbole_t symb;
     struct _node_t *fils;
     struct _node_t *suivant;
 } node_t;
+
+typedef struct _param_t
+{
+    type_t type;
+    char *nom;
+} param_t;
+typedef struct _liste_t
+{
+    param_t *param;
+    struct _liste_t *suivant;
+} liste_t;
+
+typedef struct _fonction_t
+{
+    type_t type;
+    char *nom;
+    liste_t *arguments;
+    struct _fonction_t *suivant;
+    struct _symbole_t *declarations;
+} fonction_t;
 
 
 
@@ -71,4 +90,8 @@ void concatenate(char *ptr, const char *str, ...);
 void generateDot(node_t *node, const char *filename);
 void generateDotContent(FILE* fp, node_t *node, node_t *parent);
 char *generateHex(int length);
+void verify_return_statements(node_t *node, type_t return_type);
+int linked_list_size(liste_t* linked_list);
+int linked_node_size(node_t *node);
+void check_call_func(node_t *func_call, node_t *list_expr);
 #endif
