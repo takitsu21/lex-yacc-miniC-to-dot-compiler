@@ -39,10 +39,11 @@ int test2( int g ) {
             return a;
         }
     }
-    return h;
+    return g;
 }
 
 int main() {
+    int tab[2][3];
     int x,y;
     x = test(x);
     y = test2(2);

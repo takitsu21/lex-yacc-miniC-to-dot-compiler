@@ -63,7 +63,8 @@ programme	:
 				}
 				q->fils = create_node_children(mk_single_node("BLOC"), q->fils, NULL, NULL, NULL);
 				afficher_fonction(fonctions[hash(q->nom)]);
-				affiche(global);
+				visualise($2);
+				// affiche(global);
 				// affiche();
 				// visualise($2);
 				generateDot($2, "test.dot");
@@ -139,18 +140,24 @@ declarateur	:
 			}
 		}
 	|	tableau_decl {
+		printf("TAB decl %d\n", scope);
+		// affiche(global);
+
 			$$ = $1;
 		}
 ;
 tableau_decl:
 	IDENTIFICATEUR { $$ = $1;}
 	| tableau_decl '[' expression ']' {
+
+		printf("TAB decl %d\n", scope);
 		if (scope == 0) {
 			$$ = inserer(global, $1->nom);
 		} else {
 			$$ = inserer(local, $1->nom);
 		}
-		$$->constante = $3->nom;
+		// $$->constante = $3->nom;
+		insert_next_symb($$, $3);
 
 	}
 fonction	:
@@ -285,14 +292,26 @@ saut	:
 affectation	:
 		variable '=' expression {
 
-
-			if ( (local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL) && expression_match($1, $3)) {
+			if (strcmp($1->nom, "TAB") && $1->fils!= NULL && (local[hash($1->fils->nom)] != NULL && scope >= local[hash($1->fils->nom)]->scope) || (global[hash($1->fils->nom)] != NULL)) {
 				$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
 			} else {
-				char *tmp = malloc(sizeof(char));
-				sprintf(tmp, "La variable %s n'a pas encore été délcaré\n", $1->nom);
-				semantic_error(tmp);
+				if ((local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL)) {
+					$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
+				} else {
+					char *tmp = malloc(sizeof(char));
+					sprintf(tmp, "La variable %s n'a pas encore été délcaré\n", $1->nom);
+					semantic_error(tmp);
+				}
 			}
+
+
+			// if ((local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL)) {
+			// 	$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
+			// } else {
+			// 	char *tmp = malloc(sizeof(char));
+			// 	sprintf(tmp, "La variable %s n'a pas encore été délcaré\n", $1->nom);
+			// 	semantic_error(tmp);
+			// }
 			// $$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
 		}
 ;
@@ -313,7 +332,9 @@ variable	:
 				$$ = $1;
 			}
 	|	tableau {
+
 			$$ = create_node_children(mk_single_node("TAB"), $1, NULL, NULL, NULL);
+			printf("FILS %s\n", $$->fils->nom);
 		}
 ;
 tableau:
@@ -327,24 +348,28 @@ tableau:
 expression :
 
 	'(' expression ')' { $$ = $2; }
-	| expression PLUS expression { expression_match($1, $2); $$ = create_node_children($2, $1, $3, NULL, NULL);}
-	| expression MOINS expression { expression_match($1, $2);$$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression DIV expression { expression_match($1, $2);$$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression MUL expression { expression_match($1, $2);$$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression RSHIFT expression { expression_match($1, $2);$$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression LSHIFT expression { expression_match($1, $2);$$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression BAND expression { expression_match($1, $2);$$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression BOR expression { expression_match($1, $2);$$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| MOINS expression %prec MUL { printf("%s\n", $1->nom);$$ = create_node_children($1, $2, NULL, NULL, NULL); }
+	| expression PLUS expression {  $$ = create_node_children($2, $1, $3, NULL, NULL);}
+	| expression MOINS expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression DIV expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression MUL expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression RSHIFT expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression LSHIFT expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression BAND expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression BOR expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| MOINS expression %prec MUL { $$ = create_node_children($1, $2, NULL, NULL, NULL); }
 	| CONSTANTE { $$ = $1;  }
 	| variable {
-		if ( (local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL)) {
-			$$ = $1;
-		} else {
-			char *tmp = malloc(sizeof(char));
-			sprintf(tmp, "La variable %s n'a pas encore été délcaré\n", $1->nom);
-			semantic_error(tmp);
-		}
+			if (strcmp($1->nom, "TAB") && $1->fils!= NULL && (local[hash($1->fils->nom)] != NULL && scope >= local[hash($1->fils->nom)]->scope) || (global[hash($1->fils->nom)] != NULL)) {
+				$$ = $1;
+			} else {
+				if ((local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL)) {
+					$$ = $1;
+				} else {
+					char *tmp = malloc(sizeof(char));
+					sprintf(tmp, "La variable %s n'a pas encore été délcaré\n", $1->nom);
+					semantic_error(tmp);
+				}
+			}
 		}
 	| IDENTIFICATEUR '(' liste_expressions ')' {
 		check_call_func($1, $3);

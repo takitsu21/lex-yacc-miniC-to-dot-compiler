@@ -1,12 +1,10 @@
-extern int printd(int printI);
-extern void printmescouilles(int j, int v);
+extern int printd(int i);
 
 int main() {
   int i,j, k, l, m, n;
   int i;
   i = 45000;
   j = -123;
-  printmescouilles(i, j);
   printd(i+j);
   printd(45000+j);
   printd(i+123);
