@@ -17,6 +17,14 @@ typedef enum _type_t
     _VOID
 } type_t;
 
+typedef enum _declaration_t
+{
+    FONCTION,
+    LOCAL,
+    GLOBAL
+} declaration_t;
+
+
 typedef struct _record_t
 {
     type_t type;
@@ -63,6 +71,7 @@ typedef struct _fonction_t
     liste_t *arguments;
     struct _fonction_t *suivant;
     struct _symbole_t *declarations;
+    struct _symbole_t **local;
 } fonction_t;
 
 

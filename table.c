@@ -180,6 +180,8 @@ fonction_t *ajouter_fonction(type_t type, const char *nom, liste_t *args, symbol
     f->nom = strdup(nom);
     f->arguments = args;
     f->declarations = declarations;
+    f->local = malloc(sizeof(local));
+    memcpy(f->local, local, sizeof(local));
     f->suivant = NULL;
     return f;
 }
@@ -238,10 +240,26 @@ void afficher_fonction(fonction_t *fonction)
     printf("\n\n");
 }
 
+int tab_size(symbole_t *tab) {
+    int i = 0;
+    symbole_t *q = tab;
+    while (q != NULL) {
+        i++;
+        q = q->suivant;
+    }
+    return i;
+}
+
 param_t *create_param(type_t type, const char *nom)
 {
     param_t *param = malloc(sizeof(param_t));
     param->nom = strdup(nom);
     param->type = type;
     return param;
+}
+
+void check_semantic_errors(fonction_t *func) {
+    symbole_t **local_declaration = func->local;
+    affiche(local_declaration);
+
 }

@@ -23,4 +23,6 @@ void afficher_fonction(fonction_t *fonction);
 param_t *create_param (type_t type, const char * nom);
 int listes_egales(liste_t *l1, liste_t *l2);
 void afficher_liste(liste_t *liste);
+int tab_size(symbole_t *tab);
+void check_semantic_errors(fonction_t *func);
 #endif
