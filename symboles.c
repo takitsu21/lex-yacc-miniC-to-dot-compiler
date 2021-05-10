@@ -12,7 +12,6 @@ node_t *create_node(const char *nom, void *type)
     {
         node->type = (type_t)type;
     }
-
     node->suivant = NULL;
     node->fils = NULL;
     node->code = (char *)malloc(sizeof(char));
@@ -77,7 +76,7 @@ void generateDot(node_t *node, const char *filename)
 
     if (fp == NULL)
     {
-        printf("file can't be opened");
+        printf("Ouverture du fichier impossible");
         exit(1);
     }
     fprintf(fp, "digraph mon_programme {\n");
@@ -126,18 +125,38 @@ int linked_node_size(node_t *node) {
     return i;
 }
 
+void verify_return_recursive_call(node_t *node) {
+    while (node != NULL) {
+        if (local[hash(node->nom)] != NULL && fonctions[hash(node->nom)] == NULL) {
+            char *tmp = malloc(sizeof(char));
+            sprintf(tmp, "La fonction %s n'est pas encore déclaré.\n", node->nom);
+            semantic_error(tmp);
+        }
+        if (node->fils != NULL) {
+            verify_return_recursive_call(node->fils);
+        }
+        node = node->suivant;
+    }
+}
+
 void verify_return_statements(node_t *node, type_t return_type)
 {
     while (node != NULL)
     {
-        if (strcmp("RETURN", node->nom) == 0 && node->type != return_type)
-        {
-            char *tmp = malloc(sizeof(char));
-            sprintf(tmp, "Le type de renvoie %s n'est pas le bon.\n", node->nom);
-            semantic_error(tmp);
+        printf("%d %s\n", node->is_func, node->nom);
+
+
+        if (strcmp("RETURN", node->nom) == 0) {
+            if (node->type != return_type) {
+                char *tmp = malloc(sizeof(char));
+                sprintf(tmp, "Le type de renvoie %s n'est pas le bon.\n", node->nom);
+                semantic_error(tmp);
+            }
+            // verify_return_recursive_call(node->fils);
         }
         if (node->fils != NULL)
         {
+            verify_return_recursive_call(node->fils);
             verify_return_statements(node->fils, return_type);
         }
         node = node->suivant;

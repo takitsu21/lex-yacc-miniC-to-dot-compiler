@@ -59,10 +59,14 @@ programme	:
 					// fonction_t *f = fonctions[hash(q->nom)];
 					// printf("q->nom %s\n", q->nom);
 					// afficher_fonction(fonctions[hash(q->nom)]);
-					affiche(fonctions[hash(q->nom)]->local);
+					// affiche(fonctions[hash(q->nom)]->local);
+					// if (q->is_func) {
+					// 	affiche(fonctions[hash(q->nom)]->local);
+					// 	afficher_fonction(fonctions[hash(q->nom)]);
+					// }
 					q = q->suivant;
 				}
-				affiche(fonctions[hash(q->nom)]->local);
+				// affiche(fonctions[hash(q->nom)]->local);
 				q->fils = create_node_children(mk_single_node("BLOC"), q->fils, NULL, NULL, NULL);
 				afficher_fonction(fonctions[hash(q->nom)]);
 				// visualise($2);
@@ -151,7 +155,8 @@ fonction	:
 			$$->type = $1->type;
 			$$->is_func = 1;
 			fonctions[hash($2->nom)] = ajouter_fonction($1->type, $2->nom, $4, $7);
-			verify_return_statements($8, $1->type);
+			verify_return_statements($$, $1->type);
+			printf("llaaaaaa %d\n", $$->is_func);
 			table_reset(local);
 		}
 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' {

@@ -180,8 +180,12 @@ fonction_t *ajouter_fonction(type_t type, const char *nom, liste_t *args, symbol
     f->nom = strdup(nom);
     f->arguments = args;
     f->declarations = declarations;
-    f->local = malloc(sizeof(local));
-    memcpy(f->local, local, sizeof(local));
+    if (strcmp("EXTERN", nom) != 0) {
+        f->local = malloc(sizeof(local));
+        memcpy(f->local, local, sizeof(local));
+    }
+
+    // affiche(f->local);
     f->suivant = NULL;
     return f;
 }
