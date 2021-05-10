@@ -127,7 +127,7 @@ int linked_node_size(node_t *node) {
 
 void verify_return_recursive_call(node_t *node) {
     while (node != NULL) {
-        if (local[hash(node->nom)] != NULL && fonctions[hash(node->nom)] == NULL) {
+        if (local[hash(node->nom)] == NULL && fonctions[hash(node->nom)] == NULL) {
             char *tmp = malloc(sizeof(char));
             sprintf(tmp, "La fonction %s n'est pas encore déclaré.\n", node->nom);
             semantic_error(tmp);
@@ -143,20 +143,17 @@ void verify_return_statements(node_t *node, type_t return_type)
 {
     while (node != NULL)
     {
-        printf("%d %s\n", node->is_func, node->nom);
-
-
+        printf("%s\n", node->nom);
         if (strcmp("RETURN", node->nom) == 0) {
             if (node->type != return_type) {
                 char *tmp = malloc(sizeof(char));
                 sprintf(tmp, "Le type de renvoie %s n'est pas le bon.\n", node->nom);
                 semantic_error(tmp);
             }
-            // verify_return_recursive_call(node->fils);
+            verify_return_recursive_call(node->fils);
         }
         if (node->fils != NULL)
         {
-            verify_return_recursive_call(node->fils);
             verify_return_statements(node->fils, return_type);
         }
         node = node->suivant;

@@ -155,8 +155,7 @@ fonction	:
 			$$->type = $1->type;
 			$$->is_func = 1;
 			fonctions[hash($2->nom)] = ajouter_fonction($1->type, $2->nom, $4, $7);
-			verify_return_statements($$, $1->type);
-			printf("llaaaaaa %d\n", $$->is_func);
+			verify_return_statements($$, $1->type); // TODO : detecter les appels recursifs
 			table_reset(local);
 		}
 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' {
@@ -229,7 +228,7 @@ instruction	:
 		// } else {
 			$$ = $1;
 		// }
-		}
+	}
 ;
 iteration	:
 		FOR '(' affectation ';' condition ';' affectation ')' instruction {
@@ -317,7 +316,7 @@ bloc	:
 ;
 appel	:
 		IDENTIFICATEUR '(' liste_expressions ')' ';' {
-			// check_call_func($1, $3);
+			check_call_func($1, $3);
 			insert_children($1, $3);
 			$$ = $1;
 		}
@@ -367,7 +366,7 @@ expression :
 			}
 		}
 	| IDENTIFICATEUR '(' liste_expressions ')' {
-		// check_call_func($1, $3);
+		check_call_func($1, $3);
 		insert_children($1, $3);
 		$$ = $1;
 		}

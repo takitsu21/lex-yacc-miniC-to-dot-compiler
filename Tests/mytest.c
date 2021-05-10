@@ -1,5 +1,5 @@
 int test () {
     int res, a, b, c, d, e;
-    a = test2();
+    res = test();
     return test();
 }
