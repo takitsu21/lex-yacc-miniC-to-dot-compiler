@@ -4,8 +4,7 @@ H                       [a-fA-F0-9]
 E                       [Ee][+-]?{D}+
 FS                      (f|F|l|L)
 IS                      (u|U|l|L)*
-comment    "/*"((\*+[^/*])|([^*]))*\**"*/"
-
+comment (\/\*)(.|\r|\n)*?(\*\/)
 
 %{
 /*
@@ -20,7 +19,6 @@ comment    "/*"((\*+[^/*])|([^*]))*\**"*/"
 #include <stdlib.h>
 #include "y.tab.h"
 #include "symboles.h"
-#include "table.h"
 yycol = 0;
 scope = 0;
 /* Ne g�re pas les commentaires. A rajouter */

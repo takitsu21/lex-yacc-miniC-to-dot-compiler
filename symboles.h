@@ -3,12 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdarg.h>
-
-
-
-
+#include <ctype.h>
+#include <string.h>
+#define TAILLE 499 /*nbr premier de preference */
 
 
 typedef enum _type_t
@@ -17,21 +15,6 @@ typedef enum _type_t
     _VOID
 } type_t;
 
-typedef enum _declaration_t
-{
-    FONCTION,
-    LOCAL,
-    GLOBAL
-} declaration_t;
-
-
-typedef struct _record_t
-{
-    type_t type;
-    char *nom;
-    int decLineNo;
-    int lastUseLine;
-} record_t;
 
 typedef struct _symbole_t
 {
@@ -40,7 +23,6 @@ typedef struct _symbole_t
     char *constante;
     type_t type;
     struct _symbole *suivant;
-    struct _symbole_t *records;
 } symbole_t;
 
 typedef struct _node_t
@@ -74,9 +56,12 @@ typedef struct _fonction_t
     struct _symbole_t **local;
 } fonction_t;
 
-
+symbole_t *global[TAILLE];
+fonction_t *fonctions[TAILLE];
+symbole_t *local[TAILLE];
 
 void affiche();
+int isdigits(const char *str);
 node_t *mk_single_node(const char *nom);
 void insert_next(node_t *p, node_t *c);
 void print_children(node_t *ll);
@@ -100,7 +85,29 @@ void generateDot(node_t *node, const char *filename);
 void generateDotContent(FILE* fp, node_t *node, node_t *parent);
 char *generateHex(int length);
 void verify_return_statements(node_t *node, type_t return_type);
+void verify_recursive_calls(node_t *node, const char *func_name);
+void check_return(node_t *node, type_t return_type);
 int linked_list_size(liste_t* linked_list);
 int linked_node_size(node_t *node);
 void check_call_func(node_t *func_call, node_t *list_expr);
+void check_declared(node_t *func, const char *func_name);
+void check_tab(node_t *tab, node_t *expr);
+void add_args_to_ts(symbole_t **st, liste_t *args, const char * func_name);
+void insert_next_symb(symbole_t *symb1, symbole_t *symb2);
+int hash(char *nom);
+void table_reset();
+symbole_t *inserer(symbole_t **table, char *nom);
+void affiche(symbole_t **table);
+symbole_t *create_symb(const char * nom, void* type);
+void concatener_listes(liste_t *l1, liste_t *l2);
+liste_t *creer_liste(param_t *p);
+void semantic_error(const char *error);
+fonction_t *ajouter_fonction(type_t type, const char *nom, liste_t *args, symbole_t *declarations);
+void afficher_fonction(fonction_t *fonction);
+param_t *create_param (type_t type, const char * nom);
+int listes_egales(liste_t *l1, liste_t *l2);
+void afficher_liste(liste_t *liste);
+int tab_size(symbole_t *tab);
+void check_semantic_errors(fonction_t *func);
+symbole_t *insert_next_table(symbole_t **table, const char *nom, symbole_t *s);
 #endif

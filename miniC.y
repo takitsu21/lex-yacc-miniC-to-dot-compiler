@@ -2,9 +2,8 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include "symboles.h"
-	#include "table.h"
-	#define DEBUGGER 1
-	#define VERBOSE 1
+	#define DEBUGGER 0
+	#define VERBOSE 0
 	void yyerror(char *s);
 	// extern int printd(int i);
 	extern int yylineno;
@@ -13,8 +12,6 @@
 	extern int debugger(const char* s, int token, const char* token_type);
 	extern int no_node;
 	extern int scope;
-	char *current_func;
-	// init();
 %}
 
 
@@ -31,8 +28,7 @@
 
 %type <symb> liste_declarateurs liste_declarations declarateur declaration tableau_decl
 
-%type <params> create_liste_param liste_parms
-
+%type <params> liste_parms create_liste_param
 %type <param> parm
 
 %token FOR WHILE IF ELSE SWITCH CASE DEFAULT INT VOID
@@ -55,21 +51,32 @@ programme	:
 
 				node_t *q = $2;
 				while (q->suivant != NULL) {
-					q->fils = create_node_children(mk_single_node("BLOC"), q->fils, NULL, NULL, NULL);
-					// fonction_t *f = fonctions[hash(q->nom)];
-					// printf("q->nom %s\n", q->nom);
-					// afficher_fonction(fonctions[hash(q->nom)]);
-					// affiche(fonctions[hash(q->nom)]->local);
 					// if (q->is_func) {
-					// 	affiche(fonctions[hash(q->nom)]->local);
+					// 	add_args_to_ts(fonctions[hash(q->nom)]->local, fonctions[hash(q->nom)]->arguments, q->nom);
 					// 	afficher_fonction(fonctions[hash(q->nom)]);
 					// }
+					if (strcmp(q->nom, "EXTERN")) {
+						// affiche(fonctions[hash(q->nom)]->local);
+
+						// printf("FUNC NAME : %s %s\n",fonctions[hash(q->nom)]->nom, q->nom);
+					}
+
+
+
+
+					check_declared(q->fils, q->nom);
+					q->fils = create_node_children(mk_single_node("BLOC"), q->fils, NULL, NULL, NULL);
+					verify_return_statements(q->fils, q->type);
+
 					q = q->suivant;
 				}
-				// affiche(fonctions[hash(q->nom)]->local);
+				// if (strcmp(q->nom, "EXTERN")) {
+				// 	affiche(fonctions[hash(q->nom)]->local);
+				// 	printf("FUNC NAME : %s %s\n",fonctions[hash(q->nom)]->nom, q->nom);
+				// }
+				check_declared(q->fils, q->nom);
 				q->fils = create_node_children(mk_single_node("BLOC"), q->fils, NULL, NULL, NULL);
-				afficher_fonction(fonctions[hash(q->nom)]);
-				// visualise($2);
+				verify_return_statements(q->fils, q->type);
 				generateDot($2, "test.dot");
 
 
@@ -82,6 +89,7 @@ liste_declarations	:
 				} else {
 					insert_next_symb($1, $2);
 				}
+
 				$$ = $1;
 			}
 	| {
@@ -113,14 +121,16 @@ declaration	:
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur {
+			printf("liste_declarateurs\n");
 
 			if ($1 == NULL) {
 				$1 = $3;
 			} else {
-				insert_next_symb($1, $3);
+				printf("liste decl %s\n", $3->nom);
+				// insert_next_symb($1, $3);
 			}
 			$$ = $1;
-			}
+		}
 	|	declarateur 	{
 			$$ = $1;
 		}
@@ -142,10 +152,18 @@ tableau_decl:
 	| tableau_decl '[' expression ']' {
 		if (scope == 0) {
 			$$ = inserer(global, $1->nom);
+			// $$ = create_symb($1->nom, &$1->type);
 		} else {
 			$$ = inserer(local, $1->nom);
+			// $$ = create_symb($1->nom, &$1->type);
 		}
 		insert_next_symb($$, $3);
+		// $$ = inserer(local, $1->nom);
+		// printf("%s\n", $3->nom);
+		// printf("%d\n", local[hash($1->nom)] != NULL);
+
+		// $$ = local[hash($1->nom)];
+		// $$ = insert_next_table(local, $$->nom, create_symb($3->nom, _INT));
 
 	}
 fonction	:
@@ -154,15 +172,20 @@ fonction	:
 			$$->nom = $2->nom;
 			$$->type = $1->type;
 			$$->is_func = 1;
-			fonctions[hash($2->nom)] = ajouter_fonction($1->type, $2->nom, $4, $7);
-			verify_return_statements($$, $1->type); // TODO : detecter les appels recursifs
+			printf("FUNC NAME : %s\n", $$->nom);
+			ajouter_fonction($1->type, $2->nom, $4, $7);
+			// add_args_to_ts(fonctions[hash($2->nom)]->local, fonctions[hash($2->nom)]->arguments, $2->nom);
+			// affiche(fonctions[hash($2->nom)]->local);
+			// printf("FUNC NAME : %s\n",fonctions[hash($2->nom)]->nom);
+
 			table_reset(local);
 		}
 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' {
-			fonctions[hash($2->nom)] = ajouter_fonction($2->type, $3->nom, $5, NULL);
-			printf("fonction[hash($3->nom)] = %s\n", fonctions[hash($3->nom)]->nom);
+			ajouter_fonction($2->type, $3->nom, $5, NULL);
+			// printf("fonction[hash($3->nom)] = %s\n", fonctions[hash($3->nom)]->nom);
 			// afficher_fonction(fonctions[hash($2->nom)]);
 			$$ = mk_single_node("EXTERN");
+			$$->is_func = 1;
 		}
 ;
 type	:
@@ -171,32 +194,37 @@ type	:
 ;
 create_liste_param :	// cf Forum Khaoula Bouhlal
 		create_liste_param ',' parm	{
-				$$ = creer_liste($3);
+			printf("CREATE\n");
+			// $1 = creer_liste($3);
+			if ($1 == NULL) {
+				$1 = $3;
+			} else {
+				printf("before concat\n");
+				concatener_listes($1, creer_liste($3));
+				printf("after concat\n");
 			}
+			$$ = $1;
+		}
 	| 	parm	{
 			$$ = creer_liste($1);
 		}
 ;
 liste_parms	:
-		liste_parms ',' parm	{
-				if ($1 == NULL) {
-					$1 = creer_liste($3);
-				}
-				$$ = concatener_listes($1, creer_liste($3));
-				afficher_liste($$);
-			}
-	| create_liste_param {
+		create_liste_param	{
+			printf("liste params %s\n", $1->param->nom);
 			$$ = $1;
+			afficher_liste($$);
 		}
 	| {
-		// $$ = NULL;
 		$$ = NULL;
 		}
 ;
 parm	:
 		INT IDENTIFICATEUR	{
 				$$ = create_param(_INT, $2->nom);
+				// $2->type = _INT;
 				inserer(local, $2->nom);
+
 			}
 ;
 liste_instructions :
@@ -274,39 +302,18 @@ saut	:
 ;
 affectation	:
 		variable '=' expression {
-
-			if ( (strcmp($1->nom, "TAB") == 0 && $1->fils != NULL) && ( (local[hash($1->fils->nom)] != NULL && scope >= local[hash($1->fils->nom)]->scope) || (global[hash($1->fils->nom)] != NULL))) {
-				int tab_decl = tab_size(global[hash($1->fils->nom)]->suivant);
-				int var_size = linked_node_size($1->fils->suivant);
-				int difference = tab_decl - var_size;
-				if (var_size > tab_decl) {
-					char *tmp = malloc(sizeof(char));
-					sprintf(tmp, "Vous essayez d'accéder à une case du tableau qui n'a pas été déclaré.\n", $1->fils->nom);
-					semantic_error(tmp);
-				}
-				symbole_t *q_decl = global[hash($1->fils->nom)]->suivant;
-				node_t * q_var = $1->fils->suivant;
-				while (q_var != NULL) {
-					if (atoi(q_decl->nom) <= atoi(q_var->nom)) {
-						char *tmp = malloc(sizeof(char));
-						sprintf(tmp, "Vous essayez d'accéder à une case du tableau qui n'a pas été déclaré.\n", $1->fils->nom);
-						semantic_error(tmp);
-					}
-					q_decl = q_decl->suivant;
-					q_var = q_var->suivant;
-				}
-				$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
-			} else {
-
-				if ( (local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL)) {
-					$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
-				} else {
-					char *tmp = malloc(sizeof(char));
-					sprintf(tmp, "La variable %s n'a pas encore été délcaré.\n", $1->nom);
-					semantic_error(tmp);
-				}
-
+			// printf("%s\n", $1->nom);
+			if (strcmp("TAB", $1->nom) == 0) {
+				check_tab($1, $3);
 			}
+			else if ( (local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL)) {
+
+			} else {
+				char *tmp = malloc(sizeof(char));
+				sprintf(tmp, "La variable %s n'a pas encore été déclaré.\n", $1->nom);
+				semantic_error(tmp);
+			}
+			$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
 		}
 ;
 bloc	:
@@ -316,7 +323,7 @@ bloc	:
 ;
 appel	:
 		IDENTIFICATEUR '(' liste_expressions ')' ';' {
-			check_call_func($1, $3);
+			// check_call_func($1, $3);
 			insert_children($1, $3);
 			$$ = $1;
 		}
@@ -328,7 +335,6 @@ variable	:
 	|	tableau {
 
 			$$ = create_node_children(mk_single_node("TAB"), $1, NULL, NULL, NULL);
-			// printf("FILS %s\n", $$->fils->nom);
 		}
 ;
 tableau:
@@ -353,27 +359,27 @@ expression :
 	| MOINS expression %prec MUL { $$ = create_node_children($1, $2, NULL, NULL, NULL); }
 	| CONSTANTE { $$ = $1;  }
 	| variable {
-			if ( (strcmp($1->nom, "TAB") == 0 && $1->fils != NULL) && ( (local[hash($1->fils->nom)] != NULL && scope >= local[hash($1->fils->nom)]->scope) || (global[hash($1->fils->nom)] != NULL))) {
-				$$ = $1;
+			if (strcmp($1->nom, "TAB") == 0) {
+				check_tab($1, $1);
 			} else {
 				if ((local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL)) {
 					$$ = $1;
 				} else {
 					char *tmp = malloc(sizeof(char));
-					sprintf(tmp, "La variable %s n'a pas encore été délcaré\n", $1->nom);
+					sprintf(tmp, "La variable %s n'a pas encore été déclaré\n", $1->nom);
 					semantic_error(tmp);
 				}
 			}
 		}
 	| IDENTIFICATEUR '(' liste_expressions ')' {
-		check_call_func($1, $3);
+		// check_call_func($1, $3);
 		insert_children($1, $3);
 		$$ = $1;
-		}
+	}
 ;
 liste_expressions	:
-		create_expr_liste { printf("list creation"); $$ = $1; }
-	| { printf("list expr eps\n");$$ = NULL; }
+		create_expr_liste { $$ = $1; }
+	| { $$ = NULL; }
 ;
 create_expr_liste :   // cf mail forum David Fissore
     	create_expr_liste ',' expression {
@@ -383,7 +389,8 @@ create_expr_liste :   // cf mail forum David Fissore
 				insert_next($1, $3);
 			}
 			$$ = $1;
-			}
+		}
+
     | 	expression { $$ = $1; }
 ;
 condition	:
