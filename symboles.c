@@ -252,7 +252,7 @@ void generateDotContent(FILE *fp, node_t *node, node_t *parent)
         {
             if (fonctions[hash(node->nom)] != NULL)
             {
-                printf("linked list %d, linked node %d %s\n", linked_list_size(fonctions[hash(node->nom)]->arguments), linked_node_size(node->fils), node->nom);
+                // printf("linked list %d, linked node %d %s\n", linked_list_size(fonctions[hash(node->nom)]->arguments), linked_node_size(node->fils), node->nom);
                 if (linked_list_size(fonctions[hash(node->nom)]->arguments) != linked_node_size(node->fils)) {
                     char *tmp = malloc(sizeof(char));
                     sprintf(tmp, "Mauvais nombre d'arguments lors l'appel de la fonction %s\n", node->nom);

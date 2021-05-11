@@ -6,7 +6,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <string.h>
-#define MAX_SIZE 211 /*nbr premier de preference */
+#define TAILLE 211 /*nbr premier de preference */
 
 
 typedef enum _type_t
@@ -56,9 +56,9 @@ typedef struct _fonction_t
     struct _symbole_t **local;
 } fonction_t;
 
-symbole_t *global[MAX_SIZE];
-fonction_t *fonctions[MAX_SIZE];
-symbole_t *local[MAX_SIZE];
+symbole_t *global[TAILLE];
+fonction_t *fonctions[TAILLE];
+symbole_t *local[TAILLE];
 
 void affiche();
 int isdigits(const char *str);
