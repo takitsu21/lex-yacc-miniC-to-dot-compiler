@@ -111,24 +111,14 @@ liste_fonctions	:
 ;
 declaration	:
 		type liste_declarateurs ';' 	{
-			// table[hash()]
-			// printf("DECLARATION nom %s\n", $2->nom);
-			// table[hash($2->nom)]->suivant = $2;
-			// table[hash($2->nom)]->type = $1->type;
 			$$ = $2;
 			$$->type = $1->type;
 	}
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur {
-			printf("liste_declarateurs\n");
 
-			if ($1 == NULL) {
-				$1 = $3;
-			} else {
-				printf("liste decl %s\n", $3->nom);
-				// insert_next_symb($1, $3);
-			}
+			insert_next_symb($1, $3);
 			$$ = $1;
 		}
 	|	declarateur 	{
@@ -194,14 +184,10 @@ type	:
 ;
 create_liste_param :	// cf Forum Khaoula Bouhlal
 		create_liste_param ',' parm	{
-			printf("CREATE\n");
-			// $1 = creer_liste($3);
 			if ($1 == NULL) {
 				$1 = $3;
 			} else {
-				printf("before concat\n");
 				concatener_listes($1, creer_liste($3));
-				printf("after concat\n");
 			}
 			$$ = $1;
 		}
@@ -271,9 +257,8 @@ selection	:
 			$$ = create_node_children(mk_single_node("IF"), $3, $5, NULL, NULL);
 		}
 	|	IF '(' condition ')' instruction ELSE instruction {
-			node_t *if_node = create_node_children(mk_single_node("IF"), $3, $5, NULL, NULL);
+			node_t *if_node = create_node_children(mk_single_node("IF"), $3, $5, $7, NULL);
 			$$ = if_node;
-			$$->suivant = $7;
 		}
 	|	SWITCH '(' expression ')' instruction {
 			node_t *node_switch = create_node_children(mk_single_node("SWITCH"), $3, $5, NULL, NULL);
