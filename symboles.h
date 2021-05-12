@@ -7,7 +7,8 @@
 #include <ctype.h>
 #include <string.h>
 #define TAILLE 211 /*nbr premier de preference */
-
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
 
 typedef enum _type_t
 {
@@ -52,7 +53,6 @@ typedef struct _fonction_t
     char *nom;
     liste_t *arguments;
     struct _fonction_t *suivant;
-    struct _symbole_t *declarations;
     struct _symbole_t **local;
 } fonction_t;
 
@@ -64,28 +64,15 @@ void affiche();
 int isdigits(const char *str);
 node_t *mk_single_node(const char *nom);
 void insert_next(node_t *p, node_t *c);
-void print_children(node_t *ll);
-void print_next(node_t *ll);
-void insert_children(node_t *t, node_t *c1);
-void insert_brother(node_t *c, node_t *b);
 node_t *create_node(const char *nom, void* type);
-void printTreeRecursive(node_t *node, int level);
-void printTabs(int count);
-void print_all_next(node_t *suivants, int level);
 void insert_node(node_t *src, node_t *dst);
 node_t *create_node_children(node_t *p, node_t *c1, node_t *c2, node_t *c3, node_t *c4);
 void visualise(node_t *node);
-void printTreeRecursive(node_t *node, int level);
-void printTabs(int count);
-void insert_next_brother(node_t *p, node_t *brother);
-void write_file(const char *filename, const char *text);
 char *get_type(type_t type);
-void concatenate(char *ptr, const char *str, ...);
 void generateDot(node_t *node, const char *filename);
 void generateDotContent(FILE* fp, node_t *node, node_t *parent);
 char *generateHex(int length);
 void verify_return_statements(node_t *node, type_t return_type);
-void verify_recursive_calls(node_t *node, const char *func_name);
 void check_return(node_t *node, type_t return_type);
 int linked_list_size(liste_t* linked_list);
 int linked_node_size(node_t *node);
@@ -102,7 +89,7 @@ symbole_t *create_symb(const char * nom, void* type);
 void concatener_listes(liste_t *l1, liste_t *l2);
 liste_t *creer_liste(param_t *p);
 void semantic_error(const char *error);
-fonction_t *ajouter_fonction(type_t type, const char *nom, liste_t *args, symbole_t *declarations);
+fonction_t *ajouter_fonction(type_t type, const char *nom, liste_t *args);
 void afficher_fonction(fonction_t *fonction);
 param_t *create_param (type_t type, const char * nom);
 int listes_egales(liste_t *l1, liste_t *l2);

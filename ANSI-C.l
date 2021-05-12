@@ -15,11 +15,9 @@ comment (\/\*)(.|\r|\n)*?(\*\/)
     FS                      (f|F|l|L)   float / long
     IS                      (u|U|l|L)*   unsigned / long
 */
-#include <stdio.h>
-#include <stdlib.h>
 #include "y.tab.h"
 #include "symboles.h"
-yycol = 0;
+yycol = 1;
 scope = 0;
 /* Ne g�re pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
@@ -27,27 +25,24 @@ scope = 0;
 %option yylineno
 
 %%
-{comment}               { printf("commentaire : %s\n", yytext); }
-"break"                 { return debugger(yytext, BREAK, "BREAK"); return BREAK; }
-"case"                  { return debugger(yytext, CASE, "CASE"); return CASE; }
-"default"               { return debugger(yytext, DEFAULT, "DEFAULT"); return DEFAULT; }
-"else"                  { return debugger(yytext, ELSE, "ELSE"); return ELSE; }
-"extern"                { return debugger(yytext, EXTERN, "EXTERN"); return EXTERN; }
-"for"                   { return debugger(yytext, FOR, "FOR"); return FOR; }
-"if"                    { return debugger(yytext, IF, "IF"); return IF; }
-"int"                   {
-    return debugger(yytext, INT, "INT"); return INT ;}
-"return"                { return debugger(yytext, RETURN, "RETURN"); return RETURN; }
-"switch"                { return debugger(yytext, SWITCH, "SWITCH"); return SWITCH; }
-"void"                  {
-    return debugger(yytext, VOID, "VOID"); return VOID; }
-"while"                 {
-    return debugger(yytext, WHILE, "WHILE"); return WHILE; }
+{comment}               { ; }
+"break"                 { return debugger(yytext, BREAK, "BREAK"); }
+"case"                  { return debugger(yytext, CASE, "CASE"); }
+"default"               { return debugger(yytext, DEFAULT, "DEFAULT"); }
+"else"                  { return debugger(yytext, ELSE, "ELSE"); }
+"extern"                { return debugger(yytext, EXTERN, "EXTERN"); }
+"for"                   { return debugger(yytext, FOR, "FOR"); }
+"if"                    { return debugger(yytext, IF, "IF"); }
+"int"                   { return debugger(yytext, INT, "INT"); }
+"return"                { return debugger(yytext, RETURN, "RETURN"); }
+"switch"                { return debugger(yytext, SWITCH, "SWITCH"); }
+"void"                  { return debugger(yytext, VOID, "VOID"); }
+"while"                 { return debugger(yytext, WHILE, "WHILE"); }
 
 {L}({L}|{D})*           {
-    node_t *node = create_node(strdup(yytext), NULL);
-    yylval.node = node;
-    return debugger(yytext, IDENTIFICATEUR, "IDENTIFICATEUR"); return IDENTIFICATEUR;
+        node_t *node = create_node(strdup(yytext), NULL);
+        yylval.node = node;
+        return debugger(yytext, IDENTIFICATEUR, "IDENTIFICATEUR");
     }
 
 0[xX]{H}+{IS}?          {
@@ -56,67 +51,99 @@ scope = 0;
             return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE;
         }
 0{D}+{IS}?              {
-    node_t *node = create_node(strdup(yytext), NULL);
-    yylval.node = node;
-    return debugger(strdup(yytext), CONSTANTE, "CONSTANTE"); return CONSTANTE; }
+        node_t *node = create_node(strdup(yytext), NULL);
+        yylval.node = node;
+        return debugger(strdup(yytext), CONSTANTE, "CONSTANTE"); return CONSTANTE;
+    }
 {D}+{IS}?               {
-    node_t *node = create_node(strdup(yytext), NULL);
-    yylval.node = node;
-    return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE; }
-L?'(\\.|[^\\'])+'       { ; }
+        node_t *node = create_node(strdup(yytext), NULL);
+        yylval.node = node;
+        return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE;
+    }
+
 
 {D}+{E}{FS}?            {
-    node_t *node = create_node(strdup(yytext), NULL);
-    yylval.node = node;
-    return CONSTANTE; }
+        node_t *node = create_node(strdup(yytext), NULL);
+        yylval.node = node;
+        return CONSTANTE;
+    }
 {D}*"."{D}+({E})?{FS}?  {
-    node_t *node = create_node(strdup(yytext), NULL);
-    yylval.node = node;
-    return CONSTANTE; }
+        node_t *node = create_node(strdup(yytext), NULL);
+        yylval.node = node;
+        return CONSTANTE;
+    }
 {D}+"."{D}*({E})?{FS}?  {
-    node_t *node = create_node(strdup(yytext), NULL);
-    yylval.node = node;
-    return CONSTANTE;
- }
-
-
-L?\"(\\.|[^\\"])*\"     { ; }
-
+        node_t *node = create_node(strdup(yytext), NULL);
+        yylval.node = node;
+        return CONSTANTE;
+    }
 
 
 "&"                    {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, BAND, "BAND"); return BAND; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, BAND, "BAND");
+    }
 "|"                    {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, BOR, "BOR"); return BOR; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, BOR, "BOR");
+    }
 ">>"                    {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, RSHIFT, "RSHIFT"); return RSHIFT; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, RSHIFT, "RSHIFT");
+    }
 "<<"                    {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, LSHIFT, "LSHIFT"); return LSHIFT; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, LSHIFT, "LSHIFT");
+    }
 "&&"                    {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, LAND, "LAND"); return LAND; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, LAND, "LAND");
+    }
 "||"                    {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, LOR, "LOR"); return LOR; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, LOR, "LOR");
+    }
 "<="                    {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, LEQ, "LEQ"); return LEQ; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, LEQ, "LEQ");
+    }
 ">="                    {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, GEQ, "GEQ"); return GEQ; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, GEQ, "GEQ");
+    }
 "=="                    {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, EQ, "EQ"); return EQ; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, EQ, "EQ");
+    }
 "!="                    {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, NEQ, "NEQ"); return NEQ; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, NEQ, "NEQ");
+    }
 "!"                     {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, NOT, "NOT"); return NOT; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, NOT, "NOT");
+    }
 
 "-"                     {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, MOINS, "MOINS"); return MOINS; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, MOINS, "MOINS");
+    }
 "/"                     {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, DIV, "DIV"); return DIV; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, DIV, "DIV");
+    }
 "*"                     {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, MUL, "MUL"); return MUL; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, MUL, "MUL");
+    }
 "<"                     {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, LT, "LT"); return LT; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, LT, "LT");
+    }
 ">"                     {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, GT, "GT"); return GT; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, GT, "GT");
+    }
 "+"                     {
     yylval.node = create_node(yytext, NULL); return debugger(yytext, PLUS, "PLUS"); return PLUS; }
 
@@ -125,23 +152,16 @@ L?\"(\\.|[^\\"])*\"     { ; }
 [();,:\[\]=]          { return *yytext; }
 "{"                     { scope++; return *yytext; }
 "}"                     { scope--; return *yytext; }
-.                       { printf("Lexical error at line %d:%d : %s\n", yylineno, yycol,  *yytext);
-                            exit(EXIT_FAILURE); }
+.                       {
+        fprintf(stderr, "%sLexical error at line %d:%d : %s\n", KRED, yylineno, yycol, yytext);
+        fprintf(stderr, "%s", KNRM);
+        exit(EXIT_FAILURE);
+    }
 %%
 
 
 main (int argc, char *argv[]) {
-
-    // printf("%s\n\n\n", argv[1]);
-    // file_name = calloc(strlen(argv[1]) + 1, sizeof(char));
-    // strcpy(file_name, argv[1]);
-    // printf("%s\n", file_name);
     while (yyparse());
-
-
-    // sprintf(file_name, "%s", argv[1]);
-
-
-
+    exit(EXIT_SUCCESS);
 }
 
