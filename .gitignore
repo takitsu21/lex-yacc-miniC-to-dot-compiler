@@ -6,3 +6,5 @@ test.dot
 *.docx
 *.pptx
 Presentation.pdf
+pdf-output/*
+dot-output/*

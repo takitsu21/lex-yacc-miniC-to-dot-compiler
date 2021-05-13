@@ -9,6 +9,7 @@ Compilateur C vers code intermédiaire dot
 ```make```
 
 - Générer le binary du programme
+
 ```make compile```
 
 - Il faut que les fichiers de tests soit obligatoirement dans le dossier Tests/ sinon le programme ne pourra pas les voir.
