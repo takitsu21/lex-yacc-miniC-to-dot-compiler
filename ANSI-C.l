@@ -50,6 +50,7 @@ scope = 0;
             yylval.node = node;
             return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE;
         }
+
 0{D}+{IS}?              {
         node_t *node = create_node(strdup(yytext), NULL);
         yylval.node = node;
@@ -145,7 +146,9 @@ scope = 0;
         return debugger(yytext, GT, "GT");
     }
 "+"                     {
-    yylval.node = create_node(yytext, NULL); return debugger(yytext, PLUS, "PLUS"); return PLUS; }
+        yylval.node = create_node(yytext, NULL);
+        return debugger(yytext, PLUS, "PLUS");
+    }
 
 \n                      { yycol = 0; }
 [ \t\v\f\n]               { ; }
@@ -162,6 +165,6 @@ scope = 0;
 
 main (int argc, char *argv[]) {
     while (yyparse());
-    exit(EXIT_SUCCESS);
+    return (EXIT_SUCCESS);
 }
 

@@ -65,7 +65,7 @@ liste_declarations	:
 					insert_next_symb($1, $2);
 				}
 
-				$$ = $1;
+				// $$ = $1;
 			}
 	| {
 		$$ = NULL;
@@ -92,7 +92,6 @@ declaration	:
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur {
-			insert_next_symb($1, $3);
 			$$ = $1;
 		}
 	|	declarateur 	{
@@ -112,13 +111,14 @@ declarateur	:
 		}
 ;
 tableau_decl:
-	IDENTIFICATEUR { $$ = $1;}
-	| tableau_decl '[' expression ']' {
+	IDENTIFICATEUR {
 		if (scope == 0) {
 			$$ = inserer(global, $1->nom);
 		} else {
 			$$ = inserer(local, $1->nom);
 		}
+	 }
+	| tableau_decl '[' expression ']' {
 		insert_next_symb($$, $3);
 	}
 ;
@@ -165,7 +165,6 @@ liste_parms	:
 parm	:
 		INT IDENTIFICATEUR	{
 				$$ = create_param(_INT, $2->nom);
-				// $2->type = _INT;
 				inserer(local, $2->nom);
 
 			}
@@ -195,7 +194,7 @@ instruction	:
 iteration	:
 		FOR '(' affectation ';' condition ';' affectation ')' instruction {
 			$$ = create_node_children(mk_single_node("FOR"), $3, $5, $7, $9);
-			}
+		}
 	|	WHILE '(' condition ')' instruction {
 			$$ = create_node_children(mk_single_node("WHILE"), $3, $5, NULL, NULL);
 		}
@@ -238,12 +237,18 @@ saut	:
 ;
 affectation	:
 		variable '=' expression {
-			if (!strcmp("TAB", $1->nom) || ((local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL))) {
+			if (!strcmp("TAB", $1->nom)) {
+				check_tab($1);
+				// check_tab_affectation($1, $3);
+			}
+			else {
+				if (((local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL))) {
 				// pas d'erreurs
-			} else {
-				char *tmp = malloc(sizeof(char));
-				sprintf(tmp, "La variable %s n'a pas encore été déclaré.\n", $1->nom);
-				semantic_error(tmp);
+				} else {
+					char *tmp = malloc(sizeof(char));
+					sprintf(tmp, "La variable %s n'a pas encore été déclaré.\n", $1->nom);
+					semantic_error(tmp);
+				}
 			}
 			$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
 		}
@@ -285,18 +290,24 @@ expression :
 	| expression LSHIFT expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
 	| expression BAND expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
 	| expression BOR expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| MOINS expression %prec MUL { $$ = create_node_children($1, $2, NULL, NULL, NULL); }
+	| MOINS expression %prec MOINS { $$ = create_node_children($1, $2, NULL, NULL, NULL); }
 	| CONSTANTE { $$ = $1;  }
 	| variable {
-		if (!strcmp("TAB", $1->nom) || ((local[hash($1->nom)] != NULL &&
-			scope >= local[hash($1->nom)]->scope) ||
-			(global[hash($1->nom)] != NULL))) {
-			$$ = $1;
-		} else {
-			char *tmp = malloc(sizeof(char));
-			sprintf(tmp, "La variable %s n'a pas encore été déclaré\n", $1->nom);
-			semantic_error(tmp);
+		if (!strcmp("TAB", $1->nom)) {
+			check_tab($1);
 		}
+		else {
+			if (((local[hash($1->nom)] != NULL &&
+				scope >= local[hash($1->nom)]->scope) ||
+				(global[hash($1->nom)] != NULL))) {
+
+			} else {
+				char *tmp = malloc(sizeof(char));
+				sprintf(tmp, "La variable %s n'a pas encore été déclaré\n", $1->nom);
+				semantic_error(tmp);
+			}
+		}
+		$$ = $1;
 	}
 
 	| IDENTIFICATEUR '(' liste_expressions ')' {

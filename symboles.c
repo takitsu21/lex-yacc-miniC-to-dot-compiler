@@ -46,23 +46,6 @@ void generateDot(node_t *node, const char *filename)
     fprintf(fp, "}\n");
 }
 
-char *generateHex(int length)
-{
-    const char *digits = "0123456789ABCDEF";
-    char str[length + 1];
-    str[0] = *(digits + (1 + rand() % 15));
-
-    int i = 1;
-    for (; i < length; i++)
-    {
-        str[i] = *(digits + (rand() % 16));
-    }
-
-    str[i] = '\0';
-    char *ret = calloc(length, sizeof(char));
-    strcpy(ret, str);
-    return ret;
-}
 
 int linked_list_size(liste_t *linked_list)
 {
@@ -83,7 +66,6 @@ int linked_node_size(node_t *node)
     while (q != NULL)
     {
         i++;
-        // printf("node child %s\n", node->nom);
         q = q->suivant;
     }
     return i;
@@ -183,7 +165,8 @@ void generateDotContent(FILE *fp, node_t *node, node_t *parent)
 {
     while (node != NULL)
     {
-        node->code = generateHex(16);
+        node->code = malloc(sizeof(char));
+        sprintf(node->code, "%p", (void*)node);
 
         if (strcmp("EXTERN", node->nom) == 0)
         {
@@ -193,14 +176,12 @@ void generateDotContent(FILE *fp, node_t *node, node_t *parent)
 
         if (node->is_func != NULL)
         {
-            // verify_parameters(node, node->nom, 0);
             fprintf(fp, "node_%s [label=\"%s, %s\" shape=invtrapezium color=blue];\n", node->code, node->nom, get_type(node->type));
         }
         else
         {
             if (fonctions[hash(node->nom)] != NULL)
             {
-                // printf("linked list %d, linked node %d %s\n", linked_list_size(fonctions[hash(node->nom)]->arguments), linked_node_size(node->fils), node->nom);
                 if (linked_list_size(fonctions[hash(node->nom)]->arguments) != linked_node_size(node->fils))
                 {
                     char *tmp = malloc(sizeof(char));
@@ -377,21 +358,8 @@ void concatenate(char *ptr, const char *str, ...)
     strcpy(ptr, ret);
 }
 
-int expression_match(node_t *e1, node_t *e2)
-{
-    if (e1->type != e2->type)
-    {
-        printf("Les expression %s (%s) et %s (%s) n'ont pas le meme type", e1->nom, get_type(e1->type), e2->nom, get_type(e2->type));
-        exit(1);
-    }
-    return 1;
-}
-
 void check_declared(node_t *func, const char *func_name)
 {
-    // symbole_t **st = malloc(sizeof(local));
-    // memcpy(st, fonctions[hash(func_name)]->local, sizeof(local));
-
     while (func != NULL)
     {
         int h = hash(func->nom);
@@ -462,8 +430,9 @@ void check_call_func(node_t *func_call, node_t *list_expr)
     }
 }
 
-void check_tab(node_t *tab, node_t *expr)
+void check_tab(node_t *tab)
 {
+    int var_size = 0;
     symbole_t *to_use;
     node_t *var = tab->fils;
     if (local[hash(var->nom)] != NULL)
@@ -480,35 +449,101 @@ void check_tab(node_t *tab, node_t *expr)
         sprintf(tmp, "La variable %s n'est pas encore déclaré.\n", var->nom);
         semantic_error(tmp);
     }
-    int var_size;
     if (var->suivant != NULL)
     {
         var_size = linked_node_size(var->suivant);
+    } else {
+        var_size = tab_size(to_use);
+    }
+    int decl_size = tab_size(to_use);
+    if (decl_size - var_size < 0) {
+        char *tmp = malloc(sizeof(char));
+        sprintf(tmp, "La dimension à laquelle vous essayé d'accéder n'est pas la bonne.\n");
+        semantic_error(tmp);
+    }
+}
+
+void check_tab_affectation(node_t *tab, node_t *expr)
+{
+    symbole_t *to_use;
+    node_t *var = tab->fils;
+    int var_size = 0;
+    if (local[hash(var->nom)] != NULL)
+    {
+        to_use = local[hash(var->nom)];
+    }
+    else if (global[hash(var->nom)] != NULL)
+    {
+        to_use = global[hash(var->nom)];
     }
     else
     {
-        // pas tab
-        return;
+        char *tmp = malloc(sizeof(char));
+        sprintf(tmp, "La variable %s n'est pas encore déclaré.\n", var->nom);
+        semantic_error(tmp);
     }
-    int decl_size = tab_size(to_use);
-    // printf("decl_size : %d var_size : %d\n", decl_size, var_size);
-    // if (decl_size - var_size < 0) {
-    //     char *tmp = malloc(sizeof(char));
-    //     sprintf(tmp, "La dimension à laquelle vous essayé d'accéder n'est pas la bonne.\n");
-    //     semantic_error(tmp);
-    // }
 
-    // symbole_t *q_decl = to_use;
-    // node_t * q_var = tab;
-    // while (q_var != NULL) {
-    //     if (atoi(q_decl->nom) <= atoi(q_var->nom)) {
-    //         char *tmp = malloc(sizeof(char));
-    //         sprintf(tmp, "Vous essayez d'accéder à une case du tableau qui n'a pas été déclaré.\n");
-    //         semantic_error(tmp);
-    //     }
-    //     q_decl = q_decl->suivant;
-    //     q_var = q_var->suivant;
-    // }
+    if (var->suivant != NULL)
+    {
+        var_size = linked_node_size(var->suivant);
+    } else {
+        var_size = tab_size(to_use);
+    }
+
+    // affiche(global);
+    int decl_size = tab_size(to_use);
+    printf("decl_size : %d var_size : %d\n", decl_size, var_size);
+    int difference_dim = decl_size - var_size;
+    if (difference_dim < 0) {
+        char *tmp = malloc(sizeof(char));
+        sprintf(tmp, "La dimension à laquelle vous essayé d'accéder n'est pas la bonne.\n");
+        semantic_error(tmp);
+    }
+    int difference_dimension = 0;
+    int dim_var_size_inner_expr = 0;
+    int dim_decl_size_inner_expr = 0;
+    while (expr != NULL) {
+        if ((!strcmp("TAB", expr->nom) || local[hash(expr->nom)] != NULL || global[hash(expr->nom)] != NULL)) {
+            node_t *tab_expr;
+            if (expr->fils != NULL) {
+                tab_expr = expr->fils;
+            } else {
+                tab_expr = expr;
+            }
+
+            if (local[hash(tab_expr->nom)] != NULL)
+            {
+                to_use = local[hash(tab_expr->nom)];
+            }
+            else if (global[hash(tab_expr->nom)] != NULL)
+            {
+                to_use = global[hash(tab_expr->nom)];
+            }
+            else
+            {
+                char *tmp = malloc(sizeof(char));
+                sprintf(tmp, "La variable %s n'est pas encore déclaré.\n", tab_expr->nom);
+                semantic_error(tmp);
+            }
+            // if (expr->fils == NULL) {
+            //     dim_var_size_inner_expr = tab_size(to_use);
+            // } else {
+
+
+            // }
+            dim_decl_size_inner_expr = tab_size(to_use);
+            dim_var_size_inner_expr = linked_node_size(tab_expr);
+
+            printf("to use : %s | %s dim_var_size_inner_expr : %d dim_decl_size_inner_expr : %d %d %d\n", to_use->nom, tab_expr->nom, dim_var_size_inner_expr, dim_decl_size_inner_expr, dim_decl_size_inner_expr - dim_var_size_inner_expr, decl_size - var_size);
+            if (decl_size - var_size != dim_decl_size_inner_expr - dim_var_size_inner_expr) {
+                // printf("La dimension à laquelle vous essayé d'accéder n'est pas la bonne. %s\n", tab_expr->nom);
+                char *tmp = malloc(sizeof(char));
+                sprintf(tmp, "La dimension à laquelle vous essayé d'accéder n'est pas la bonne.\n");
+                semantic_error(tmp);
+            }
+        }
+        expr = expr->suivant;
+    }
 }
 
 void add_args_to_ts(symbole_t **st, liste_t *args, const char *func_name)
@@ -540,8 +575,9 @@ int hash(char *nom)
 void table_reset(symbole_t **table)
 {
     int i;
-    for (i = 0; i < TAILLE; i++)
+    for (i = 0; i < TAILLE; i++) {
         table[i] = NULL;
+    }
 }
 
 symbole_t *inserer(symbole_t **table, char *nom)
@@ -657,42 +693,22 @@ fonction_t *ajouter_fonction(type_t type, const char *nom, liste_t *args)
     fonction_t *nouvelle_fonction;
     h = hash(nom);
     f = fonctions[h];
-    precedent = NULL;
-    while (f != NULL)
+    if (f != NULL && strcmp(f->nom, nom) == 0)
     {
-        if (strcmp(f->nom, nom) == 0)
-        {
-            /* on a trouvé une fonction portant le meme nom */
-            if ((f->type == type) && (listes_egales(f->arguments, args)))
-                printf("Re-déclaration cohérente de la fonction %s a la ligne %d:%d\n", f->nom, yylineno, yycol);
-            else
-                printf("Re-déclaration incohérente de la fonction %s a la ligne %d:%d\n", f->nom, yylineno, yycol);
-            exit(1);
-            return NULL;
-        }
-        precedent = f;
-        f = f->suivant;
+        /* on a trouvé une fonction portant le meme nom */
+        char *tmp = malloc(sizeof(char));
+        sprintf(tmp, "Re-déclaration de la fonction %s a la ligne %d:%d", f->nom, yylineno, yycol);
+        semantic_error(tmp);
+        return NULL;
     }
     nouvelle_fonction = (fonction_t *)malloc(sizeof(fonction_t));
-
-    if (precedent == NULL)
-    {
-        fonctions[h] = nouvelle_fonction;
-        f = fonctions[h];
-    }
-    else
-    {
-        precedent->suivant = nouvelle_fonction;
-        f = precedent->suivant;
-    }
+    fonctions[h] = nouvelle_fonction;
+    f = fonctions[h];
     f->type = type;
     f->nom = strdup(nom);
     f->arguments = args;
-    if (strcmp("EXTERN", nom) != 0)
-    {
-        f->local = malloc(sizeof(local));
-        memcpy(f->local, local, sizeof(local));
-    }
+    f->local = malloc(sizeof(local));
+    memcpy(f->local, local, sizeof(local));
     return f;
 }
 int listes_egales(liste_t *l1, liste_t *l2)
@@ -735,7 +751,7 @@ int tab_size(symbole_t *tab)
 {
     int i = 0;
     symbole_t *q = tab;
-    while (q != NULL)
+    while (q->suivant != NULL)
     {
         i++;
         q = q->suivant;

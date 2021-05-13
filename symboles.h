@@ -9,6 +9,7 @@
 #define TAILLE 211 /*nbr premier de preference */
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
+#define KYEL  "\x1B[33m"
 
 typedef enum _type_t
 {
@@ -21,7 +22,6 @@ typedef struct _symbole_t
 {
     char *nom;
     int scope;
-    char *constante;
     type_t type;
     struct _symbole *suivant;
 } symbole_t;
@@ -52,7 +52,6 @@ typedef struct _fonction_t
     type_t type;
     char *nom;
     liste_t *arguments;
-    struct _fonction_t *suivant;
     struct _symbole_t **local;
 } fonction_t;
 
@@ -70,15 +69,15 @@ node_t *create_node_children(node_t *p, node_t *c1, node_t *c2, node_t *c3, node
 void visualise(node_t *node);
 char *get_type(type_t type);
 void generateDot(node_t *node, const char *filename);
-void generateDotContent(FILE* fp, node_t *node, node_t *parent);
-char *generateHex(int length);
+void generateDotContent(FILE *fp, node_t *node, node_t *parent);
 void verify_return_statements(node_t *node, type_t return_type);
 void check_return(node_t *node, type_t return_type);
 int linked_list_size(liste_t* linked_list);
 int linked_node_size(node_t *node);
 void check_call_func(node_t *func_call, node_t *list_expr);
 void check_declared(node_t *func, const char *func_name);
-void check_tab(node_t *tab, node_t *expr);
+void check_tab(node_t *tab);
+void check_tab_affectation(node_t *tab, node_t *expr);
 void add_args_to_ts(symbole_t **st, liste_t *args, const char * func_name);
 void insert_next_symb(symbole_t *symb1, symbole_t *symb2);
 int hash(char *nom);

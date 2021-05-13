@@ -3,3 +3,6 @@ y.tab.h
 lex.yy.c
 c2dot
 test.dot
+*.docx
+*.pptx
+Presentation.pdf
