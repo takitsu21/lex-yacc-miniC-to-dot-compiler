@@ -3,6 +3,7 @@
         "stdlib.h": "c",
         "limits": "c",
         "type_traits": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "symboles.h": "c"
     }
 }

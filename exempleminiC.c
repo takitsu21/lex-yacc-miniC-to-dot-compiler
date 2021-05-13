@@ -1,7 +1,5 @@
 extern int printd( int i );
 
-
-
 /*----------------------------*/
 /* un petit programme exemple
   pour montrer le langage miniC.*/
@@ -14,12 +12,4 @@ int main() {
    }
    printd(i);
    return (i+3);
-}
-
-int foo() {
-   return 0;
-}
-
-void bar() {
-   printd(0 + 5);
 }

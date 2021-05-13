@@ -2,9 +2,8 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include "symboles.h"
-	#include "table.h"
-	#define DEBUGGER 1
-	#define VERBOSE 1
+	#define DEBUGGER 0
+	#define VERBOSE 0
 	void yyerror(char *s);
 	// extern int printd(int i);
 	extern int yylineno;
@@ -13,8 +12,6 @@
 	extern int debugger(const char* s, int token, const char* token_type);
 	extern int no_node;
 	extern int scope;
-	char *current_func;
-	// init();
 %}
 
 
@@ -27,12 +24,11 @@
 
 %token <node> IDENTIFICATEUR CONSTANTE PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR GEQ LEQ EQ NEQ NOT LAND LOR LT GT
 
-%type <node> fonction variable appel create_expr_liste expression type binary_op binary_comp binary_rel programme liste_fonctions affectation condition bloc saut liste_instructions iteration instruction selection liste_expressions tableau
+%type <node> fonction variable appel create_expr_liste expression type binary_comp binary_rel programme liste_fonctions affectation condition bloc saut liste_instructions iteration instruction selection liste_expressions tableau
 
 %type <symb> liste_declarateurs liste_declarations declarateur declaration tableau_decl
 
-%type <params> create_liste_param liste_parms
-
+%type <params> liste_parms create_liste_param
 %type <param> parm
 
 %token FOR WHILE IF ELSE SWITCH CASE DEFAULT INT VOID
@@ -51,24 +47,14 @@
 %%
 programme	:
 		liste_declarations liste_fonctions {
-				printf("PROGRAMME END\n");
-
-				node_t *q = $2;
-				while (q->suivant != NULL) {
-					q->fils = create_node_children(mk_single_node("BLOC"), q->fils, NULL, NULL, NULL);
-					// fonction_t *f = fonctions[hash(q->nom)];
-					// printf("q->nom %s\n", q->nom);
-					// afficher_fonction(fonctions[hash(q->nom)]);
-					affiche(fonctions[hash(q->nom)]->local);
-					q = q->suivant;
+				node_t* programme = create_node_children(mk_single_node("Programme"), $2, NULL, NULL, NULL);
+				while ($2 != NULL) {
+					check_declared($2->fils, $2->nom);
+					verify_return_statements($2->fils, $2->type);
+					$2->fils = create_node_children(mk_single_node("BLOC"), $2->fils, NULL, NULL, NULL);
+					$2 = $2->suivant;
 				}
-				affiche(fonctions[hash(q->nom)]->local);
-				q->fils = create_node_children(mk_single_node("BLOC"), q->fils, NULL, NULL, NULL);
-				afficher_fonction(fonctions[hash(q->nom)]);
-				// visualise($2);
-				generateDot($2, "test.dot");
-
-
+				generateDot(programme, "test.dot");
 			}
 ;
 liste_declarations	:
@@ -78,7 +64,8 @@ liste_declarations	:
 				} else {
 					insert_next_symb($1, $2);
 				}
-				$$ = $1;
+
+				// $$ = $1;
 			}
 	| {
 		$$ = NULL;
@@ -99,24 +86,14 @@ liste_fonctions	:
 ;
 declaration	:
 		type liste_declarateurs ';' 	{
-			// table[hash()]
-			// printf("DECLARATION nom %s\n", $2->nom);
-			// table[hash($2->nom)]->suivant = $2;
-			// table[hash($2->nom)]->type = $1->type;
 			$$ = $2;
 			$$->type = $1->type;
 	}
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur {
-
-			if ($1 == NULL) {
-				$1 = $3;
-			} else {
-				insert_next_symb($1, $3);
-			}
 			$$ = $1;
-			}
+		}
 	|	declarateur 	{
 			$$ = $1;
 		}
@@ -134,58 +111,54 @@ declarateur	:
 		}
 ;
 tableau_decl:
-	IDENTIFICATEUR { $$ = $1;}
-	| tableau_decl '[' expression ']' {
+	IDENTIFICATEUR {
 		if (scope == 0) {
 			$$ = inserer(global, $1->nom);
 		} else {
 			$$ = inserer(local, $1->nom);
 		}
+	 }
+	| tableau_decl '[' expression ']' {
 		insert_next_symb($$, $3);
-
 	}
-fonction	:
+;
+fonction:
 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' {
 			$$->fils = $8;
 			$$->nom = $2->nom;
 			$$->type = $1->type;
 			$$->is_func = 1;
-			fonctions[hash($2->nom)] = ajouter_fonction($1->type, $2->nom, $4, $7);
-			verify_return_statements($8, $1->type);
+			ajouter_fonction($1->type, $2->nom, $4);
 			table_reset(local);
 		}
 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' {
-			fonctions[hash($2->nom)] = ajouter_fonction($2->type, $3->nom, $5, NULL);
-			printf("fonction[hash($3->nom)] = %s\n", fonctions[hash($3->nom)]->nom);
-			// afficher_fonction(fonctions[hash($2->nom)]);
+			ajouter_fonction($2->type, $3->nom, $5);
 			$$ = mk_single_node("EXTERN");
+			$$->is_func = 1;
 		}
 ;
 type	:
 		VOID	{ $$ = create_node("_VOID", _VOID); }
 	|	INT		{ $$ = create_node("_INT", _INT); }
 ;
-create_liste_param :	// cf Forum Khaoula Bouhlal
+create_liste_param :
 		create_liste_param ',' parm	{
-				$$ = creer_liste($3);
+			if ($1 == NULL) {
+				$1 = $3;
+			} else {
+				concatener_listes($1, creer_liste($3));
 			}
+			$$ = $1;
+		}
 	| 	parm	{
 			$$ = creer_liste($1);
 		}
 ;
 liste_parms	:
-		liste_parms ',' parm	{
-				if ($1 == NULL) {
-					$1 = creer_liste($3);
-				}
-				$$ = concatener_listes($1, creer_liste($3));
-				afficher_liste($$);
-			}
-	| create_liste_param {
+		create_liste_param	{
 			$$ = $1;
 		}
 	| {
-		// $$ = NULL;
 		$$ = NULL;
 		}
 ;
@@ -193,6 +166,7 @@ parm	:
 		INT IDENTIFICATEUR	{
 				$$ = create_param(_INT, $2->nom);
 				inserer(local, $2->nom);
+
 			}
 ;
 liste_instructions :
@@ -210,38 +184,31 @@ liste_instructions :
 		}
 ;
 instruction	:
-		iteration {$$ = $1; }
-	|	selection {$$ = $1;}
-	|	saut {$$ = $1; }
-	|	affectation ';' {$$ = $1; }
-	|	bloc {$$ = $1;}
-	|	appel {
-		// printf("APPEL : %s\n", $1->nom);
-		// if (fonctions[hash($1->nom)] == NULL) {
-		// 	char *tmp = malloc(sizeof(char));
-		// 	sprintf(tmp, "La fonction %s n'a pas encore été déclaré.\n", $1->nom);
-		// 	semantic_error(tmp);
-		// } else {
-			$$ = $1;
-		// }
-		}
+		iteration { $$ = $1; }
+	|	selection { $$ = $1;}
+	|	saut { $$ = $1; }
+	|	affectation ';' { $$ = $1; }
+	|	bloc { $$ = $1; }
+	|	appel { $$ = $1; }
 ;
 iteration	:
 		FOR '(' affectation ';' condition ';' affectation ')' instruction {
 			$$ = create_node_children(mk_single_node("FOR"), $3, $5, $7, $9);
-			}
+		}
 	|	WHILE '(' condition ')' instruction {
 			$$ = create_node_children(mk_single_node("WHILE"), $3, $5, NULL, NULL);
 		}
 ;
 selection	:
 		IF '(' condition ')' instruction %prec THEN {
-			$$ = create_node_children(mk_single_node("IF"), $3, $5, NULL, NULL);
+			node_t *node_then = create_node_children(mk_single_node("THEN"), $5, NULL, NULL, NULL);
+			$$ = create_node_children(mk_single_node("IF"), $3, node_then, NULL, NULL);
 		}
 	|	IF '(' condition ')' instruction ELSE instruction {
-			node_t *if_node = create_node_children(mk_single_node("IF"), $3, $5, NULL, NULL);
+			node_t *node_then = create_node_children(mk_single_node("THEN"), $5, NULL, NULL, NULL);
+			node_t *node_else = create_node_children(mk_single_node("ELSE"), $7, NULL, NULL, NULL);
+			node_t *if_node = create_node_children(mk_single_node("IF"), $3, node_then, node_else, NULL);
 			$$ = if_node;
-			$$->suivant = $7;
 		}
 	|	SWITCH '(' expression ')' instruction {
 			node_t *node_switch = create_node_children(mk_single_node("SWITCH"), $3, $5, NULL, NULL);
@@ -250,8 +217,8 @@ selection	:
 	|	CASE CONSTANTE ':' liste_instructions selection {
 			char *tmp = calloc(4 + strlen($2->nom), sizeof(char));
 			sprintf(tmp, "CASE %s", $2->nom);
-			node_t *inst = create_node_children(mk_single_node(tmp), $4, $5, NULL, NULL);
-			// inst->suivant = $5;
+			node_t *inst = create_node_children(mk_single_node(tmp), $4, NULL, NULL, NULL);
+			inst->suivant = $5;
 			$$ = inst;
 		}
 
@@ -270,39 +237,20 @@ saut	:
 ;
 affectation	:
 		variable '=' expression {
-
-			if ( (strcmp($1->nom, "TAB") == 0 && $1->fils != NULL) && ( (local[hash($1->fils->nom)] != NULL && scope >= local[hash($1->fils->nom)]->scope) || (global[hash($1->fils->nom)] != NULL))) {
-				int tab_decl = tab_size(global[hash($1->fils->nom)]->suivant);
-				int var_size = linked_node_size($1->fils->suivant);
-				int difference = tab_decl - var_size;
-				if (var_size > tab_decl) {
-					char *tmp = malloc(sizeof(char));
-					sprintf(tmp, "Vous essayez d'accéder à une case du tableau qui n'a pas été déclaré.\n", $1->fils->nom);
-					semantic_error(tmp);
-				}
-				symbole_t *q_decl = global[hash($1->fils->nom)]->suivant;
-				node_t * q_var = $1->fils->suivant;
-				while (q_var != NULL) {
-					if (atoi(q_decl->nom) <= atoi(q_var->nom)) {
-						char *tmp = malloc(sizeof(char));
-						sprintf(tmp, "Vous essayez d'accéder à une case du tableau qui n'a pas été déclaré.\n", $1->fils->nom);
-						semantic_error(tmp);
-					}
-					q_decl = q_decl->suivant;
-					q_var = q_var->suivant;
-				}
-				$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
-			} else {
-
-				if ( (local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL)) {
-					$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
+			if (!strcmp("TAB", $1->nom)) {
+				check_tab($1);
+				// check_tab_affectation($1, $3);
+			}
+			else {
+				if (((local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL))) {
+				// pas d'erreurs
 				} else {
 					char *tmp = malloc(sizeof(char));
-					sprintf(tmp, "La variable %s n'a pas encore été délcaré.\n", $1->nom);
+					sprintf(tmp, "La variable %s n'a pas encore été déclaré.\n", $1->nom);
 					semantic_error(tmp);
 				}
-
 			}
+			$$ = create_node_children(mk_single_node(":="), $1, $3, NULL, NULL);
 		}
 ;
 bloc	:
@@ -312,7 +260,6 @@ bloc	:
 ;
 appel	:
 		IDENTIFICATEUR '(' liste_expressions ')' ';' {
-			// check_call_func($1, $3);
 			insert_children($1, $3);
 			$$ = $1;
 		}
@@ -322,9 +269,7 @@ variable	:
 				$$ = $1;
 			}
 	|	tableau {
-
 			$$ = create_node_children(mk_single_node("TAB"), $1, NULL, NULL, NULL);
-			// printf("FILS %s\n", $$->fils->nom);
 		}
 ;
 tableau:
@@ -334,7 +279,6 @@ tableau:
 		$$ = $1;
 	}
 ;
-/* TD 5 */
 expression :
 
 	'(' expression ')' { $$ = $2; }
@@ -346,30 +290,34 @@ expression :
 	| expression LSHIFT expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
 	| expression BAND expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
 	| expression BOR expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| MOINS expression %prec MUL { $$ = create_node_children($1, $2, NULL, NULL, NULL); }
+	| MOINS expression %prec MOINS { $$ = create_node_children($1, $2, NULL, NULL, NULL); }
 	| CONSTANTE { $$ = $1;  }
 	| variable {
-			if ( (strcmp($1->nom, "TAB") == 0 && $1->fils != NULL) && ( (local[hash($1->fils->nom)] != NULL && scope >= local[hash($1->fils->nom)]->scope) || (global[hash($1->fils->nom)] != NULL))) {
-				$$ = $1;
+		if (!strcmp("TAB", $1->nom)) {
+			check_tab($1);
+		}
+		else {
+			if (((local[hash($1->nom)] != NULL &&
+				scope >= local[hash($1->nom)]->scope) ||
+				(global[hash($1->nom)] != NULL))) {
+
 			} else {
-				if ((local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL)) {
-					$$ = $1;
-				} else {
-					char *tmp = malloc(sizeof(char));
-					sprintf(tmp, "La variable %s n'a pas encore été délcaré\n", $1->nom);
-					semantic_error(tmp);
-				}
+				char *tmp = malloc(sizeof(char));
+				sprintf(tmp, "La variable %s n'a pas encore été déclaré\n", $1->nom);
+				semantic_error(tmp);
 			}
 		}
+		$$ = $1;
+	}
+
 	| IDENTIFICATEUR '(' liste_expressions ')' {
-		// check_call_func($1, $3);
 		insert_children($1, $3);
 		$$ = $1;
-		}
+	}
 ;
 liste_expressions	:
-		create_expr_liste { printf("list creation"); $$ = $1; }
-	| { printf("list expr eps\n");$$ = NULL; }
+		create_expr_liste { $$ = $1; }
+	| { $$ = NULL; }
 ;
 create_expr_liste :   // cf mail forum David Fissore
     	create_expr_liste ',' expression {
@@ -379,7 +327,8 @@ create_expr_liste :   // cf mail forum David Fissore
 				insert_next($1, $3);
 			}
 			$$ = $1;
-			}
+		}
+
     | 	expression { $$ = $1; }
 ;
 condition	:
@@ -392,16 +341,7 @@ condition	:
 	|	'(' condition ')' { $$ = $2; }
 	|	expression binary_comp expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
 ;
-binary_op	:
-		PLUS	{ $$ = $1; }
-	|       MOINS	{ $$ = $1; }
-	|	MUL	{ $$ = $1; }
-	|	DIV	{ $$ = $1; }
-	|       LSHIFT	{ $$ = $1; }
-	|       RSHIFT	{$$ = $1; }
-	|	BAND	{$$ = $1; }
-	|	BOR	{$$ = $1; }
-;
+
 binary_rel	:
 		LAND	{ $$ = $1; }
 	|	LOR	{ $$ = $1; }
@@ -423,8 +363,9 @@ binary_comp	:
 
 // Gestion des erreurs syntaxique
 void yyerror(char *s) {
-	fprintf(stderr, "Syntax error at line %d:%d : %s\n", yylineno, yycol, s);
-	exit(1);
+	fprintf(stderr, "%sSyntax error at line %d:%d : %s\n", KRED, yylineno, yycol, s);
+	fprintf(stderr, "%s", KNRM);
+	exit(EXIT_FAILURE);
 }
 
 // debugger printer
