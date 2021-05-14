@@ -74,7 +74,6 @@ void verify_return_statements(node_t *node, type_t return_type);
 void check_return(node_t *node, type_t return_type);
 int linked_list_size(liste_t* linked_list);
 int linked_node_size(node_t *node);
-void check_call_func(node_t *func_call, node_t *list_expr);
 void check_declared(node_t *func, const char *func_name);
 void check_tab(node_t *tab);
 void insert_next_symb(symbole_t *symb1, symbole_t *symb2);

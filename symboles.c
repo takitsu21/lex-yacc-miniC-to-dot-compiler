@@ -340,41 +340,6 @@ int isdigits(const char *str)
     return number == strlen(str);
 }
 
-void check_call_func(node_t *func_call, node_t *list_expr)
-{
-    if (fonctions[hash(func_call->nom)] == NULL)
-    {
-        char *tmp = malloc(sizeof(char));
-        sprintf(tmp, "La fonction %s n'a pas encore été déclaré.\n", func_call->nom);
-        semantic_error(tmp);
-    }
-    node_t *q = list_expr;
-    liste_t *args = fonctions[hash(func_call->nom)]->arguments;
-    if (linked_node_size(q) != linked_list_size(args))
-    {
-        char *tmp = malloc(sizeof(char));
-        sprintf(tmp, "Il n'y a pas le même nombre d'arguments dans l'appel de la fonction %s\n", func_call->nom);
-        semantic_error(tmp);
-    }
-    while (q != NULL)
-    {
-        if (args == NULL)
-        {
-            char *tmp = malloc(sizeof(char));
-            sprintf(tmp, "Il n'y a pas le même nombre d'arguments dans l'appel de la fonction %s\n", func_call->nom);
-            semantic_error(tmp);
-        }
-        else if (q->type != args->param->type)
-        {
-            char *tmp = malloc(sizeof(char));
-            sprintf(tmp, "La variable %s n'a pas le même type que l'argument %s\n", func_call->nom);
-            semantic_error(tmp);
-        }
-        args = args->suivant;
-        q = q->suivant;
-    }
-}
-
 void check_tab(node_t *tab)
 {
     int var_size = 0;
