@@ -22,6 +22,7 @@ typedef struct _symbole_t
 {
     char *nom;
     int scope;
+    int tab_dimension;
     type_t type;
     struct _symbole *suivant;
 } symbole_t;
@@ -76,7 +77,6 @@ int linked_node_size(node_t *node);
 void check_call_func(node_t *func_call, node_t *list_expr);
 void check_declared(node_t *func, const char *func_name);
 void check_tab(node_t *tab);
-void check_tab_affectation(node_t *tab, node_t *expr);
 void insert_next_symb(symbole_t *symb1, symbole_t *symb2);
 int hash(char *nom);
 void table_reset();
@@ -92,4 +92,9 @@ int listes_egales(liste_t *l1, liste_t *l2);
 int tab_size(symbole_t *tab);
 void check_semantic_errors(fonction_t *func);
 symbole_t *insert_next_table(symbole_t **table, const char *nom, symbole_t *s);
+void free_tree(node_t *tree);
+void free_functions(fonction_t **fs);
+void free_liste(liste_t *l);
+void free_st(symbole_t **st);
+void check_type(node_t *e);
 #endif

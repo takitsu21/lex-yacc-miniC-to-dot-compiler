@@ -12,6 +12,7 @@
 	extern int debugger(const char* s, int token, const char* token_type);
 	extern int no_node;
 	extern int scope;
+	int tab_dimension = 0;
 %}
 
 
@@ -55,6 +56,8 @@ programme	:
 					$2 = $2->suivant;
 				}
 				generateDot(programme, "test.dot");
+				free_tree(programme);
+				printf("Memory successfully freed!\n");
 			}
 ;
 liste_declarations	:
@@ -65,7 +68,7 @@ liste_declarations	:
 					insert_next_symb($1, $2);
 				}
 
-				// $$ = $1;
+				$$ = $1;
 			}
 	| {
 		$$ = NULL;
@@ -92,7 +95,7 @@ declaration	:
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur {
-			$$ = $1;
+			$$ = $3;
 		}
 	|	declarateur 	{
 			$$ = $1;
@@ -108,6 +111,8 @@ declarateur	:
 		}
 	|	tableau_decl {
 			$$ = $1;
+			$$->tab_dimension = tab_dimension;
+			tab_dimension = 0;
 		}
 ;
 tableau_decl:
@@ -119,8 +124,9 @@ tableau_decl:
 		}
 	 }
 	| tableau_decl '[' expression ']' {
-		insert_next_symb($$, $3);
-	}
+			tab_dimension++;
+			$$ = $1;
+		}
 ;
 fonction:
 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' {
@@ -160,7 +166,7 @@ liste_parms	:
 		}
 	| {
 		$$ = NULL;
-		}
+	}
 ;
 parm	:
 		INT IDENTIFICATEUR	{
@@ -211,6 +217,7 @@ selection	:
 			$$ = if_node;
 		}
 	|	SWITCH '(' expression ')' instruction {
+			check_type($3);
 			node_t *node_switch = create_node_children(mk_single_node("SWITCH"), $3, $5, NULL, NULL);
 			$$ = node_switch;
 		}
@@ -237,11 +244,13 @@ saut	:
 ;
 affectation	:
 		variable '=' expression {
+			check_type($1);
+			check_type($3);
 			if (!strcmp("TAB", $1->nom)) {
 				check_tab($1);
-				// check_tab_affectation($1, $3);
 			}
 			else {
+
 				if (((local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL))) {
 				// pas d'erreurs
 				} else {
@@ -282,14 +291,38 @@ tableau:
 expression :
 
 	'(' expression ')' { $$ = $2; }
-	| expression PLUS expression {  $$ = create_node_children($2, $1, $3, NULL, NULL);}
-	| expression MOINS expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression DIV expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression MUL expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression RSHIFT expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression LSHIFT expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression BAND expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
-	| expression BOR expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	| expression PLUS expression {
+		check_type($1);
+		check_type($3);
+		$$ = create_node_children($2, $1, $3, NULL, NULL);}
+	| expression MOINS expression {
+		check_type($1);
+		check_type($3);
+		$$ = create_node_children($2, $1, $3, NULL, NULL);}
+	| expression DIV expression {
+		check_type($1);
+		check_type($3);
+		$$ = create_node_children($2, $1, $3, NULL, NULL);}
+	| expression MUL expression {
+		check_type($1);
+		check_type($3);
+		$$ = create_node_children($2, $1, $3, NULL, NULL);}
+	| expression RSHIFT expression {
+		check_type($1);
+		check_type($3);
+		$$ = create_node_children($2, $1, $3, NULL, NULL);}
+	| expression LSHIFT expression {
+		check_type($1);
+		check_type($3);
+		$$ = create_node_children($2, $1, $3, NULL, NULL);}
+	| expression BAND expression {
+		check_type($1);
+		check_type($3);
+		$$ = create_node_children($2, $1, $3, NULL, NULL);}
+	| expression BOR expression {
+		check_type($1);
+		check_type($3);
+		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 	| MOINS expression %prec MOINS { $$ = create_node_children($1, $2, NULL, NULL, NULL); }
 	| CONSTANTE { $$ = $1;  }
 	| variable {
@@ -297,13 +330,14 @@ expression :
 			check_tab($1);
 		}
 		else {
+			check_type($1);
 			if (((local[hash($1->nom)] != NULL &&
 				scope >= local[hash($1->nom)]->scope) ||
 				(global[hash($1->nom)] != NULL))) {
 
 			} else {
 				char *tmp = malloc(sizeof(char));
-				sprintf(tmp, "La variable %s n'a pas encore été déclaré\n", $1->nom);
+				sprintf(tmp, "La variable %s n'a pas encore été déclaré", $1->nom);
 				semantic_error(tmp);
 			}
 		}
@@ -334,12 +368,16 @@ create_expr_liste :   // cf mail forum David Fissore
 condition	:
 		NOT '(' condition ')' {
 			$$ = create_node_children(mk_single_node("NOT"), $3, NULL, NULL, NULL);
-			}
+		}
 	|	condition binary_rel condition %prec REL {
 		$$ = create_node_children($2, $1, $3, NULL, NULL);
 		}
 	|	'(' condition ')' { $$ = $2; }
-	|	expression binary_comp expression { $$ = create_node_children($2, $1, $3, NULL, NULL); }
+	|	expression binary_comp expression {
+
+		check_type($1);
+		check_type($3);
+		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 ;
 
 binary_rel	:

@@ -22,7 +22,7 @@ Exemple avec add.c dans le dossier de tests fourni :
 
 ## Problèmes
 
-Les erreurs sémantiques des tableaux ne sont pas totalement géré il n'y a que l'accès à la n >= (taille du tableau) qui est géré exemple :
+- Les erreurs sémantiques des tableaux ne sont pas totalement géré il n'y a que l'accès à la n >= (taille du tableau) qui est géré exemple :
 
 ```c
 int tab[1][2][3];
@@ -32,4 +32,31 @@ int main() {
     return 0;
 }
 ```
+
 Ce code va levé une erreur sémantique.
+
+- Le code ci-dessous ne générera pas d'erreurs sémantique alors qu'il devrait car nous avons un type void et int qui sont comparés mais c'est un appel récursif nous n'avons pas géré ce cas.
+
+```c
+void main() {
+    if (main() > 0) {
+        int b;
+    }
+}
+```
+En revanche le code :
+
+```c
+void test(int b) {
+    test(b);
+}
+
+void main(int a) {
+    int a;
+    if (a < test(a)) {
+        a = 5;
+    }
+}
+```
+
+lèvera bien l'erreur sémantique que l'expression est de type void et que a est de type int.
