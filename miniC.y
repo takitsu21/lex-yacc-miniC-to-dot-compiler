@@ -55,6 +55,8 @@ programme	:
 				}
 				generateDot(programme, "test.dot");
 				free_tree(programme);
+				free_functions(fonctions);
+				table_reset(global);
 				printf("Memory successfully freed!\n");
 			}
 ;

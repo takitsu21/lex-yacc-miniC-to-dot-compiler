@@ -610,7 +610,8 @@ void free_functions(fonction_t **fs)
     {
         if (fs[i] != NULL)
         {
-            free_st(fs[i]->local);
+            free(fs[i]->nom);
+            table_reset(fs[i]->local);
             free_liste(fs[i]->arguments);
             free(fs[i]);
         }
