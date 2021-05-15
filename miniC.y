@@ -42,7 +42,6 @@
 %left LAND LOR
 %nonassoc THEN
 %nonassoc ELSE
-%left OP
 %left REL
 %start programme
 %%
@@ -94,9 +93,13 @@ declaration	:
 ;
 liste_declarateurs	:
 		liste_declarateurs ',' declarateur {
-			$$ = $3;
+			if (scope == 0) {
+				$$ = inserer(global, $1->nom);
+			} else {
+				$$ = inserer(local, $1->nom);
+			}
 		}
-	|	declarateur 	{
+	|	declarateur {
 			$$ = $1;
 		}
 ;
@@ -180,7 +183,6 @@ liste_instructions :
 			} else {
 				insert_next($1, $2);
 			}
-
 			$$ = $1;
 		}
 	| {
@@ -246,9 +248,12 @@ affectation	:
 				check_tab($1);
 			}
 			else {
-
-				if (((local[hash($1->nom)] != NULL && scope >= local[hash($1->nom)]->scope) || (global[hash($1->nom)] != NULL))) {
-				// pas d'erreurs
+				symbole_t *s = search_var(local, $1->nom);
+				if (s == NULL) {
+					s = search_var(global, $1->nom);
+				}
+				if (s != NULL && scope >= s->scope) {
+					// pas d'erreurs
 				} else {
 					char *tmp = malloc(sizeof(char));
 					sprintf(tmp, "La variable %s n'a pas encore été déclaré.\n", $1->nom);
@@ -267,6 +272,7 @@ appel	:
 		IDENTIFICATEUR '(' liste_expressions ')' ';' {
 			insert_children($1, $3);
 			$$ = $1;
+			$$->is_appel = 1;
 		}
 ;
 variable	:
@@ -310,14 +316,15 @@ expression :
 			check_tab($1);
 		}
 		else {
-			// check_type($1, NULL);
-			if (((local[hash($1->nom)] != NULL &&
-				scope >= local[hash($1->nom)]->scope) ||
-				(global[hash($1->nom)] != NULL))) {
-
+			symbole_t *s = search_var(local, $1->nom);
+			if (s == NULL) {
+				s = search_var(global, $1->nom);
+			}
+			if (s != NULL && scope >= s->scope) {
+				// pas d'erreurs
 			} else {
 				char *tmp = malloc(sizeof(char));
-				sprintf(tmp, "La variable %s n'a pas encore été déclaré", $1->nom);
+				sprintf(tmp, "La variable %s n'a pas encore été déclaré.", $1->nom);
 				semantic_error(tmp);
 			}
 		}
@@ -325,6 +332,7 @@ expression :
 	}
 
 	| IDENTIFICATEUR '(' liste_expressions ')' {
+		$$->is_appel = 1;
 		insert_children($1, $3);
 		$$ = $1;
 	}

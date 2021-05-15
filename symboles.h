@@ -32,6 +32,7 @@ typedef struct _node_t
     type_t type;
     char *code;
     int is_func;
+    int is_appel;
     struct _node_t *fils;
     struct _node_t *suivant;
 } node_t;
@@ -94,4 +95,5 @@ void free_liste(liste_t *l);
 void free_st(symbole_t **st);
 void check_type(node_t *e, const char *func_name);
 int search_var_in_func(const char *func_name, const char *nom);
+symbole_t *search_var(symbole_t **st, const char * nom);
 #endif

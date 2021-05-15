@@ -77,6 +77,11 @@ void check_semantic_errors(node_t *node, type_t return_type, const char *func_na
     while (node != NULL)
     {
         int h = hash(node->nom);
+        if (node->is_appel != NULL && fonctions[h] == NULL) {
+            char *tmp = malloc(sizeof(char));
+            sprintf(tmp, "La fonction %s n'est pas défini", node->nom);
+            semantic_error(tmp);
+        }
 
         if (node->fils != NULL)
         {
@@ -381,7 +386,7 @@ int hash(char *nom)
     int taille = strlen(nom);
     int r = 0;
     for (i = 0; i < taille; i++)
-        r = ((r << sizeof(char)) + nom[i]) % TAILLE;
+        r = ((r << 8) + nom[i]) % TAILLE;
     return r;
 }
 
@@ -410,7 +415,7 @@ symbole_t *inserer(symbole_t **table, char *nom)
         {
             return s;
         }
-        // precedent = s;
+        precedent = s;
         s = s->suivant;
     }
     if (precedent == NULL)
@@ -671,10 +676,25 @@ int search_var_in_func(const char *func_name, const char *nom)
 {
     for (int i = 0; i < TAILLE; i++)
     {
-        if (fonctions[i] != NULL && fonctions[i]->local[hash(nom)] != NULL)
+        if (fonctions[i] != NULL && search_var(fonctions[i]->local, nom) != NULL)
         {
             return 1;
         }
     }
     return 0;
+}
+
+symbole_t *search_var(symbole_t **st, const char * nom) {
+    for (int i = 0; i < TAILLE; i++) {
+        if (st[i] != NULL) {
+            symbole_t *q = st[i];
+            while (q != NULL) {
+                if (q->nom != NULL && !strcmp(q->nom, nom)) {
+                    return q;
+                }
+                q = q->suivant;
+            }
+        }
+    }
+    return NULL;
 }
