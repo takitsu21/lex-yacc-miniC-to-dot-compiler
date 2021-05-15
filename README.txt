@@ -1,8 +1,10 @@
-# Compiler
+# Projet de compilation
 
-Compilateur C vers code intermédiaire dot
+Compilateur miniC vers code intermédiaire dot.
 
 ## Différentes façon de tester
+
+⚠️ Tout les fichiers que vous voulez testé doivent être dans le dossier Tests/ si vous utilisez les commandes make ci-dessous.
 
 - Génerer le binary et générer tout les pdf du dossier Tests/ dans pdf-output/ et tout leur .dot respectif dans dot-output/
 
@@ -12,7 +14,7 @@ Compilateur C vers code intermédiaire dot
 
 ```make compile```
 
-- Il faut que les fichiers de tests soit obligatoirement dans le dossier Tests/ sinon le programme ne pourra pas les voir.
+- Vous pouvez aussi testé un fichier à la fois, impérativement faire attention que le fichier soit dans le dossier "Tests/".
 
 ```make test FILENAME=file.c```
 

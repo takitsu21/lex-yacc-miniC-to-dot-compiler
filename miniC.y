@@ -48,7 +48,6 @@
 programme	:
 		liste_declarations liste_fonctions {
 				node_t* programme = create_node_children(mk_single_node("Programme"), $2, NULL, NULL, NULL);
-				// check_semantic_errors(programme, $2->type, $2->nom);
 				while ($2 != NULL) {
 					check_semantic_errors($2, $2->type, $2->nom);
 					$2->fils = create_node_children(mk_single_node("BLOC"), $2->fils, NULL, NULL, NULL);

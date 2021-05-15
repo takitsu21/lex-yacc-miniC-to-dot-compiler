@@ -3,6 +3,10 @@ int main(int c) {
     a = 1;
     b = 1;
     j = main(i) - main(f);
-    a = (a + 5 - b + c());
+    a = (a + 5 - b + a - a);
     return main(a);
+}
+
+void test() {
+    int a;
 }

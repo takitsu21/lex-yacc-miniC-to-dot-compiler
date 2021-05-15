@@ -77,12 +77,12 @@ void check_semantic_errors(node_t *node, type_t return_type, const char *func_na
     while (node != NULL)
     {
         int h = hash(node->nom);
-        if (node->is_appel != NULL && fonctions[h] == NULL) {
+        if (node->is_appel != NULL && fonctions[h] == NULL)
+        {
             char *tmp = malloc(sizeof(char));
             sprintf(tmp, "La fonction %s n'est pas défini", node->nom);
             semantic_error(tmp);
         }
-
         if (node->fils != NULL)
         {
             if (strcmp("RETURN", node->nom) == 0)
@@ -119,7 +119,7 @@ void check_return(node_t *node, type_t return_type)
             fonctions[hash(node->nom)]->type != node->type)
         {
             char *tmp = malloc(sizeof(char));
-            sprintf(tmp, "Le type de renvoie %s : %s n'est pas le bon le type attendu est %s.", node->nom, get_type(node->type), get_type(return_type));
+            sprintf(tmp, "Le type de renvoie %s -> %s n'est pas le bon le type attendu est %s.", node->nom, get_type(node->type), get_type(return_type));
             semantic_error(tmp);
         }
         if (node->fils != NULL)
@@ -658,16 +658,6 @@ void check_type(node_t *e, const char *func_name)
         {
             check_type(e->fils, func_name);
         }
-        else
-        {
-            if ((func_name != NULL && !isdigits(e->nom) && strcmp("BREAK", e->nom)) && ((fonctions[h] == NULL && local[h] == NULL && global[h] == NULL && !search_var_in_func(func_name, e->nom))))
-            {
-                char *tmp = malloc(sizeof(char));
-                sprintf(tmp, "La fonction %s n'a pas encore été déclaré.", e->nom);
-                semantic_error(tmp);
-            }
-        }
-
         e = e->suivant;
     }
 }
@@ -684,12 +674,17 @@ int search_var_in_func(const char *func_name, const char *nom)
     return 0;
 }
 
-symbole_t *search_var(symbole_t **st, const char * nom) {
-    for (int i = 0; i < TAILLE; i++) {
-        if (st[i] != NULL) {
+symbole_t *search_var(symbole_t **st, const char *nom)
+{
+    for (int i = 0; i < TAILLE; i++)
+    {
+        if (st[i] != NULL)
+        {
             symbole_t *q = st[i];
-            while (q != NULL) {
-                if (q->nom != NULL && !strcmp(q->nom, nom)) {
+            while (q != NULL)
+            {
+                if (q->nom != NULL && !strcmp(q->nom, nom))
+                {
                     return q;
                 }
                 q = q->suivant;
