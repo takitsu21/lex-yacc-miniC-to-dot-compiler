@@ -516,7 +516,7 @@ fonction_t *ajouter_fonction(type_t type, const char *nom, liste_t *args)
     {
         /* on a trouvé une fonction portant le meme nom */
         char *tmp = malloc(sizeof(char));
-        sprintf(tmp, "Re-déclaration de la fonction %s a la ligne %d:%d", f->nom, yylineno, yycol);
+        sprintf(tmp, "Re-déclaration de la fonction %s", f->nom);
         semantic_error(tmp);
         return NULL;
     }
