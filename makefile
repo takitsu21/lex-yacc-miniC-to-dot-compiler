@@ -36,7 +36,11 @@ create-directories:
 	@$(mkdir_pdf)
 	@$(mkdir_dot)
 valgrind-debug: clean compile
-	valgrind --tool=memcheck -s --leak-check=full --leak-resolution=high --show-reachable=yes ./$(FILE_OUT) < $(C_FILE)
+	valgrind --leak-check=full \
+			--show-leak-kinds=all \
+			--track-origins=yes \
+			--verbose \
+			--log-file=valgrind-out.txt ./$(FILE_OUT) < $(C_FILE)
 install:
 	sudo apt install -y graphviz flex bison valgrind --upgrade
 graph:
