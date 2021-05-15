@@ -377,11 +377,11 @@ void check_tab(node_t *tab)
 
 int hash(char *nom)
 {
-    int i, r;
+    int i;
     int taille = strlen(nom);
-    r = 0;
+    int r = 0.0;
     for (i = 0; i < taille; i++)
-        r = ((r << 8) + nom[i]) % TAILLE;
+        r = ((r << sizeof(char)) + nom[i]) % TAILLE;
     return r;
 }
 
