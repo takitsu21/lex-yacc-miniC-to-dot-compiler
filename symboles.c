@@ -379,7 +379,7 @@ int hash(char *nom)
 {
     int i;
     int taille = strlen(nom);
-    int r = 0.0;
+    int r = 0;
     for (i = 0; i < taille; i++)
         r = ((r << sizeof(char)) + nom[i]) % TAILLE;
     return r;
