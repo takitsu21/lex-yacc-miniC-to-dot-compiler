@@ -70,17 +70,37 @@ int linked_node_size(node_t *node)
     return i;
 }
 
-void verify_return_statements(node_t *node, type_t return_type)
+// void check_func(node_t* f, )
+
+void check_semantic_errors(node_t *node, type_t return_type, const char *func_name)
 {
     while (node != NULL)
     {
-        if (node->fils != NULL && strcmp("RETURN", node->nom) == 0)
-        {
-            check_return(node->fils, return_type);
-        }
+        int h = hash(node->nom);
+
         if (node->fils != NULL)
         {
-            verify_return_statements(node->fils, return_type);
+            if (strcmp("RETURN", node->nom) == 0)
+            {
+                check_return(node->fils, return_type);
+            }
+            else if (node->fils->fils != NULL && strcmp("IF", node->nom) == 0)
+            {
+                check_type(node->fils->fils, func_name);
+            }
+            else if (strcmp(":=", node->nom) == 0 && node->fils->suivant != NULL)
+            {
+                check_type(node->fils, func_name);
+            }
+            else if (strcmp("SWITCH", node->nom) == 0)
+            {
+                check_type(node->fils, func_name);
+            }
+        }
+
+        if (node->fils != NULL)
+        {
+            check_semantic_errors(node->fils, return_type, func_name);
         }
         node = node->suivant;
     }
@@ -90,12 +110,11 @@ void check_return(node_t *node, type_t return_type)
 {
     while (node != NULL)
     {
-        if (node->type != return_type ||
-            (fonctions[hash(node->nom)] != NULL &&
-             fonctions[hash(node->nom)]->type != return_type))
+        if (fonctions[hash(node->nom)] != NULL &&
+            fonctions[hash(node->nom)]->type != node->type)
         {
             char *tmp = malloc(sizeof(char));
-            sprintf(tmp, "Le type de renvoie %s : %s n'est pas le bon le type attendu est %s.\n", node->nom, get_type(node->type), get_type(return_type));
+            sprintf(tmp, "Le type de renvoie %s : %s n'est pas le bon le type attendu est %s.", node->nom, get_type(node->type), get_type(return_type));
             semantic_error(tmp);
         }
         if (node->fils != NULL)
@@ -127,15 +146,14 @@ void generateDotContent(FILE *fp, node_t *node, node_t *parent)
         {
             if (fonctions[hash(node->nom)] != NULL)
             {
-                if (linked_list_size(fonctions[hash(node->nom)]->arguments) != linked_node_size(node->fils))
+                int params_size = linked_list_size(fonctions[hash(node->nom)]->arguments);
+                int node_size = linked_node_size(node->fils);
+                if (params_size != node_size)
                 {
                     char *tmp = malloc(sizeof(char));
-                    sprintf(tmp, "Mauvais nombre d'arguments lors l'appel de la fonction %s\n", node->nom);
+                    sprintf(tmp, "Mauvais nombre d'arguments lors l'appel de la fonction %s, requis %d, lors de l'appel %d fournis.", node->nom, params_size, node_size);
                     semantic_error(tmp);
                 }
-
-                // printf("fonctions[hash(node->nom)] %s\n", fonctions[hash(node->nom)]->nom);
-
                 fprintf(fp, "node_%s [label=\"%s\" shape=septagon];\n", node->code, node->nom);
             }
             else if (strcmp("RETURN", node->nom) == 0)
@@ -195,7 +213,6 @@ node_t *mk_single_node(const char *nom)
 {
     node_t *node = (node_t *)malloc(sizeof(node_t));
     node->nom = strdup(nom);
-    // node->type = (type_t)NULL;
     node->suivant = NULL;
     node->fils = NULL;
     return node;
@@ -232,24 +249,6 @@ void insert_next_brother(node_t *p, node_t *brother)
     while (q->suivant != NULL)
     {
         q = q->suivant;
-    }
-}
-
-void print_children(node_t *ll)
-{
-    node_t *next = ll->fils;
-    while ((next = next->suivant) != NULL)
-    {
-        printf("%s -> ", next->nom);
-    }
-}
-
-void print_next(node_t *ll)
-{
-    node_t *next = ll;
-    while ((next = next->suivant) != NULL)
-    {
-        printf("%s\n", next->nom);
     }
 }
 
@@ -540,28 +539,6 @@ int listes_egales(liste_t *l1, liste_t *l2)
     return 1;
 }
 
-void afficher_liste(liste_t *liste)
-{
-    liste_t *next = liste;
-    while (next != NULL)
-    {
-        printf(" %s (%s)", next->param->nom,
-               get_type(next->param->type));
-        next = next->suivant;
-    }
-}
-
-void afficher_symb(symbole_t *declarations)
-{
-    symbole_t *next = declarations;
-    printf("Declarations : ");
-    while (next != NULL)
-    {
-        printf("-> %s (%s)", next->nom, get_type(next->type));
-        next = next->suivant;
-    }
-}
-
 int tab_size(symbole_t *tab)
 {
     int i = 0;
@@ -586,13 +563,9 @@ void free_tree(node_t *tree)
 {
     while (tree != NULL)
     {
-        if (tree->nom) {
-            free(tree->nom);
-        }
-
+        free(tree->nom);
         if (tree->fils != NULL)
         {
-
             free_tree(tree->fils);
             free(tree);
         }
@@ -613,7 +586,8 @@ void free_st(symbole_t **st)
         {
             while (st[i] != NULL)
             {
-                if (st[i]->nom != NULL) {
+                if (st[i]->nom != NULL)
+                {
                     free(st[i]->nom);
                 }
 
@@ -629,12 +603,12 @@ void free_functions(fonction_t **fs)
     int i = 0;
     for (i = 0; i < TAILLE; i++)
     {
-        if (fs[i] != NULL) {
+        if (fs[i] != NULL)
+        {
             free_st(fs[i]->local);
             free_liste(fs[i]->arguments);
             free(fs[i]);
         }
-
     }
 }
 
@@ -648,31 +622,59 @@ void free_liste(liste_t *l)
     {
         free_liste(l->suivant);
     }
-    if (l->param != NULL) {
+    if (l->param != NULL)
+    {
         free(l->param->nom);
         free(l->param);
     }
     free(l);
 }
 
-void check_type(node_t *e) {
+void check_type(node_t *e, const char *func_name)
+{
     symbole_t *s;
-    while (e != NULL) {
-        if (fonctions[hash(e->nom)] != NULL) {
-            if (fonctions[hash(e->nom)]->type == _VOID) {
+    while (e != NULL)
+    {
+        int h = hash(e->nom);
+        if (fonctions[hash(e->nom)] != NULL && fonctions[hash(e->nom)]->type == _VOID)
+        {
+            char *tmp = malloc(sizeof(char));
+            sprintf(tmp, "%s : Type void rencontré dans une expression, int attendu.", e->nom);
+            semantic_error(tmp);
+        }
+        if (e->type == _VOID)
+        {
+            char *tmp = malloc(sizeof(char));
+            sprintf(tmp, "%s : Type void rencontré dans une expression, int attendu.", e->nom);
+            semantic_error(tmp);
+        }
+
+        if (e->fils != NULL)
+        {
+            check_type(e->fils, func_name);
+        }
+        else
+        {
+            if ((func_name != NULL && !isdigits(e->nom) && strcmp("BREAK", e->nom)) && ((fonctions[h] == NULL && local[h] == NULL && global[h] == NULL && !search_var_in_func(func_name, e->nom))))
+            {
                 char *tmp = malloc(sizeof(char));
-                sprintf(tmp, "Type void rencontré dans une expression");
+                sprintf(tmp, "La fonction %s n'a pas encore été déclaré.", e->nom);
                 semantic_error(tmp);
             }
         }
-        if (e->type == _VOID) {
-            char *tmp = malloc(sizeof(char));
-            sprintf(tmp, "Type void rencontré dans une expression");
-            semantic_error(tmp);
-        }
-        if (e->fils != NULL) {
-            check_type(e->fils);
-        }
+
         e = e->suivant;
     }
+}
+
+int search_var_in_func(const char *func_name, const char *nom)
+{
+    for (int i = 0; i < TAILLE; i++)
+    {
+        if (fonctions[i] != NULL && fonctions[i]->local[hash(nom)] != NULL)
+        {
+            return 1;
+        }
+    }
+    return 0;
 }

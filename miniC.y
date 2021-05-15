@@ -49,9 +49,9 @@
 programme	:
 		liste_declarations liste_fonctions {
 				node_t* programme = create_node_children(mk_single_node("Programme"), $2, NULL, NULL, NULL);
+				// check_semantic_errors(programme, $2->type, $2->nom);
 				while ($2 != NULL) {
-					check_declared($2->fils, $2->nom);
-					verify_return_statements($2->fils, $2->type);
+					check_semantic_errors($2, $2->type, $2->nom);
 					$2->fils = create_node_children(mk_single_node("BLOC"), $2->fils, NULL, NULL, NULL);
 					$2 = $2->suivant;
 				}
@@ -67,7 +67,6 @@ liste_declarations	:
 				} else {
 					insert_next_symb($1, $2);
 				}
-
 				$$ = $1;
 			}
 	| {
@@ -172,7 +171,6 @@ parm	:
 		INT IDENTIFICATEUR	{
 				$$ = create_param(_INT, $2->nom);
 				inserer(local, $2->nom);
-
 			}
 ;
 liste_instructions :
@@ -217,7 +215,7 @@ selection	:
 			$$ = if_node;
 		}
 	|	SWITCH '(' expression ')' instruction {
-			check_type($3);
+			// check_type($3);
 			node_t *node_switch = create_node_children(mk_single_node("SWITCH"), $3, $5, NULL, NULL);
 			$$ = node_switch;
 		}
@@ -244,8 +242,6 @@ saut	:
 ;
 affectation	:
 		variable '=' expression {
-			check_type($1);
-			check_type($3);
 			if (!strcmp("TAB", $1->nom)) {
 				check_tab($1);
 			}
@@ -292,36 +288,20 @@ expression :
 
 	'(' expression ')' { $$ = $2; }
 	| expression PLUS expression {
-		check_type($1);
-		check_type($3);
 		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 	| expression MOINS expression {
-		check_type($1);
-		check_type($3);
 		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 	| expression DIV expression {
-		check_type($1);
-		check_type($3);
 		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 	| expression MUL expression {
-		check_type($1);
-		check_type($3);
 		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 	| expression RSHIFT expression {
-		check_type($1);
-		check_type($3);
 		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 	| expression LSHIFT expression {
-		check_type($1);
-		check_type($3);
 		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 	| expression BAND expression {
-		check_type($1);
-		check_type($3);
 		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 	| expression BOR expression {
-		check_type($1);
-		check_type($3);
 		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 	| MOINS expression %prec MOINS { $$ = create_node_children($1, $2, NULL, NULL, NULL); }
 	| CONSTANTE { $$ = $1;  }
@@ -330,7 +310,7 @@ expression :
 			check_tab($1);
 		}
 		else {
-			check_type($1);
+			// check_type($1, NULL);
 			if (((local[hash($1->nom)] != NULL &&
 				scope >= local[hash($1->nom)]->scope) ||
 				(global[hash($1->nom)] != NULL))) {
@@ -375,8 +355,8 @@ condition	:
 	|	'(' condition ')' { $$ = $2; }
 	|	expression binary_comp expression {
 
-		check_type($1);
-		check_type($3);
+//		check_type($1);
+//		check_type($3);
 		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 ;
 

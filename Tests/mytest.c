@@ -37,9 +37,9 @@ int bar(int g)
     printd(1);
     if (a == b)
     {
-        int h;
-        h = 0;
-        if (g == h && a > 0 || h == 0 && (h & 0) > a)
+        int z;
+        z = 0;
+        if (g == z && a > 0 || z == 0 && (z & 0) > a)
         {
             int i;
             i = 0;

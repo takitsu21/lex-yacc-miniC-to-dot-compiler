@@ -21,9 +21,9 @@ YACC_FLAGS=-d $(YACC_IN)
 DOT_CC=dot
 FLEX_CC=flex
 YACC_CC=yacc
-mkdir_pdf=mkdir pdf-output
+mkdir_pdf=mkdir -p pdf-output
 rename=mv $(DOT_FILE) dot-output/$(FILENAME).dot
-mkdir_dot=mkdir dot-output
+mkdir_dot=mkdir -p dot-output
 
 
 all: clean compile create-directories

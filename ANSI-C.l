@@ -48,35 +48,25 @@ scope = 0;
 0[xX]{H}+{IS}?          {
             node_t *node = create_node(strdup(yytext), NULL);
             yylval.node = node;
-            return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE;
+            return debugger(yytext, CONSTANTE, "CONSTANTE");
         }
 
 0{D}+{IS}?              {
         node_t *node = create_node(strdup(yytext), NULL);
         yylval.node = node;
-        return debugger(strdup(yytext), CONSTANTE, "CONSTANTE"); return CONSTANTE;
+        return debugger(strdup(yytext), CONSTANTE, "CONSTANTE");
     }
 {D}+{IS}?               {
         node_t *node = create_node(strdup(yytext), NULL);
         yylval.node = node;
-        return debugger(yytext, CONSTANTE, "CONSTANTE"); return CONSTANTE;
+        return debugger(yytext, CONSTANTE, "CONSTANTE");
     }
 
 
 {D}+{E}{FS}?            {
         node_t *node = create_node(strdup(yytext), NULL);
         yylval.node = node;
-        return CONSTANTE;
-    }
-{D}*"."{D}+({E})?{FS}?  {
-        node_t *node = create_node(strdup(yytext), NULL);
-        yylval.node = node;
-        return CONSTANTE;
-    }
-{D}+"."{D}*({E})?{FS}?  {
-        node_t *node = create_node(strdup(yytext), NULL);
-        yylval.node = node;
-        return CONSTANTE;
+        return debugger(yytext, CONSTANTE, "CONSTANTE");
     }
 
 
