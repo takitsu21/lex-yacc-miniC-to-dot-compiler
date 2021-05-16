@@ -117,7 +117,7 @@ void check_return(node_t *node, type_t return_type)
             fonctions[hash(node->nom)]->type != node->type)
         {
             char *tmp = malloc(sizeof(char));
-            sprintf(tmp, "Le type de renvoie %s -> %s n'est pas le bon le type attendu est %s.", node->nom, get_type(node->type), get_type(return_type));
+            sprintf(tmp, "Vous ne pouvez pas renvoyer de valeurs dans la fonction %s car son type est %s.", node->nom, get_type(fonctions[hash(node->nom)]->type));
             semantic_error(tmp);
         }
         if (node->fils != NULL)

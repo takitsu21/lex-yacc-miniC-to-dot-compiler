@@ -199,10 +199,12 @@ instruction	:
 ;
 iteration	:
 		FOR '(' affectation ';' condition ';' affectation ')' instruction {
-			$$ = create_node_children(mk_single_node("FOR"), $3, $5, $7, $9);
+			node_t *inst = create_node_children(mk_single_node("BLOC"), $9, NULL, NULL, NULL);
+			$$ = create_node_children(mk_single_node("FOR"), $3, $5, $7, inst);
 		}
 	|	WHILE '(' condition ')' instruction {
-			$$ = create_node_children(mk_single_node("WHILE"), $3, $5, NULL, NULL);
+			node_t *inst = create_node_children(mk_single_node("BLOC"), $5, NULL, NULL, NULL);
+			$$ = create_node_children(mk_single_node("WHILE"), $3, inst, NULL, NULL);
 		}
 ;
 selection	:
@@ -227,8 +229,7 @@ selection	:
 			inst->suivant = $5;
 			$$ = inst;
 		}
-
-	|	DEFAULT ':' instruction {
+	|	DEFAULT ':' liste_instructions {
 			$$ = create_node_children(mk_single_node("DEFAULT"), $3, NULL, NULL, NULL);
 		}
 ;
