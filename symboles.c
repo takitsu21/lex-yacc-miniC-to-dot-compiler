@@ -31,8 +31,6 @@ void insert_node(node_t *src, node_t *dst)
 
 void generateDot(node_t *node, const char *filename)
 {
-    srand((unsigned int)time(NULL));
-
     FILE *fp = fopen(filename, "w");
     fp = fopen(filename, "a");
 
@@ -347,20 +345,20 @@ int isdigits(const char *str)
 void check_tab(node_t *tab)
 {
     int var_size = 0;
-    symbole_t *to_use;
     node_t *var = tab->fils;
-    if (local[hash(var->nom)] != NULL)
+    symbole_t *to_use = search_var(local, var->nom);
+    if (to_use == NULL)
     {
-        to_use = local[hash(var->nom)];
+        to_use = search_var(global, var->nom);
     }
-    else if (global[hash(var->nom)] != NULL)
+    if (to_use != NULL && scope >= to_use->scope)
     {
-        to_use = global[hash(var->nom)];
+        // pas d'erreurs
     }
     else
     {
         char *tmp = malloc(sizeof(char));
-        sprintf(tmp, "La variable %s n'est pas encore déclaré.\n", var->nom);
+        sprintf(tmp, "La variable %s n'a pas encore été déclaré.\n", var->nom);
         semantic_error(tmp);
     }
     if (var->suivant != NULL)
@@ -375,7 +373,7 @@ void check_tab(node_t *tab)
     if (to_use->tab_dimension - var_size < 0)
     {
         char *tmp = malloc(sizeof(char));
-        sprintf(tmp, "La dimension à laquelle vous essayé d'accéder n'est pas la bonne.\n");
+        sprintf(tmp, "La dimension à laquelle vous essayé d'accéder n'est pas la bonne.");
         semantic_error(tmp);
     }
 }
