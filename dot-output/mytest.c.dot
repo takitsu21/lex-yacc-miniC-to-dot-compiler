@@ -1,255 +1,259 @@
 digraph mon_programme {
-node_0x7fffdb53f9a0 [label="Programme"];
-node_0x7fffdb539240 [label="foo, int" shape=invtrapezium color=blue];
-node_0x7fffdb53fa60 [label="BLOC"];
-node_0x7fffdb539710 [label=":="];
-node_0x7fffdb5394d0 [label="a"];
-node_0x7fffdb539710 -> node_0x7fffdb5394d0
-node_0x7fffdb5395f0 [label="+"];
-node_0x7fffdb539570 [label="b"];
-node_0x7fffdb5395f0 -> node_0x7fffdb539570
-node_0x7fffdb539690 [label="c"];
-node_0x7fffdb5395f0 -> node_0x7fffdb539690
-node_0x7fffdb539710 -> node_0x7fffdb5395f0
-node_0x7fffdb53fa60 -> node_0x7fffdb539710
-node_0x7fffdb53ae10 [label="IF", shape=diamond];
-node_0x7fffdb539810 [label="=="];
-node_0x7fffdb539790 [label="1"];
-node_0x7fffdb539810 -> node_0x7fffdb539790
-node_0x7fffdb5398b0 [label="1"];
-node_0x7fffdb539810 -> node_0x7fffdb5398b0
-node_0x7fffdb53ae10 -> node_0x7fffdb539810
-node_0x7fffdb53adb0 [label="THEN"];
-node_0x7fffdb53a390 [label="IF", shape=diamond];
-node_0x7fffdb539b40 [label="=="];
-node_0x7fffdb539ac0 [label="1"];
-node_0x7fffdb539b40 -> node_0x7fffdb539ac0
-node_0x7fffdb539be0 [label="1"];
-node_0x7fffdb539b40 -> node_0x7fffdb539be0
-node_0x7fffdb53a390 -> node_0x7fffdb539b40
-node_0x7fffdb53a330 [label="THEN"];
-node_0x7fffdb539f10 [label=":="];
-node_0x7fffdb539df0 [label="d"];
-node_0x7fffdb539f10 -> node_0x7fffdb539df0
-node_0x7fffdb539e90 [label="f"];
-node_0x7fffdb539f10 -> node_0x7fffdb539e90
-node_0x7fffdb53a330 -> node_0x7fffdb539f10
-node_0x7fffdb53a2d0 [label="WHILE"];
-node_0x7fffdb53a010 [label=">"];
-node_0x7fffdb539f90 [label="f"];
-node_0x7fffdb53a010 -> node_0x7fffdb539f90
-node_0x7fffdb53a0b0 [label="d"];
-node_0x7fffdb53a010 -> node_0x7fffdb53a0b0
-node_0x7fffdb53a2d0 -> node_0x7fffdb53a010
-node_0x7fffdb53a270 [label=":="];
-node_0x7fffdb53a150 [label="d"];
-node_0x7fffdb53a270 -> node_0x7fffdb53a150
-node_0x7fffdb53a1f0 [label="1"];
-node_0x7fffdb53a270 -> node_0x7fffdb53a1f0
-node_0x7fffdb53a2d0 -> node_0x7fffdb53a270
-node_0x7fffdb53a330 -> node_0x7fffdb53a2d0
-node_0x7fffdb53a390 -> node_0x7fffdb53a330
-node_0x7fffdb53adb0 -> node_0x7fffdb53a390
-node_0x7fffdb53ad50 [label="IF", shape=diamond];
-node_0x7fffdb53a490 [label="=="];
-node_0x7fffdb53a410 [label="d"];
-node_0x7fffdb53a490 -> node_0x7fffdb53a410
-node_0x7fffdb53a530 [label="e"];
-node_0x7fffdb53a490 -> node_0x7fffdb53a530
-node_0x7fffdb53ad50 -> node_0x7fffdb53a490
-node_0x7fffdb53acf0 [label="THEN"];
-node_0x7fffdb53ac90 [label="SWITCH"];
-node_0x7fffdb53a5d0 [label="a"];
-node_0x7fffdb53ac90 -> node_0x7fffdb53a5d0
-node_0x7fffdb53ac30 [label="CASE 1"];
-node_0x7fffdb53a790 [label="RETURN" shape=trapezium color=blue];
-node_0x7fffdb53a710 [label="a"];
-node_0x7fffdb53a790 -> node_0x7fffdb53a710
-node_0x7fffdb53ac30 -> node_0x7fffdb53a790
-node_0x7fffdb53ac90 -> node_0x7fffdb53ac30
-node_0x7fffdb53abb0 [label="CASE 2"];
-node_0x7fffdb53a9d0 [label="RETURN" shape=trapezium color=blue];
-node_0x7fffdb53a8b0 [label="foo" shape=septagon];
-node_0x7fffdb53a950 [label="5"];
-node_0x7fffdb53a8b0 -> node_0x7fffdb53a950
-node_0x7fffdb53a9d0 -> node_0x7fffdb53a8b0
-node_0x7fffdb53abb0 -> node_0x7fffdb53a9d0
-node_0x7fffdb53ac90 -> node_0x7fffdb53abb0
-node_0x7fffdb53ab30 [label="DEFAULT"];
-node_0x7fffdb53aad0 [label="RETURN" shape=trapezium color=blue];
-node_0x7fffdb53aa50 [label="e"];
-node_0x7fffdb53aad0 -> node_0x7fffdb53aa50
-node_0x7fffdb53ab30 -> node_0x7fffdb53aad0
-node_0x7fffdb53ac90 -> node_0x7fffdb53ab30
-node_0x7fffdb53acf0 -> node_0x7fffdb53ac90
-node_0x7fffdb53ad50 -> node_0x7fffdb53acf0
-node_0x7fffdb53adb0 -> node_0x7fffdb53ad50
-node_0x7fffdb53ae10 -> node_0x7fffdb53adb0
-node_0x7fffdb53fa60 -> node_0x7fffdb53ae10
-node_0x7fffdb53af10 [label="RETURN" shape=trapezium color=blue];
-node_0x7fffdb53ae90 [label="d"];
-node_0x7fffdb53af10 -> node_0x7fffdb53ae90
-node_0x7fffdb53fa60 -> node_0x7fffdb53af10
-node_0x7fffdb539240 -> node_0x7fffdb53fa60
-node_0x7fffdb53f9a0 -> node_0x7fffdb539240
-node_0x7fffdb53b660 [label="bar, int" shape=invtrapezium color=blue];
-node_0x7fffdb53fac0 [label="BLOC"];
-node_0x7fffdb53b8f0 [label="printd" shape=septagon];
-node_0x7fffdb53b990 [label="1"];
-node_0x7fffdb53b8f0 -> node_0x7fffdb53b990
-node_0x7fffdb53fac0 -> node_0x7fffdb53b8f0
-node_0x7fffdb53dc70 [label="IF", shape=diamond];
-node_0x7fffdb53bab0 [label="=="];
-node_0x7fffdb53ba30 [label="a"];
-node_0x7fffdb53bab0 -> node_0x7fffdb53ba30
-node_0x7fffdb53bb50 [label="b"];
-node_0x7fffdb53bab0 -> node_0x7fffdb53bb50
-node_0x7fffdb53dc70 -> node_0x7fffdb53bab0
-node_0x7fffdb53dc10 [label="THEN"];
-node_0x7fffdb53be80 [label=":="];
-node_0x7fffdb53bd60 [label="z"];
-node_0x7fffdb53be80 -> node_0x7fffdb53bd60
-node_0x7fffdb53be00 [label="0"];
-node_0x7fffdb53be80 -> node_0x7fffdb53be00
-node_0x7fffdb53dc10 -> node_0x7fffdb53be80
-node_0x7fffdb53dbb0 [label="IF", shape=diamond];
-node_0x7fffdb53c520 [label="&&"];
-node_0x7fffdb53c2e0 [label="||"];
-node_0x7fffdb53c0a0 [label="&&"];
-node_0x7fffdb53bf80 [label="=="];
-node_0x7fffdb53bf00 [label="g"];
-node_0x7fffdb53bf80 -> node_0x7fffdb53bf00
-node_0x7fffdb53c020 [label="z"];
-node_0x7fffdb53bf80 -> node_0x7fffdb53c020
-node_0x7fffdb53c0a0 -> node_0x7fffdb53bf80
-node_0x7fffdb53c1c0 [label=">"];
-node_0x7fffdb53c140 [label="a"];
-node_0x7fffdb53c1c0 -> node_0x7fffdb53c140
-node_0x7fffdb53c260 [label="0"];
-node_0x7fffdb53c1c0 -> node_0x7fffdb53c260
-node_0x7fffdb53c0a0 -> node_0x7fffdb53c1c0
-node_0x7fffdb53c2e0 -> node_0x7fffdb53c0a0
-node_0x7fffdb53c400 [label="=="];
-node_0x7fffdb53c380 [label="z"];
-node_0x7fffdb53c400 -> node_0x7fffdb53c380
-node_0x7fffdb53c4a0 [label="0"];
-node_0x7fffdb53c400 -> node_0x7fffdb53c4a0
-node_0x7fffdb53c2e0 -> node_0x7fffdb53c400
-node_0x7fffdb53c520 -> node_0x7fffdb53c2e0
-node_0x7fffdb53c760 [label=">"];
-node_0x7fffdb53c640 [label="&"];
-node_0x7fffdb53c5c0 [label="z"];
-node_0x7fffdb53c640 -> node_0x7fffdb53c5c0
-node_0x7fffdb53c6e0 [label="0"];
-node_0x7fffdb53c640 -> node_0x7fffdb53c6e0
-node_0x7fffdb53c760 -> node_0x7fffdb53c640
-node_0x7fffdb53c800 [label="a"];
-node_0x7fffdb53c760 -> node_0x7fffdb53c800
-node_0x7fffdb53c520 -> node_0x7fffdb53c760
-node_0x7fffdb53dbb0 -> node_0x7fffdb53c520
-node_0x7fffdb53daf0 [label="THEN"];
-node_0x7fffdb53cb30 [label=":="];
-node_0x7fffdb53ca10 [label="i"];
-node_0x7fffdb53cb30 -> node_0x7fffdb53ca10
-node_0x7fffdb53cab0 [label="0"];
-node_0x7fffdb53cb30 -> node_0x7fffdb53cab0
-node_0x7fffdb53daf0 -> node_0x7fffdb53cb30
-node_0x7fffdb53cf10 [label=":="];
-node_0x7fffdb53cbb0 [label="a"];
-node_0x7fffdb53cf10 -> node_0x7fffdb53cbb0
-node_0x7fffdb53cdf0 [label="+"];
-node_0x7fffdb53ccd0 [label="+"];
-node_0x7fffdb53cc50 [label="i"];
-node_0x7fffdb53ccd0 -> node_0x7fffdb53cc50
-node_0x7fffdb53cd70 [label="b"];
-node_0x7fffdb53ccd0 -> node_0x7fffdb53cd70
-node_0x7fffdb53cdf0 -> node_0x7fffdb53ccd0
-node_0x7fffdb53ce90 [label="g"];
-node_0x7fffdb53cdf0 -> node_0x7fffdb53ce90
-node_0x7fffdb53cf10 -> node_0x7fffdb53cdf0
-node_0x7fffdb53daf0 -> node_0x7fffdb53cf10
-node_0x7fffdb53d010 [label="RETURN" shape=trapezium color=blue];
-node_0x7fffdb53cf90 [label="a"];
-node_0x7fffdb53d010 -> node_0x7fffdb53cf90
-node_0x7fffdb53daf0 -> node_0x7fffdb53d010
-node_0x7fffdb53dbb0 -> node_0x7fffdb53daf0
-node_0x7fffdb53db50 [label="ELSE"];
-node_0x7fffdb53da90 [label="FOR"];
-node_0x7fffdb53d2d0 [label=":="];
-node_0x7fffdb53d1b0 [label="i"];
-node_0x7fffdb53d2d0 -> node_0x7fffdb53d1b0
-node_0x7fffdb53d250 [label="0"];
-node_0x7fffdb53d2d0 -> node_0x7fffdb53d250
-node_0x7fffdb53da90 -> node_0x7fffdb53d2d0
-node_0x7fffdb53d3d0 [label="<"];
-node_0x7fffdb53d350 [label="i"];
-node_0x7fffdb53d3d0 -> node_0x7fffdb53d350
-node_0x7fffdb53d470 [label="10"];
-node_0x7fffdb53d3d0 -> node_0x7fffdb53d470
-node_0x7fffdb53da90 -> node_0x7fffdb53d3d0
-node_0x7fffdb53d750 [label=":="];
-node_0x7fffdb53d510 [label="i"];
-node_0x7fffdb53d750 -> node_0x7fffdb53d510
-node_0x7fffdb53d630 [label="+"];
-node_0x7fffdb53d5b0 [label="i"];
-node_0x7fffdb53d630 -> node_0x7fffdb53d5b0
-node_0x7fffdb53d6d0 [label="1"];
-node_0x7fffdb53d630 -> node_0x7fffdb53d6d0
-node_0x7fffdb53d750 -> node_0x7fffdb53d630
-node_0x7fffdb53da90 -> node_0x7fffdb53d750
-node_0x7fffdb53da30 [label="IF", shape=diamond];
-node_0x7fffdb53d850 [label="=="];
-node_0x7fffdb53d7d0 [label="i"];
-node_0x7fffdb53d850 -> node_0x7fffdb53d7d0
-node_0x7fffdb53d8f0 [label="5"];
-node_0x7fffdb53d850 -> node_0x7fffdb53d8f0
-node_0x7fffdb53da30 -> node_0x7fffdb53d850
-node_0x7fffdb53d9d0 [label="THEN"];
-node_0x7fffdb53d970 [label="BREAK" shape=box];
-node_0x7fffdb53d9d0 -> node_0x7fffdb53d970
-node_0x7fffdb53da30 -> node_0x7fffdb53d9d0
-node_0x7fffdb53da90 -> node_0x7fffdb53da30
-node_0x7fffdb53db50 -> node_0x7fffdb53da90
-node_0x7fffdb53dbb0 -> node_0x7fffdb53db50
-node_0x7fffdb53dc10 -> node_0x7fffdb53dbb0
-node_0x7fffdb53dc70 -> node_0x7fffdb53dc10
-node_0x7fffdb53fac0 -> node_0x7fffdb53dc70
-node_0x7fffdb53dd70 [label="RETURN" shape=trapezium color=blue];
-node_0x7fffdb53dcf0 [label="g"];
-node_0x7fffdb53dd70 -> node_0x7fffdb53dcf0
-node_0x7fffdb53fac0 -> node_0x7fffdb53dd70
-node_0x7fffdb53b660 -> node_0x7fffdb53fac0
-node_0x7fffdb53f9a0 -> node_0x7fffdb53b660
-node_0x7fffdb53e4c0 [label="main, int" shape=invtrapezium color=blue];
-node_0x7fffdb53fb20 [label="BLOC"];
-node_0x7fffdb53ecd0 [label=":="];
-node_0x7fffdb53eb10 [label="x"];
-node_0x7fffdb53ecd0 -> node_0x7fffdb53eb10
-node_0x7fffdb53ebb0 [label="foo" shape=septagon];
-node_0x7fffdb53ec50 [label="x"];
-node_0x7fffdb53ebb0 -> node_0x7fffdb53ec50
-node_0x7fffdb53ecd0 -> node_0x7fffdb53ebb0
-node_0x7fffdb53fb20 -> node_0x7fffdb53ecd0
-node_0x7fffdb53ef10 [label=":="];
-node_0x7fffdb53ed50 [label="y"];
-node_0x7fffdb53ef10 -> node_0x7fffdb53ed50
-node_0x7fffdb53edf0 [label="bar" shape=septagon];
-node_0x7fffdb53ee90 [label="2"];
-node_0x7fffdb53edf0 -> node_0x7fffdb53ee90
-node_0x7fffdb53ef10 -> node_0x7fffdb53edf0
-node_0x7fffdb53fb20 -> node_0x7fffdb53ef10
-node_0x7fffdb53f250 [label="RETURN" shape=trapezium color=blue];
-node_0x7fffdb53f130 [label="+"];
-node_0x7fffdb53f010 [label="+"];
-node_0x7fffdb53ef90 [label="x"];
-node_0x7fffdb53f010 -> node_0x7fffdb53ef90
-node_0x7fffdb53f0b0 [label="y"];
-node_0x7fffdb53f010 -> node_0x7fffdb53f0b0
-node_0x7fffdb53f130 -> node_0x7fffdb53f010
-node_0x7fffdb53f1d0 [label="main" shape=septagon];
-node_0x7fffdb53f130 -> node_0x7fffdb53f1d0
-node_0x7fffdb53f250 -> node_0x7fffdb53f130
-node_0x7fffdb53fb20 -> node_0x7fffdb53f250
-node_0x7fffdb53e4c0 -> node_0x7fffdb53fb20
-node_0x7fffdb53f9a0 -> node_0x7fffdb53e4c0
+node_0x561548632860 [label="Programme"];
+node_0x56154862c040 [label="foo, int" shape=invtrapezium color=blue];
+node_0x561548632920 [label="BLOC"];
+node_0x56154862c510 [label=":="];
+node_0x56154862c2d0 [label="a"];
+node_0x56154862c510 -> node_0x56154862c2d0
+node_0x56154862c3f0 [label="+"];
+node_0x56154862c370 [label="b"];
+node_0x56154862c3f0 -> node_0x56154862c370
+node_0x56154862c490 [label="c"];
+node_0x56154862c3f0 -> node_0x56154862c490
+node_0x56154862c510 -> node_0x56154862c3f0
+node_0x561548632920 -> node_0x56154862c510
+node_0x56154862dc70 [label="IF", shape=diamond];
+node_0x56154862c610 [label="=="];
+node_0x56154862c590 [label="1"];
+node_0x56154862c610 -> node_0x56154862c590
+node_0x56154862c6b0 [label="1"];
+node_0x56154862c610 -> node_0x56154862c6b0
+node_0x56154862dc70 -> node_0x56154862c610
+node_0x56154862dc10 [label="THEN"];
+node_0x56154862d1f0 [label="IF", shape=diamond];
+node_0x56154862c940 [label="=="];
+node_0x56154862c8c0 [label="1"];
+node_0x56154862c940 -> node_0x56154862c8c0
+node_0x56154862c9e0 [label="1"];
+node_0x56154862c940 -> node_0x56154862c9e0
+node_0x56154862d1f0 -> node_0x56154862c940
+node_0x56154862d190 [label="THEN"];
+node_0x56154862cd10 [label=":="];
+node_0x56154862cbf0 [label="d"];
+node_0x56154862cd10 -> node_0x56154862cbf0
+node_0x56154862cc90 [label="f"];
+node_0x56154862cd10 -> node_0x56154862cc90
+node_0x56154862d190 -> node_0x56154862cd10
+node_0x56154862d130 [label="WHILE"];
+node_0x56154862ce10 [label=">"];
+node_0x56154862cd90 [label="f"];
+node_0x56154862ce10 -> node_0x56154862cd90
+node_0x56154862ceb0 [label="d"];
+node_0x56154862ce10 -> node_0x56154862ceb0
+node_0x56154862d130 -> node_0x56154862ce10
+node_0x56154862d0d0 [label="BLOC"];
+node_0x56154862d070 [label=":="];
+node_0x56154862cf50 [label="d"];
+node_0x56154862d070 -> node_0x56154862cf50
+node_0x56154862cff0 [label="1"];
+node_0x56154862d070 -> node_0x56154862cff0
+node_0x56154862d0d0 -> node_0x56154862d070
+node_0x56154862d130 -> node_0x56154862d0d0
+node_0x56154862d190 -> node_0x56154862d130
+node_0x56154862d1f0 -> node_0x56154862d190
+node_0x56154862dc10 -> node_0x56154862d1f0
+node_0x56154862dbb0 [label="IF", shape=diamond];
+node_0x56154862d2f0 [label="=="];
+node_0x56154862d270 [label="d"];
+node_0x56154862d2f0 -> node_0x56154862d270
+node_0x56154862d390 [label="e"];
+node_0x56154862d2f0 -> node_0x56154862d390
+node_0x56154862dbb0 -> node_0x56154862d2f0
+node_0x56154862db50 [label="THEN"];
+node_0x56154862daf0 [label="SWITCH"];
+node_0x56154862d430 [label="a"];
+node_0x56154862daf0 -> node_0x56154862d430
+node_0x56154862da90 [label="CASE 1"];
+node_0x56154862d5f0 [label="RETURN" shape=trapezium color=blue];
+node_0x56154862d570 [label="a"];
+node_0x56154862d5f0 -> node_0x56154862d570
+node_0x56154862da90 -> node_0x56154862d5f0
+node_0x56154862daf0 -> node_0x56154862da90
+node_0x56154862da10 [label="CASE 2"];
+node_0x56154862d830 [label="RETURN" shape=trapezium color=blue];
+node_0x56154862d710 [label="foo" shape=septagon];
+node_0x56154862d7b0 [label="5"];
+node_0x56154862d710 -> node_0x56154862d7b0
+node_0x56154862d830 -> node_0x56154862d710
+node_0x56154862da10 -> node_0x56154862d830
+node_0x56154862daf0 -> node_0x56154862da10
+node_0x56154862d990 [label="DEFAULT"];
+node_0x56154862d930 [label="RETURN" shape=trapezium color=blue];
+node_0x56154862d8b0 [label="e"];
+node_0x56154862d930 -> node_0x56154862d8b0
+node_0x56154862d990 -> node_0x56154862d930
+node_0x56154862daf0 -> node_0x56154862d990
+node_0x56154862db50 -> node_0x56154862daf0
+node_0x56154862dbb0 -> node_0x56154862db50
+node_0x56154862dc10 -> node_0x56154862dbb0
+node_0x56154862dc70 -> node_0x56154862dc10
+node_0x561548632920 -> node_0x56154862dc70
+node_0x56154862dd70 [label="RETURN" shape=trapezium color=blue];
+node_0x56154862dcf0 [label="d"];
+node_0x56154862dd70 -> node_0x56154862dcf0
+node_0x561548632920 -> node_0x56154862dd70
+node_0x56154862c040 -> node_0x561548632920
+node_0x561548632860 -> node_0x56154862c040
+node_0x56154862e4c0 [label="bar, int" shape=invtrapezium color=blue];
+node_0x561548632980 [label="BLOC"];
+node_0x56154862e750 [label="printd" shape=septagon];
+node_0x56154862e7f0 [label="1"];
+node_0x56154862e750 -> node_0x56154862e7f0
+node_0x561548632980 -> node_0x56154862e750
+node_0x561548630b30 [label="IF", shape=diamond];
+node_0x56154862e910 [label="=="];
+node_0x56154862e890 [label="a"];
+node_0x56154862e910 -> node_0x56154862e890
+node_0x56154862e9b0 [label="b"];
+node_0x56154862e910 -> node_0x56154862e9b0
+node_0x561548630b30 -> node_0x56154862e910
+node_0x561548630ad0 [label="THEN"];
+node_0x56154862ece0 [label=":="];
+node_0x56154862ebc0 [label="z"];
+node_0x56154862ece0 -> node_0x56154862ebc0
+node_0x56154862ec60 [label="0"];
+node_0x56154862ece0 -> node_0x56154862ec60
+node_0x561548630ad0 -> node_0x56154862ece0
+node_0x561548630a70 [label="IF", shape=diamond];
+node_0x56154862f380 [label="&&"];
+node_0x56154862f140 [label="||"];
+node_0x56154862ef00 [label="&&"];
+node_0x56154862ede0 [label="=="];
+node_0x56154862ed60 [label="g"];
+node_0x56154862ede0 -> node_0x56154862ed60
+node_0x56154862ee80 [label="z"];
+node_0x56154862ede0 -> node_0x56154862ee80
+node_0x56154862ef00 -> node_0x56154862ede0
+node_0x56154862f020 [label=">"];
+node_0x56154862efa0 [label="a"];
+node_0x56154862f020 -> node_0x56154862efa0
+node_0x56154862f0c0 [label="0"];
+node_0x56154862f020 -> node_0x56154862f0c0
+node_0x56154862ef00 -> node_0x56154862f020
+node_0x56154862f140 -> node_0x56154862ef00
+node_0x56154862f260 [label="=="];
+node_0x56154862f1e0 [label="z"];
+node_0x56154862f260 -> node_0x56154862f1e0
+node_0x56154862f300 [label="0"];
+node_0x56154862f260 -> node_0x56154862f300
+node_0x56154862f140 -> node_0x56154862f260
+node_0x56154862f380 -> node_0x56154862f140
+node_0x56154862f5c0 [label=">"];
+node_0x56154862f4a0 [label="&"];
+node_0x56154862f420 [label="z"];
+node_0x56154862f4a0 -> node_0x56154862f420
+node_0x56154862f540 [label="0"];
+node_0x56154862f4a0 -> node_0x56154862f540
+node_0x56154862f5c0 -> node_0x56154862f4a0
+node_0x56154862f660 [label="a"];
+node_0x56154862f5c0 -> node_0x56154862f660
+node_0x56154862f380 -> node_0x56154862f5c0
+node_0x561548630a70 -> node_0x56154862f380
+node_0x5615486309b0 [label="THEN"];
+node_0x56154862f990 [label=":="];
+node_0x56154862f870 [label="i"];
+node_0x56154862f990 -> node_0x56154862f870
+node_0x56154862f910 [label="0"];
+node_0x56154862f990 -> node_0x56154862f910
+node_0x5615486309b0 -> node_0x56154862f990
+node_0x56154862fd70 [label=":="];
+node_0x56154862fa10 [label="a"];
+node_0x56154862fd70 -> node_0x56154862fa10
+node_0x56154862fc50 [label="+"];
+node_0x56154862fb30 [label="+"];
+node_0x56154862fab0 [label="i"];
+node_0x56154862fb30 -> node_0x56154862fab0
+node_0x56154862fbd0 [label="b"];
+node_0x56154862fb30 -> node_0x56154862fbd0
+node_0x56154862fc50 -> node_0x56154862fb30
+node_0x56154862fcf0 [label="g"];
+node_0x56154862fc50 -> node_0x56154862fcf0
+node_0x56154862fd70 -> node_0x56154862fc50
+node_0x5615486309b0 -> node_0x56154862fd70
+node_0x56154862fe70 [label="RETURN" shape=trapezium color=blue];
+node_0x56154862fdf0 [label="a"];
+node_0x56154862fe70 -> node_0x56154862fdf0
+node_0x5615486309b0 -> node_0x56154862fe70
+node_0x561548630a70 -> node_0x5615486309b0
+node_0x561548630a10 [label="ELSE"];
+node_0x561548630950 [label="FOR"];
+node_0x561548630130 [label=":="];
+node_0x561548630010 [label="i"];
+node_0x561548630130 -> node_0x561548630010
+node_0x5615486300b0 [label="0"];
+node_0x561548630130 -> node_0x5615486300b0
+node_0x561548630950 -> node_0x561548630130
+node_0x561548630230 [label="<"];
+node_0x5615486301b0 [label="i"];
+node_0x561548630230 -> node_0x5615486301b0
+node_0x5615486302d0 [label="10"];
+node_0x561548630230 -> node_0x5615486302d0
+node_0x561548630950 -> node_0x561548630230
+node_0x5615486305b0 [label=":="];
+node_0x561548630370 [label="i"];
+node_0x5615486305b0 -> node_0x561548630370
+node_0x561548630490 [label="+"];
+node_0x561548630410 [label="i"];
+node_0x561548630490 -> node_0x561548630410
+node_0x561548630530 [label="1"];
+node_0x561548630490 -> node_0x561548630530
+node_0x5615486305b0 -> node_0x561548630490
+node_0x561548630950 -> node_0x5615486305b0
+node_0x5615486308f0 [label="BLOC"];
+node_0x561548630890 [label="IF", shape=diamond];
+node_0x5615486306b0 [label="=="];
+node_0x561548630630 [label="i"];
+node_0x5615486306b0 -> node_0x561548630630
+node_0x561548630750 [label="5"];
+node_0x5615486306b0 -> node_0x561548630750
+node_0x561548630890 -> node_0x5615486306b0
+node_0x561548630830 [label="THEN"];
+node_0x5615486307d0 [label="BREAK" shape=box];
+node_0x561548630830 -> node_0x5615486307d0
+node_0x561548630890 -> node_0x561548630830
+node_0x5615486308f0 -> node_0x561548630890
+node_0x561548630950 -> node_0x5615486308f0
+node_0x561548630a10 -> node_0x561548630950
+node_0x561548630a70 -> node_0x561548630a10
+node_0x561548630ad0 -> node_0x561548630a70
+node_0x561548630b30 -> node_0x561548630ad0
+node_0x561548632980 -> node_0x561548630b30
+node_0x561548630c30 [label="RETURN" shape=trapezium color=blue];
+node_0x561548630bb0 [label="g"];
+node_0x561548630c30 -> node_0x561548630bb0
+node_0x561548632980 -> node_0x561548630c30
+node_0x56154862e4c0 -> node_0x561548632980
+node_0x561548632860 -> node_0x56154862e4c0
+node_0x561548631380 [label="main, int" shape=invtrapezium color=blue];
+node_0x5615486329e0 [label="BLOC"];
+node_0x561548631b90 [label=":="];
+node_0x5615486319d0 [label="x"];
+node_0x561548631b90 -> node_0x5615486319d0
+node_0x561548631a70 [label="foo" shape=septagon];
+node_0x561548631b10 [label="x"];
+node_0x561548631a70 -> node_0x561548631b10
+node_0x561548631b90 -> node_0x561548631a70
+node_0x5615486329e0 -> node_0x561548631b90
+node_0x561548631dd0 [label=":="];
+node_0x561548631c10 [label="y"];
+node_0x561548631dd0 -> node_0x561548631c10
+node_0x561548631cb0 [label="bar" shape=septagon];
+node_0x561548631d50 [label="2"];
+node_0x561548631cb0 -> node_0x561548631d50
+node_0x561548631dd0 -> node_0x561548631cb0
+node_0x5615486329e0 -> node_0x561548631dd0
+node_0x561548632110 [label="RETURN" shape=trapezium color=blue];
+node_0x561548631ff0 [label="+"];
+node_0x561548631ed0 [label="+"];
+node_0x561548631e50 [label="x"];
+node_0x561548631ed0 -> node_0x561548631e50
+node_0x561548631f70 [label="y"];
+node_0x561548631ed0 -> node_0x561548631f70
+node_0x561548631ff0 -> node_0x561548631ed0
+node_0x561548632090 [label="main" shape=septagon];
+node_0x561548631ff0 -> node_0x561548632090
+node_0x561548632110 -> node_0x561548631ff0
+node_0x5615486329e0 -> node_0x561548632110
+node_0x561548631380 -> node_0x5615486329e0
+node_0x561548632860 -> node_0x561548631380
 }
