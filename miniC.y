@@ -1,11 +1,10 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
-	#include "symboles.h"
+	#include "includes/symboles.h"
 	#define DEBUGGER 0
 	#define VERBOSE 0
 	void yyerror(char *s);
-	// extern int printd(int i);
 	extern int yylineno;
 	extern char* file_name;
 	extern int yycol;
@@ -218,7 +217,6 @@ selection	:
 			$$ = if_node;
 		}
 	|	SWITCH '(' expression ')' instruction {
-			// check_type($3);
 			node_t *node_switch = create_node_children(mk_single_node("SWITCH"), $3, $5, NULL, NULL);
 			$$ = node_switch;
 		}
@@ -363,9 +361,6 @@ condition	:
 		}
 	|	'(' condition ')' { $$ = $2; }
 	|	expression binary_comp expression {
-
-//		check_type($1);
-//		check_type($3);
 		$$ = create_node_children($2, $1, $3, NULL, NULL);}
 ;
 

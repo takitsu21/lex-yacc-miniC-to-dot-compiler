@@ -14,7 +14,7 @@ C_FILE=$(TESTS_PATH)$(FILENAME)
 YACC_GENS=$(YACC_C) $(YACC_H)
 LEX_GENS=lex.yy.c
 
-C_FLAGS=$(YACC_C) $(LEX_GENS) -o $(FILE_OUT) symboles.c -g -w -Wall -pedantic -lfl
+C_FLAGS=$(YACC_C) $(LEX_GENS) -o $(FILE_OUT) includes/symboles.c -g -w -Wall -pedantic -lfl
 DOT_FLAGS=-Tpdf dot-output/$(FILENAME).dot -o $(DOT_OUT_PDF)
 YACC_FLAGS=-d $(YACC_IN)
 

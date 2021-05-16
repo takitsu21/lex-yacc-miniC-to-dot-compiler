@@ -16,7 +16,7 @@ comment                 (\/\*)(.|\r|\n)*?(\*\/)|"//".*
     IS                      (u|U|l|L)*   unsigned / long
 */
 #include "y.tab.h"
-#include "symboles.h"
+#include "includes/symboles.h"
 yycol = 0;
 scope = 0;
 /* Ne g�re pas les commentaires. A rajouter */
@@ -141,7 +141,7 @@ scope = 0;
     }
 
 \n                      { yycol = 0; }
-[ \t\v\f\n]               { ; }
+[ \t\v\f]               { ; }
 [();,:\[\]=]          { return *yytext; }
 "{"                     { scope++; return *yytext; }
 "}"                     { scope--; return *yytext; }
