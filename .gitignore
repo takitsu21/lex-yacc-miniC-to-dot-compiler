@@ -6,4 +6,5 @@ test.dot
 *.docx
 *.pptx
 Presentation.pdf
+Presentation.odp
 valgrind-out.txt
