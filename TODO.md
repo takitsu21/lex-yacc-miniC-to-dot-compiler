@@ -9,11 +9,11 @@ introduisez des caractères interdits, des noms de variables incorrects, etc.
 parseur (analyseur lexico-syntaxique) fonctionne sur tous les programmes tests. Vérifiez sa robustesse
 en modifiant les programmes tests pour provoquer des erreurs syntaxiques.
 
-- [ ] Une fois que vous estimez que votre parseur est fiable, commencez à introduire des routines sémantiques
+- [X] Une fois que vous estimez que votre parseur est fiable, commencez à introduire des routines sémantiques
 yacc qui affichent des messages appropriés durant la compilation afin de tester que les routines
 sémantiques s’exécutent correctement. Ce sera le squelette de votre traduction dirigée par la syntaxe,
 que vous devrez compléter pour la génération de code.
 
-- [ ] Attention, en langage C, contrairement à d’autres langages, les chaines de caractères doivent être allouées
+- [X] Attention, en langage C, contrairement à d’autres langages, les chaines de caractères doivent être allouées
 en mémoire explicitement. Si une routines sémantique de yacc accède à une chaine de caractères
 non allouée en mémoire, votre compilateur plantera.
